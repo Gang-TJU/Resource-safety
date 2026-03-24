@@ -1,0 +1,129 @@
+{
+  "game": {
+    "max_rounds": 6,
+    "total_players": 90,
+    "phase_timers": {
+      "WEATHER": 20,
+      "VIL_DISCUSS": 90,
+      "LEADER_BUILD": 60,
+      "MAYOR_DRAIN": 60,
+      "COMPUTE": 10,
+      "ROUND_END": 15
+    }
+  },
+  "hydrology": {
+    "rainfall_base": 18,
+    "rainfall_round_increment": 8,
+    "rainfall_spread": 12,
+    "rainfall_spread_round_increment": 5,
+    "rainfall_multiplier": {
+      "A": 1.1,
+      "B": 0.9,
+      "C": 0.6
+    },
+    "spread_multiplier": {
+      "A": 1,
+      "B": 0.9,
+      "C": 0.7
+    },
+    "natural_decay": 0.85,
+    "max_drain_C": 85,
+    "sea_discharge_cap": 60,
+    "rain_distribution": [0.4, 0.35, 0.25],
+    "inter_city_flow": [0.5, 0.3, 0.2]
+  },
+  "flood_thresholds": {
+    "A1": 20,
+    "A2": 30,
+    "A3": 35,
+    "B1": 30,
+    "B2": 40,
+    "B3": 35,
+    "C1": 40,
+    "C2": 50,
+    "C3": 45
+  },
+  "is_flood_zone": {
+    "A1": true,
+    "A2": false,
+    "A3": false,
+    "B1": true,
+    "B2": false,
+    "B3": false,
+    "C1": true,
+    "C2": false,
+    "C3": false
+  },
+  "villager_counts": {
+    "A1": 8,
+    "A2": 9,
+    "A3": 9,
+    "B1": 9,
+    "B2": 8,
+    "B3": 9,
+    "C1": 9,
+    "C2": 8,
+    "C3": 9
+  },
+  "hidden_roles": {
+    "RUMOR": ["A2", "B2", "C2"],
+    "STAY": ["A1", "B1", "C3"]
+  },
+  "village_flow": {
+    "A": ["A3", "A1", "A2"],
+    "B": ["B3", "B1", "B2"],
+    "C": ["C2", "C1", "C3"]
+  },
+  "economy": {
+    "initial_village_asset": 500,
+    "initial_city_asset": 500,
+    "initial_personal_asset": 100,
+    "dam_cost": 30,
+    "dam_block": 30,
+    "dike_cost": 50,
+    "dike_drain": 50,
+    "army_card_reduction": 15,
+    "move_no_flood_loss": 30,
+    "stay_flood_loss": 50
+  },
+  "villages": {
+    "A1": "北京·房山(蓄洪)",
+    "A2": "北京·门头沟",
+    "A3": "北京·昌平",
+    "B1": "河北·涿州(兰沟洼)",
+    "B2": "河北·霸州",
+    "B3": "河北·保定",
+    "C1": "天津·静海(东淀)",
+    "C2": "天津·武清",
+    "C3": "天津·滨海新区(入海)"
+  },
+  "cities": {
+    "A": "北京",
+    "B": "河北",
+    "C": "天津"
+  },
+  "news_events": [
+    {"round": [1], "probability": 1, "text": "台风\"杜苏芮\"残余环流北上，海河流域普降大到暴雨，水利部启动防汛Ⅲ级响应。"},
+    {"round": [1], "probability": 1, "text": "北京房山、门头沟、昌平累计降雨超300mm，永定河卢沟桥站超警戒。"},
+    {"round": [2], "probability": 1, "text": "河北涿州告急！北拒马河洪峰过境，城区水深超3米。京港澳高速断行。保定上游来水持续。"},
+    {"round": [2], "probability": 1, "text": "K396次列车因暴雨滞留门头沟落坡岭站，900余名旅客被困。"},
+    {"round": [3], "probability": 1, "text": "国家防总启用兰沟洼、东淀等8处蓄滞洪区——1963年以来首次！"},
+    {"round": [3], "probability": 1, "text": "84座水库投入运用，累计拦蓄洪水约28.5亿立方米。"},
+    {"round": [4], "probability": 1, "text": "涿州码头镇图书仓库被淹，数百万册图书毁于洪水。天津滨海新区入海河道满负荷运行。"},
+    {"round": [4], "probability": 1, "text": "北京83小时降水744.8mm，140年有记录以来最大。"},
+    {"round": [5], "probability": 1, "text": "2万余名解放军武警紧急驰援涿州、霸州、保定等地。"},
+    {"round": [5], "probability": 1, "text": "大清河、子牙河相继出现洪峰，海河23条河流超警。天津海河干流入海量逼近极限。"},
+    {"round": [6], "probability": 1, "text": "海河\"23·7\"特大洪水结束，转移约120万人，损失超2000亿元。"}
+  ],
+  "random_events": [
+    {"round": [2], "probability": 0.8, "title": "涿州告急", "body": "京港澳高速涿州段断行，城区水深超2米，救援力量紧急调配。", "icon": "📱"},
+    {"round": [2,3], "probability": 0.6, "title": "K396次列车受困", "body": "列车因暴雨滞留落坡岭站超40小时，900余名旅客亟待转移。", "icon": "🚂"},
+    {"round": [3], "probability": 0.75, "title": "蓄滞洪区启用", "body": "国家防总启用兰沟洼、东淀等8处蓄滞洪区——1963年以来首次！蓄洪区村庄请立即撤离。", "icon": "🚨"},
+    {"round": [4], "probability": 0.65, "title": "老人拒绝撤离", "body": "85岁老人坚决不走：\"63年那场大水我都挺过来了！\"救援人员最终强制转移。", "icon": "🧓"},
+    {"round": [4,5], "probability": 0.55, "title": "涿州图书仓库被淹", "body": "码头镇数百万册图书泡水，出版业直接损失数亿元。", "icon": "📚"},
+    {"round": [5], "probability": 0.7, "title": "解放军驰援", "body": "2万余名官兵昼夜加固堤防、转移群众，直升机空投物资。", "icon": "⛑"},
+    {"round": [3,4], "probability": 0.4, "title": "谣言扩散", "body": "不明消息：\"上游水库已关闸\"。官方辟谣：泄洪仍在持续！", "icon": "📢"},
+    {"round": [4,5], "probability": 0.5, "title": "入海口堵塞", "body": "天津滨海新区海河入海口因潮汐顶托，排水能力骤降！下游压力剧增。", "icon": "🌊"},
+    {"round": [2,3], "probability": 0.45, "title": "保定告急", "body": "保定上游水库泄洪，白洋淀水位超汛限1.2米，周边村庄紧急转移。", "icon": "🏞"}
+  ]
+}

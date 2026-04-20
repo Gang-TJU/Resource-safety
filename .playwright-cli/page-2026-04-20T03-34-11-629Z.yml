@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: 天津大学资源安全与公共治理中心
+    - heading "洪涝风险决策仿真平台" [level=1] [ref=e5]
+    - generic [ref=e6]: Center for Resource Security and Public Governance, Tianjin University
+    - generic [ref=e7]:
+      - text: 联系方式：刘老师，
+      - link "lglhm@tju.edu.cn" [ref=e8] [cursor=pointer]:
+        - /url: mailto:lglhm@tju.edu.cn
+    - paragraph [ref=e9]: 基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: 🌊
+        - heading "流域联动机制" [level=3] [ref=e13]
+        - paragraph [ref=e14]: 上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运
+      - generic [ref=e15]:
+        - generic [ref=e16]: 🤖
+        - heading "AI协同推演" [level=3] [ref=e17]
+        - paragraph [ref=e18]: 单人即可体验完整游戏，每村5+名AI村民自主研讨发言做决策
+      - generic [ref=e19]:
+        - generic [ref=e20]: 🎯
+        - heading "有限理性博弈" [level=3] [ref=e21]
+        - paragraph [ref=e22]: 每人只掌握局部信息，需在不确定性下快速决策，体验集体困境
+    - generic [ref=e23]:
+      - button "进入游戏大厅" [ref=e24] [cursor=pointer]
+      - button "游戏规则速览" [ref=e25] [cursor=pointer]
+      - button "知情同意书" [ref=e26] [cursor=pointer]
+    - generic [ref=e27]:
+      - generic [ref=e29]: 京
+      - generic [ref=e30]: ➡️
+      - generic [ref=e31]: 冀
+      - generic [ref=e32]: ➡️
+      - generic [ref=e33]: 津
+    - generic [ref=e34]: © 2026 Tianjin University GIPC. All Rights Reserved.
+  - generic [ref=e36]:
+    - heading "📋 知情同意书" [level=3] [ref=e37]
+    - generic [ref=e39]:
+      - paragraph [ref=e40]: 尊敬的参与者：
+      - paragraph [ref=e41]: 您正在参与由天津大学资源安全与公共治理中心开发的"海河流域洪涝风险决策仿真"教学实验。本实验旨在通过模拟决策场景，帮助您理解多主体协同与博弈下的防洪决策过程。
+      - paragraph [ref=e42]: 自愿参与：您的参与完全自愿。您可以在任何时候退出实验，且不会因此受到任何不利影响。
+      - paragraph [ref=e43]: 无风险：本实验为虚拟仿真教学活动，不涉及任何人身、财务或心理风险。所有情境均为教学模拟，不代表真实事件后果。
+      - paragraph [ref=e44]: 匿名性：实验中收集的数据（包括您的决策记录和研讨发言）仅用于教学分析和学术研究，所有数据均匿名处理，不会关联到您的个人身份信息。
+      - paragraph [ref=e45]: 如您同意参与，请点击下方"我已知悉并同意"按钮。
+    - generic [ref=e46]:
+      - button "我已知悉并同意" [ref=e47] [cursor=pointer]
+      - button "返回" [ref=e48] [cursor=pointer]

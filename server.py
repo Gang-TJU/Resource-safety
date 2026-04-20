@@ -6,11 +6,14 @@ import json, os, time, random, string, uuid
 from datetime import datetime
 from pathlib import Path
 
+import hashlib, hmac, secrets
+
 import socketio
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi import FastAPI, HTTPException, Request, Depends, Cookie, Response
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
 
 # ── paths ──
 BASE = Path(__file__).parent
@@ -27,6 +30,66 @@ def save_config(cfg):
         json.dump(cfg, f, ensure_ascii=False, indent=2)
 
 CFG = load_config()
+
+# ── Admin auth ──
+ADMIN_CRED_PATH = BASE / "admin_credentials.json"
+ADMIN_SESSIONS = {}  # token -> expire_ts
+ADMIN_SESSION_PATH = BASE / "admin_sessions.json"
+
+def _load_sessions():
+    global ADMIN_SESSIONS
+    if ADMIN_SESSION_PATH.exists():
+        try:
+            with open(ADMIN_SESSION_PATH, "r") as f:
+                data = json.load(f)
+            # Prune expired sessions
+            now = time.time()
+            ADMIN_SESSIONS = {k: v for k, v in data.items() if v > now}
+        except Exception:
+            ADMIN_SESSIONS = {}
+
+def _save_sessions():
+    try:
+        with open(ADMIN_SESSION_PATH, "w") as f:
+            json.dump(ADMIN_SESSIONS, f)
+    except Exception:
+        pass
+
+_load_sessions()
+
+def _load_admin_creds():
+    if ADMIN_CRED_PATH.exists():
+        with open(ADMIN_CRED_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    # Default credentials — change on first deployment
+    creds = {"username": "admin", "password_hash": hashlib.sha256("haihe2023".encode()).hexdigest()}
+    with open(ADMIN_CRED_PATH, "w", encoding="utf-8") as f:
+        json.dump(creds, f, ensure_ascii=False, indent=2)
+    return creds
+
+def _verify_password(username, password):
+    creds = _load_admin_creds()
+    if username != creds.get("username"):
+        return False
+    return hmac.compare_digest(
+        hashlib.sha256(password.encode()).hexdigest(),
+        creds.get("password_hash", "")
+    )
+
+def _create_session():
+    token = secrets.token_hex(32)
+    ADMIN_SESSIONS[token] = time.time() + 86400  # 24h
+    _save_sessions()
+    return token
+
+def _check_session(token):
+    if not token or token not in ADMIN_SESSIONS:
+        return False
+    if time.time() > ADMIN_SESSIONS[token]:
+        del ADMIN_SESSIONS[token]
+        _save_sessions()
+        return False
+    return True
 
 # ── database (sqlite3) ──
 import sqlite3
@@ -161,8 +224,15 @@ def assign_role(room, player_name, pref=None):
 
 # ── FastAPI + Socket.IO ──
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-app = FastAPI(title="海河洪涝决策仿真平台")
+app = FastAPI(title="海河洪涝决策仿真平台", redirect_slashes=False)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 sio_app = socketio.ASGIApp(sio, other_asgi_app=app)
+
+# ── Admin auth dependency ──
+async def require_admin(request: Request):
+    token = request.cookies.get("admin_token")
+    if not _check_session(token):
+        raise HTTPException(401, "未登录或会话已过期")
 
 # Serve static files
 @app.get("/")
@@ -170,15 +240,59 @@ async def serve_index():
     return FileResponse(str(BASE / "index.html"), media_type="text/html")
 
 @app.get("/admin")
-async def serve_admin():
+async def serve_admin(request: Request):
+    token = request.cookies.get("admin_token")
+    if not _check_session(token):
+        return FileResponse(str(BASE / "admin_login.html"), media_type="text/html")
     return FileResponse(str(BASE / "admin.html"), media_type="text/html")
 
-# ── REST API: Config ──
+@app.get("/admin/")
+async def serve_admin_slash(request: Request):
+    return RedirectResponse("/admin", status_code=302)
+
+@app.post("/api/admin/login")
+async def admin_login(request: Request):
+    body = await request.json()
+    username = body.get("username", "")
+    password = body.get("password", "")
+    if not _verify_password(username, password):
+        raise HTTPException(401, "用户名或密码错误")
+    token = _create_session()
+    resp = JSONResponse({"ok": True})
+    resp.set_cookie("admin_token", token, max_age=86400, httponly=True, samesite="lax")
+    return resp
+
+@app.post("/api/admin/logout")
+async def admin_logout(request: Request):
+    token = request.cookies.get("admin_token")
+    if token and token in ADMIN_SESSIONS:
+        del ADMIN_SESSIONS[token]
+        _save_sessions()
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie("admin_token")
+    return resp
+
+@app.post("/api/admin/change-password")
+async def admin_change_password(request: Request, _=Depends(require_admin)):
+    body = await request.json()
+    old_pw = body.get("old_password", "")
+    new_pw = body.get("new_password", "")
+    creds = _load_admin_creds()
+    if not _verify_password(creds["username"], old_pw):
+        raise HTTPException(400, "原密码错误")
+    if len(new_pw) < 4:
+        raise HTTPException(400, "新密码至少4个字符")
+    creds["password_hash"] = hashlib.sha256(new_pw.encode()).hexdigest()
+    with open(ADMIN_CRED_PATH, "w", encoding="utf-8") as f:
+        json.dump(creds, f, ensure_ascii=False, indent=2)
+    return {"ok": True}
+
+# ── REST API: Config (read: public, write: admin only) ──
 @app.get("/api/config")
 async def get_config():
     return load_config()
 
-@app.post("/api/config")
+@app.post("/api/config", dependencies=[Depends(require_admin)])
 async def update_config(request: Request):
     body = await request.json()
     save_config(body)
@@ -186,24 +300,24 @@ async def update_config(request: Request):
     CFG = body
     return {"ok": True}
 
-# ── REST API: Rooms ──
-@app.post("/api/rooms")
+# ── REST API: Rooms (admin only) ──
+@app.post("/api/rooms", dependencies=[Depends(require_admin)])
 async def api_create_room(request: Request):
     body = await request.json()
     code = create_room(body.get("group_name", "默认组"))
     return {"code": code, "room": _room_summary(code)}
 
-@app.get("/api/rooms")
+@app.get("/api/rooms", dependencies=[Depends(require_admin)])
 async def api_list_rooms():
     return [_room_summary(c) for c in ROOMS]
 
-@app.get("/api/rooms/{code}")
+@app.get("/api/rooms/{code}", dependencies=[Depends(require_admin)])
 async def api_get_room(code: str):
     if code not in ROOMS:
         raise HTTPException(404, "Room not found")
     return _room_summary(code)
 
-@app.delete("/api/rooms/{code}")
+@app.delete("/api/rooms/{code}", dependencies=[Depends(require_admin)])
 async def api_delete_room(code: str):
     if code in ROOMS:
         del ROOMS[code]
@@ -222,8 +336,8 @@ def _room_summary(code):
         "round": r["round"],
     }
 
-# ── REST API: Data export ──
-@app.get("/api/export/{room_code}")
+# ── REST API: Data export (admin only) ──
+@app.get("/api/export/{room_code}", dependencies=[Depends(require_admin)])
 async def api_export(room_code: str, fmt: str = "json"):
     rounds_data = db_query("SELECT * FROM simulation_rounds WHERE room_id=? ORDER BY round_num", (room_code,))
     decisions = db_query("SELECT * FROM player_decisions WHERE room_id=? ORDER BY round_num, ts", (room_code,))
@@ -233,19 +347,19 @@ async def api_export(room_code: str, fmt: str = "json"):
     # Excel export handled by export.py script
     raise HTTPException(400, "Use export.py for Excel output")
 
-@app.get("/api/data/rounds")
+@app.get("/api/data/rounds", dependencies=[Depends(require_admin)])
 async def api_data_rounds(room_id: str = None):
     if room_id:
         return db_query("SELECT * FROM simulation_rounds WHERE room_id=? ORDER BY round_num", (room_id,))
     return db_query("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 200")
 
-@app.get("/api/data/decisions")
+@app.get("/api/data/decisions", dependencies=[Depends(require_admin)])
 async def api_data_decisions(room_id: str = None):
     if room_id:
         return db_query("SELECT * FROM player_decisions WHERE room_id=? ORDER BY round_num, ts", (room_id,))
     return db_query("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 500")
 
-@app.get("/api/data/chats")
+@app.get("/api/data/chats", dependencies=[Depends(require_admin)])
 async def api_data_chats(room_id: str = None):
     if room_id:
         return db_query("SELECT * FROM chat_logs WHERE room_id=? ORDER BY ts", (room_id,))

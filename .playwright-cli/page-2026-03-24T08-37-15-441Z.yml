@@ -1,0 +1,39 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - heading "海河洪涝决策仿真平台 · 管理后台" [level=1] [ref=e3]
+    - link "← 返回游戏" [ref=e4] [cursor=pointer]:
+      - /url: /
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - button "房间管理" [ref=e7] [cursor=pointer]
+      - button "参数配置" [ref=e8] [cursor=pointer]
+      - button "数据查看" [ref=e9] [cursor=pointer]
+      - button "数据导出" [ref=e10] [cursor=pointer]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - heading "创建新房间" [level=3] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: 组名
+            - textbox "如 A组、实验组" [ref=e17]: A组
+          - button "创建房间" [ref=e18] [cursor=pointer]
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: "1"
+          - generic [ref=e22]: 房间总数
+        - generic [ref=e23]:
+          - generic [ref=e24]: "1"
+          - generic [ref=e25]: 等待中
+        - generic [ref=e26]:
+          - generic [ref=e27]: "0"
+          - generic [ref=e28]: 进行中
+        - generic [ref=e29]:
+          - generic [ref=e30]: "0"
+          - generic [ref=e31]: 总玩家数
+      - generic [ref=e33]:
+        - generic [ref=e34]: SDX0KQ
+        - generic [ref=e35]: A组 · 0人 · 第0轮
+        - generic [ref=e36]: 等待加入
+        - generic [ref=e37]:
+          - button "复制房间码" [ref=e38] [cursor=pointer]
+          - button "删除" [ref=e39] [cursor=pointer]

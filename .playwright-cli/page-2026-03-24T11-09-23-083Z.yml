@@ -1,0 +1,390 @@
+- generic [ref=e64]:
+  - generic [ref=e65]:
+    - generic [ref=e66]:
+      - generic [ref=e67]: 第 3/6 轮
+      - generic [ref=e68]: 🌊 市长排洪决策 ★ 你需行动
+      - generic [ref=e76]: 北京市长
+      - generic [ref=e77]: 张同学
+    - generic [ref=e78]:
+      - generic [ref=e79]: 剩余
+      - generic [ref=e80]: 00:59
+      - button "规则" [ref=e81] [cursor=pointer]
+  - generic [ref=e82]:
+    - generic [ref=e83]: 🌧 本轮降雨
+    - generic [ref=e84]:
+      - generic [ref=e3742]:
+        - generic [ref=e3743]: 北京
+        - generic [ref=e3744]: "51"
+        - generic [ref=e3745]: mm
+      - generic [ref=e3746]:
+        - generic [ref=e3747]: 河北
+        - generic [ref=e3748]: "56"
+        - generic [ref=e3749]: mm
+      - generic [ref=e3750]:
+        - generic [ref=e3751]: 天津
+        - generic [ref=e3752]: "35"
+        - generic [ref=e3753]: mm
+  - generic [ref=e97]:
+    - generic [ref=e98]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: 📋
+          - generic [ref=e102]: 我的状态
+          - generic [ref=e103]: 北京市长 · 北京·房山(蓄洪)
+        - generic [ref=e104]:
+          - generic [ref=e3754]:
+            - generic [ref=e3755]: 🌧 本地降雨
+            - generic [ref=e3756]: 51 mm
+          - generic [ref=e3758]:
+            - generic [ref=e3759]: 🌊 上游来水
+            - generic [ref=e3760]: "0"
+          - generic [ref=e3761]:
+            - generic [ref=e3762]: 💧 水深/阈值
+            - generic [ref=e3763]: 13 / 20
+          - generic [ref=e3765]:
+            - generic [ref=e3766]: ✓ 安全
+            - generic [ref=e3767]: 正常
+          - generic [ref=e3768]:
+            - generic [ref=e3769]: 💰 本轮村损
+            - generic [ref=e3770]: "-5"
+          - generic [ref=e3771]:
+            - generic [ref=e3772]: 🏘 村余额
+            - generic [ref=e3773]: "445"
+          - generic [ref=e3775]:
+            - generic [ref=e3776]: 👤 个人资产
+            - generic [ref=e3777]: "100"
+          - generic [ref=e3779]:
+            - generic [ref=e3780]: 🏛 北京市资产
+            - generic [ref=e3781]: "500"
+        - generic [ref=e133]: 策略：可选：设定排洪量 | 修建大坝(花费30拦水30) | 解放军救援牌(一次性)
+        - generic [ref=e3783]:
+          - generic [ref=e3784]: 🚁 解放军救援牌状态
+          - generic [ref=e3785]: 北京市长：✓ 未使用
+          - generic [ref=e3786]: 河北市长：✗ 已使用
+          - generic [ref=e3787]: 天津市长：✓ 未使用
+          - generic [ref=e3788]: 每位市长拥有唯一一次机会，使用后所辖村庄水位立降15
+      - generic [ref=e141]:
+        - generic [ref=e142]: ⚠ 预警等级
+        - generic [ref=e143]: 黄色预警
+      - generic [ref=e145]:
+        - generic [ref=e146]: 📰 新闻播报
+        - generic [ref=e147]:
+          - generic [ref=e3789]: R1 2023年7月29日，台风"杜苏芮"残余环流抵达华北，海河流域迎来60年一遇极端暴雨。
+          - generic [ref=e3790]: R1 台风"杜苏芮"残余环流北上，海河流域普降大到暴雨，水利部启动防汛Ⅲ级响应。
+          - generic [ref=e3791]: R1 北京房山、门头沟累计降雨超300mm，永定河卢沟桥站超警戒。
+          - generic [ref=e3792]: R2 📱 京港澳高速涿州段断行，城区水深超2米，救援力量紧急调配。
+          - generic [ref=e3793]: R2 🚂 列车因暴雨滞留落坡岭站超40小时，900余名旅客亟待转移。
+          - generic [ref=e3794]: R2 🚁 河北动用解放军救援牌！
+          - generic [ref=e3795]: R2 河北涿州告急！北拒马河洪峰过境，城区水深超3米。京港澳高速断行。
+          - generic [ref=e3796]: R2 K396次列车因暴雨滞留门头沟落坡岭站，900余名旅客被困。
+          - generic [ref=e3797]: R3 🚂 列车因暴雨滞留落坡岭站超40小时，900余名旅客亟待转移。
+      - generic [ref=e149]:
+        - generic [ref=e150]: 📊 全流域水情
+        - generic [ref=e151]:
+          - generic [ref=e3798]:
+            - generic [ref=e3799]: A1
+            - generic [ref=e3802]: "13"
+          - generic [ref=e3803]:
+            - generic [ref=e3804]: A2
+            - generic [ref=e3807]: "22"
+          - generic [ref=e3808]:
+            - generic [ref=e3809]: A3
+            - generic [ref=e3812]: "8"
+          - generic [ref=e3813]:
+            - generic [ref=e3814]: B1
+            - generic [ref=e3816]: "0"
+          - generic [ref=e3817]:
+            - generic [ref=e3818]: B2
+            - generic [ref=e3821]: "14"
+          - generic [ref=e3822]:
+            - generic [ref=e3823]: B3
+            - generic [ref=e3825]: "0"
+          - generic [ref=e3826]:
+            - generic [ref=e3827]: C1
+            - generic [ref=e3830]: "18"
+          - generic [ref=e3831]:
+            - generic [ref=e3832]: C2
+            - generic [ref=e3835]: "22"
+          - generic [ref=e3836]:
+            - generic [ref=e3837]: C3
+            - generic [ref=e3839]: "0"
+    - generic [ref=e188]:
+      - generic [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]: 海河流域洪涝风险控制沙盘
+          - generic [ref=e192]: 北京(上游) → 河北(中游) → 天津(下游) → 入海 | 点击村庄查看详情
+        - generic [ref=e193]:
+          - generic [ref=e194]: 上游
+          - generic [ref=e195]: 中游
+          - generic [ref=e196]: 下游
+      - generic [ref=e197]:
+        - generic:
+          - img:
+            - generic: 渤海
+            - generic: 海河流域
+            - generic: 燕山
+            - generic: 太行山
+            - generic: 永定河
+            - generic: 大清河
+            - generic: 子牙河
+            - generic: 南运河
+            - generic: 海河干流
+            - generic: 北京
+            - generic: 涿州
+            - generic: 霸州
+            - generic: 天津
+            - generic: 房山
+            - generic: 兰沟洼
+            - generic: 东淀
+            - generic: 昌平
+            - generic: 保定
+            - generic: 滨海新区
+        - img [ref=e198]
+        - generic [ref=e201]:
+          - generic [ref=e3841] [cursor=pointer]:
+            - generic [ref=e3842]:
+              - generic [ref=e3843]: 北京·房山(蓄洪)
+              - generic [ref=e3844]: 上游
+            - generic [ref=e3845]:
+              - generic [ref=e3846]: 蓄洪区
+              - generic [ref=e3847]: 📍你在此
+            - generic [ref=e3850]: 水:13阈:20安全
+            - generic [ref=e3851]: 村资产:4458人
+          - generic [ref=e3853] [cursor=pointer]:
+            - generic [ref=e3854]:
+              - generic [ref=e3855]: 北京·门头沟
+              - generic [ref=e3856]: 上游
+            - generic [ref=e3858]: 普通
+            - generic [ref=e3861]: 水:22阈:30安全
+            - generic [ref=e3862]: 村资产:4809人
+          - generic [ref=e3864] [cursor=pointer]:
+            - generic [ref=e3865]:
+              - generic [ref=e3866]: 北京·昌平
+              - generic [ref=e3867]: 上游
+            - generic [ref=e3869]: 普通
+            - generic [ref=e3872]: 水:8阈:35安全
+            - generic [ref=e3873]: 村资产:4709人
+          - generic [ref=e3875] [cursor=pointer]:
+            - generic [ref=e3876]:
+              - generic [ref=e3877]: 河北·涿州(兰沟洼)
+              - generic [ref=e3878]: 中游
+            - generic [ref=e3880]: 蓄洪区
+            - generic [ref=e3882]: 水:0阈:30安全
+            - generic [ref=e3883]: 村资产:4509人
+          - generic [ref=e3885] [cursor=pointer]:
+            - generic [ref=e3886]:
+              - generic [ref=e3887]: 河北·霸州
+              - generic [ref=e3888]: 中游
+            - generic [ref=e3890]: 普通
+            - generic [ref=e3893]: 水:14阈:40安全
+            - generic [ref=e3894]: 村资产:4958人
+          - generic [ref=e3896] [cursor=pointer]:
+            - generic [ref=e3897]:
+              - generic [ref=e3898]: 河北·保定
+              - generic [ref=e3899]: 中游
+            - generic [ref=e3901]: 普通
+            - generic [ref=e3903]: 水:0阈:35安全
+            - generic [ref=e3904]: 村资产:4659人
+          - generic [ref=e3906] [cursor=pointer]:
+            - generic [ref=e3907]:
+              - generic [ref=e3908]: 天津·静海(东淀)
+              - generic [ref=e3909]: 下游
+            - generic [ref=e3911]: 蓄洪区
+            - generic [ref=e3914]: 水:18阈:40安全
+            - generic [ref=e3915]: 村资产:4959人
+          - generic [ref=e3917] [cursor=pointer]:
+            - generic [ref=e3918]:
+              - generic [ref=e3919]: 天津·武清
+              - generic [ref=e3920]: 下游
+            - generic [ref=e3922]: 普通
+            - generic [ref=e3925]: 水:22阈:50安全
+            - generic [ref=e3926]: 村资产:4808人
+          - generic [ref=e3928] [cursor=pointer]:
+            - generic [ref=e3929]:
+              - generic [ref=e3930]: 天津·滨海新区(入海)
+              - generic [ref=e3931]: 下游
+            - generic [ref=e3933]: 入海口
+            - generic [ref=e3935]: 水:0阈:45安全
+            - generic [ref=e3936]: 村资产:5009人
+          - generic: ⬇
+          - generic: ⬇
+          - generic: ⬇
+          - generic: ⬇
+          - generic: ⬇
+          - generic: ⬇
+          - generic: ➡
+          - generic: ➡
+          - generic:
+            - text: 🌊 入渤海
+            - text: 上限60/轮
+            - text: 已排:13
+          - generic: 北京(上游)
+          - generic: 河北(中游)
+          - generic: 天津(下游)
+    - generic [ref=e293]:
+      - generic [ref=e294]:
+        - generic [ref=e295]:
+          - generic [ref=e296]: 🎮
+          - generic [ref=e297]: 🌊 北京排洪决策
+        - generic [ref=e298]:
+          - generic [ref=e3937]: 北京蓄水约94，最大可排94。排出水量将流向下游！你的决定直接影响下游命运。
+          - generic [ref=e3938]:
+            - slider [ref=e3939]: "42"
+            - generic [ref=e3940]: "42"
+          - button "确认排洪方案" [ref=e3941] [cursor=pointer]
+        - generic [ref=e2226]:
+          - generic [ref=e3942]:
+            - generic [ref=e3943]: 🏗 修坝(花费30拦水30)
+            - button "修建大坝" [ref=e3944] [cursor=pointer]
+          - generic [ref=e3945]:
+            - generic [ref=e3946]: 🚁 解放军救援牌（仅一次）
+            - generic [ref=e3947]: 使用后你所辖三村水位各降15，全流域将收到通报。
+            - button "动用解放军救援" [ref=e3948] [cursor=pointer]
+        - generic [ref=e2738]:
+          - generic [ref=e2739]: 📊 决策影响链分析
+          - generic [ref=e2740]: 🏘 北京·房山(蓄洪)：0人搬迁 / 8人留守
+          - generic [ref=e2741]: ✓ 本村安全，搬迁者白损失30
+          - generic [ref=e2742]: 💡 你只掌握局部信息——上下游的决策正在实时影响你的处境。
+      - generic [ref=e313]:
+        - generic [ref=e314]:
+          - generic [ref=e315]: 💬 村内研讨 / 全体频道
+          - generic [ref=e316]:
+            - button "全体" [ref=e317] [cursor=pointer]
+            - button "本村" [ref=e318] [cursor=pointer]
+        - generic [ref=e319]:
+          - generic [ref=e3949]:
+            - generic [ref=e3950]:
+              - text: 系统
+              - text: 11:03
+            - generic [ref=e3951]: 游戏开始！模拟2023年7月29日—8月2日海河"23·7"流域性特大洪水，共6轮。
+          - generic [ref=e3952]:
+            - generic [ref=e3953]:
+              - text: 系统
+              - text: 11:03
+            - generic [ref=e3954]: 💡 提示：每人只掌握局部信息，需在不确定性下快速决策。你的选择会影响他人，他人的选择也会影响你。
+          - generic [ref=e3955]:
+            - generic [ref=e3956]:
+              - text: 系统
+              - text: 11:03
+            - generic [ref=e3957]: 【天气预报】北京降水29mm | 河北降水31mm | 天津降水26mm
+          - generic [ref=e3958]:
+            - generic [ref=e3959]:
+              - text: 系统
+              - text: 11:05
+            - generic [ref=e3960]: 【村民表决完成】搬迁14人，留守64人。
+          - generic [ref=e3961]:
+            - generic [ref=e3962]:
+              - text: 系统
+              - text: 11:06
+            - generic [ref=e3963]: 钱家富(北京·房山(蓄洪)村长)启用蓄滞洪区排水50。
+          - generic [ref=e3964]:
+            - generic [ref=e3965]:
+              - text: 系统
+              - text: 11:06
+            - generic [ref=e3966]: 李明辉(河北市长)排洪17单位至下游。
+          - generic [ref=e3967]:
+            - generic [ref=e3968]:
+              - text: 系统
+              - text: 11:06
+            - generic [ref=e3969]: 王建国(天津市长)排洪12单位入海。
+          - generic [ref=e3970]:
+            - generic [ref=e3971]:
+              - text: 系统
+              - text: 11:06
+            - generic [ref=e3972]: 【本轮水情结算】 北京·房山(蓄洪)：水0/20 ✓安全 损0 北京·门头沟：水15/30 ✓安全 损5 北京·昌平：水10/35 ✓安全 损0 河北·涿州(兰沟洼)：水9/30 ✓安全 损0 河北·霸州：水7/40 ✓安全 损0 河北·保定：水11/35 ✓安全 损5 天津·静海(东淀)：水9/40 ✓安全 损0 天津·武清：水11/50 ✓安全 损5 天津·滨海新区(入海)：水1/45 ✓安全 损0
+          - generic [ref=e3973]:
+            - generic [ref=e3974]:
+              - text: 系统
+              - text: 11:07
+            - generic [ref=e3975]: 第2轮开始！降雨：北京44mm 河北48mm 天津26mm
+          - generic [ref=e3976]:
+            - generic [ref=e3977]:
+              - text: 系统
+              - text: 11:07
+            - generic [ref=e3978]: 【天气预报】北京降水44mm | 河北降水48mm | 天津降水26mm
+          - generic [ref=e3979]:
+            - generic [ref=e3980]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3981]: 【村民表决完成】搬迁17人，留守61人。
+          - generic [ref=e3982]:
+            - generic [ref=e3983]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3984]: 周安平(北京·昌平村长)修坝拦水30。
+          - generic [ref=e3985]:
+            - generic [ref=e3986]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3987]: 吴治水(河北·涿州(兰沟洼)村长)启用蓄滞洪区排水50。
+          - generic [ref=e3988]:
+            - generic [ref=e3989]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3990]: 冯守正(河北·保定村长)修坝拦水30。
+          - generic [ref=e3991]:
+            - generic [ref=e3992]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3993]: 李明辉(河北市长)修建大坝拦水30。
+          - generic [ref=e3994]:
+            - generic [ref=e3995]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3996]: 🚁 李明辉(河北市长)动用解放军救援牌！水位降低15！
+          - generic [ref=e3997]:
+            - generic [ref=e3998]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e3999]: 李明辉(河北市长)排洪24单位至下游。
+          - generic [ref=e4000]:
+            - generic [ref=e4001]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e4002]: 王建国(天津市长)排洪30单位入海。
+          - generic [ref=e4003]:
+            - generic [ref=e4004]:
+              - text: 系统
+              - text: 11:08
+            - generic [ref=e4005]: 【本轮水情结算】 北京·房山(蓄洪)：水13/20 ✓安全 损5 北京·门头沟：水22/30 ✓安全 损15 北京·昌平：水8/35 ✓安全 损0 河北·涿州(兰沟洼)：水0/30 ✓安全 损0 河北·霸州：水14/40 ✓安全 损5 河北·保定：水0/35 ✓安全 损0 天津·静海(东淀)：水18/40 ✓安全 损5 天津·武清：水22/50 ✓安全 损15 天津·滨海新区(入海)：水0/45 ✓安全 损0 河北修坝-30
+          - generic [ref=e4006]:
+            - generic [ref=e4007]:
+              - text: 系统
+              - text: 11:09
+            - generic [ref=e4008]: 第3轮开始！降雨：北京51mm 河北56mm 天津35mm
+          - generic [ref=e4009]:
+            - generic [ref=e4010]:
+              - text: 系统
+              - text: 11:09
+            - generic [ref=e4011]: 【天气预报】北京降水51mm | 河北降水56mm | 天津降水35mm
+          - generic [ref=e4012]:
+            - generic [ref=e4013]:
+              - text: 系统
+              - text: 11:09
+            - generic [ref=e4014]: 【村民表决完成】搬迁20人，留守58人。
+          - generic [ref=e4015]:
+            - generic [ref=e4016]:
+              - text: 系统
+              - text: 11:09
+            - generic [ref=e4017]: 孙保民(北京·门头沟村长)修坝拦水30。
+          - generic [ref=e4018]:
+            - generic [ref=e4019]:
+              - text: 系统
+              - text: 11:09
+            - generic [ref=e4020]: 郑大河(河北·霸州村长)修坝拦水30。
+          - generic [ref=e4021]:
+            - generic [ref=e4022]:
+              - text: 系统
+              - text: 11:09
+            - generic [ref=e4023]: 蒋防汛(天津·静海(东淀)村长)启用蓄滞洪区排水50。
+        - generic [ref=e326]:
+          - textbox "发言..." [ref=e327]
+          - button "发送" [ref=e328] [cursor=pointer]
+  - generic [ref=e329]:
+    - generic [ref=e330]:
+      - generic [ref=e4024]: 👤 个人:100
+      - generic [ref=e4025]: 🏘 北京·房山(蓄洪):445
+      - generic [ref=e4026]: 🏛 北京:500
+      - generic [ref=e4027]: 📊 累计损失:250
+      - generic [ref=e4028]: 🌊 最高水位:22
+    - button "下一阶段 ▶" [active] [ref=e337] [cursor=pointer]

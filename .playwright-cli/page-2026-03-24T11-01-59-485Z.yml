@@ -1,0 +1,27 @@
+- generic [ref=e3]:
+  - generic [ref=e4]: 研究生虚拟仿真教学 · 海河"23·7"流域性特大洪水决策演练
+  - heading "洪涝风险决策仿真平台" [level=1] [ref=e5]
+  - generic [ref=e6]: 从上游到下游，体验多主体协同与博弈中的防洪决策
+  - paragraph [ref=e7]: 基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: 🌊
+      - heading "流域联动机制" [level=3] [ref=e11]
+      - paragraph [ref=e12]: 上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运
+    - generic [ref=e13]:
+      - generic [ref=e14]: 🤖
+      - heading "AI协同推演" [level=3] [ref=e15]
+      - paragraph [ref=e16]: 单人即可体验完整游戏，每村5+名AI村民自主研讨发言做决策
+    - generic [ref=e17]:
+      - generic [ref=e18]: 🎯
+      - heading "有限理性博弈" [level=3] [ref=e19]
+      - paragraph [ref=e20]: 每人只掌握局部信息，需在不确定性下快速决策，体验集体困境
+  - generic [ref=e21]:
+    - button "进入游戏大厅" [ref=e22] [cursor=pointer]
+    - button "游戏规则速览" [ref=e23] [cursor=pointer]
+  - generic [ref=e24]:
+    - generic [ref=e26]: 京
+    - generic [ref=e27]: ➡️
+    - generic [ref=e28]: 冀
+    - generic [ref=e29]: ➡️
+    - generic [ref=e30]: 津

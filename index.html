@@ -261,9 +261,10 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 <!-- INTRO -->
 <div id="S-intro" class="screen active">
   <div class="intro-w">
-    <div style="display:inline-block;padding:6px 18px;border-radius:99px;background:rgba(68,114,196,.08);border:1px solid rgba(68,114,196,.2);color:var(--cy);font-size:.8rem;font-weight:600;margin-bottom:24px;animation:fadeIn .6s both">研究生虚拟仿真教学 · 海河"23·7"流域性特大洪水决策演练</div>
+    <div style="display:inline-block;padding:6px 18px;border-radius:99px;background:rgba(68,114,196,.08);border:1px solid rgba(68,114,196,.2);color:var(--cy);font-size:.8rem;font-weight:600;margin-bottom:24px;animation:fadeIn .6s both">天津大学资源安全与公共治理中心</div>
     <h1>洪涝风险决策仿真平台</h1>
-    <div class="sub">从上游到下游，体验多主体协同与博弈中的防洪决策</div>
+    <div class="sub" style="font-size:.88rem;color:var(--t2);margin-bottom:8px">Center for Resource Security and Public Governance, Tianjin University</div>
+    <div style="font-size:.78rem;color:var(--t3);margin-bottom:22px;animation:fadeIn .7s .15s both">联系方式：刘老师，<a href="/cdn-cgi/l/email-protection#214d464d494c61554b540f4445540f424f" style="color:var(--cy);text-decoration:none"><span class="__cf_email__" data-cfemail="98f4fff4f0f5d8ecf2edb6fdfcedb6fbf6">[email&#160;protected]</span></a></div>
     <p class="desc">基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。</p>
     <div class="feat-grid">
       <div class="f"><div style="font-size:1.4rem">🌊</div><h3>流域联动机制</h3><p>上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运</p></div>
@@ -273,8 +274,10 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
     <div class="intro-btns">
       <button class="btn btn-p" onclick="showScreen('S-lobby')">进入游戏大厅</button>
       <button class="btn btn-o" onclick="showGuide()">游戏规则速览</button>
+      <button class="btn btn-o" onclick="showConsent()">知情同意书</button>
     </div>
     <div class="river-art"><div class="rl"></div><div class="cd cd-a">京</div><span class="af" style="left:32%">➡️</span><div class="cd cd-b">冀</div><span class="af" style="left:66%">➡️</span><div class="cd cd-c">津</div></div>
+    <div style="margin-top:32px;font-size:.72rem;color:var(--t3);animation:fadeIn .7s .6s both;line-height:1.8">© 2026 Tianjin University GIPC. All Rights Reserved.</div>
   </div>
 </div>
 
@@ -289,9 +292,9 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
         <div class="fg"><label>学号</label><input id="inp-sid" value="2024001"></div>
         <div class="fg"><label>偏好角色</label></div>
         <div class="rg" id="role-sel">
-          <div class="rc sel" data-r="MAYOR" onclick="selRole(this,'MAYOR')"><h4>🏛 市长/省级指挥</h4><p>决策修坝(花费30拦水30)与排洪量，拥有一次解放军救援牌</p></div>
-          <div class="rc" data-r="VLF" onclick="selRole(this,'VLF')"><h4>🏠 蓄滞洪区村长</h4><p>可花50启用蓄滞洪区排水50至下游</p></div>
-          <div class="rc" data-r="VLN" onclick="selRole(this,'VLN')"><h4>🏘 普通村庄村长</h4><p>可花30修坝拦住上游水量30</p></div>
+          <div class="rc sel" data-r="MAYOR" onclick="selRole(this,'MAYOR')"><h4>🏛 市长/省级指挥</h4><p>决策排洪量、修坝(花费30拦水30)、炸坝(花费20)，拥有一次解放军救援牌(清零水位)</p></div>
+          <div class="rc" data-r="VLF" onclick="selRole(this,'VLF')"><h4>🏠 蓄滞洪区村长</h4><p>可花10~50购置沙袋防洪屏障，抵挡水量</p></div>
+          <div class="rc" data-r="VLN" onclick="selRole(this,'VLN')"><h4>🏘 普通村庄村长</h4><p>可花10~50购置沙袋防洪屏障，抵挡水量</p></div>
           <div class="rc" data-r="VIL" onclick="selRole(this,'VIL')"><h4>🧑 普通村民</h4><p>决策搬迁or留守，搬+未淹损30，不搬+淹损50</p></div>
         </div>
         <div class="fg"><label>房间码（留空=单机模式，输入=联机模式）</label><input id="inp-room" placeholder="如 ABC123，教师创建后分享给学生"></div>
@@ -438,7 +441,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 
 <div id="toast-c"></div>
 
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js" defer></script><script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
 // ===================== MULTIPLAYER / CONFIG LAYER =====================
 let MP={enabled:false,socket:null,roomCode:null,isHost:false};
@@ -508,14 +511,14 @@ let G={nm:'张同学',sid:'2024001',pref:'MAYOR',role:null,vil:null,
   rain:{A:0,B:0,C:0},ws:{},va:{},pa:{},ca:{A:500,B:500,C:500},
   cd:{A:0,B:0,C:0},dams:{},dike:{},vm:{},players:[],roundEnded:false,
   armyCard:{A:true,B:true,C:true},_evtModalTimer:null,
-  totalLoss:0,vilHist:{}};
+  totalLoss:0,vilHist:{},sandbags:{},blasted:{}};
 
 // ===================== INIT =====================
 function initGame(){
   G.round=1;G.pi=0;G.msgs=[];G.news=[];G.votes={};G.voted=false;G.hist=[];G.roundEnded=false;G.totalLoss=0;G.vilHist={};
-  VIL.forEach(v=>{G.ws[v]=0;G.va[v]=500;G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.vilHist[v]=[]});
+  VIL.forEach(v=>{G.ws[v]=0;G.va[v]=500;G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.vilHist[v]=[];G.sandbags[v]=0});
   G.ca={A:500,B:500,C:500};G.cd={A:0,B:0,C:0};G.dams.A=false;G.dams.B=false;G.dams.C=false;
-  G.armyCard={A:true,B:true,C:true};
+  G.armyCard={A:true,B:true,C:true};G.blasted={A:false,B:false,C:false};
   G._upflow={};VIL.forEach(v=>G._upflow[v]=0);G._justFlooded={};G._seaDischarge=0;
   createPlayers();genRain();showScreen('S-game');renderAll();startTimer();
   sysMsg('游戏开始！模拟2023年7月29日—8月2日海河"23·7"流域性特大洪水，共6轮。');
@@ -596,14 +599,16 @@ function aiVilDiscuss(){VIL.forEach(v=>{G.vm[v]=G.vm[v]||{};const w=G.ws[v],th=F
       setTimeout(()=>aiChat(p.nm,v,msg,p.spec==='STAY'?'村民(老人)':'村民'),800+i*600+Math.random()*1000)}});
   if(spk.length>=2)setTimeout(()=>aiChat(spk[spk.length-1].nm,v,pick(DISCUSS_TEMPLATES.agree),'村民'),spk.length*600+2000+Math.random()*800)})}
 function aiLeaderBuild(){VIL.forEach(v=>{const ld=G.players.find(p=>p.role==='LEADER_'+v&&p.bot);if(!ld)return;const w=G.ws[v]+G.rain[v[0]]*.5;
-  if(IFZ[v]){if(w>FT[v]*.7&&G.va[v]>=50&&Math.random()<.4){G.dike[v]=true;sysMsg(`${ld.nm}(${VN[v]}村长)启用蓄滞洪区排水50。`)}}
-  else{if(w>FT[v]*.5&&G.va[v]>=30&&Math.random()<.45){G.dams[v]=true;sysMsg(`${ld.nm}(${VN[v]}村长)修坝拦水30。`)}}})}
+  const ratio=w/FT[v];if(ratio>0.4&&G.va[v]>=10){const amt=Math.min(Math.round(10+ratio*40),50,G.va[v]);G.sandbags[v]=amt;G.va[v]-=amt;sysMsg(`${ld.nm}(${VN[v]}村长)投入${amt}万购置沙袋防洪屏障，可抵挡${amt}单位水量。`)}})}
 function aiMayorDrain(){['A','B','C'].forEach(c=>{const m=G.players.find(p=>p.role==='MAYOR_'+c&&p.bot);if(!m)return;
   const vf=VFLOW[c],tw=vf.reduce((s,v)=>s+G.ws[v],0)+G.rain[c];let d;
   if(c==='A')d=Math.min(tw,tw*(.3+Math.random()*.25));else if(c==='B')d=Math.min(tw*.65,tw*(.25+Math.random()*.3));else d=Math.min(getHyd('max_drain_C',85),tw*(.35+Math.random()*.3));
   G.cd[c]=Math.round(d);
   if(tw>50&&G.ca[c]>=30&&Math.random()<.4){G.dams[c]=true;sysMsg(`${m.nm}(${CN[c]}市长)修建大坝拦水30。`)}
-  if(G.armyCard[c]&&tw>65&&Math.random()<.25){G.armyCard[c]=false;vf.forEach(v=>{G.ws[v]=Math.max(0,G.ws[v]-15)});sysMsg(`🚁 ${m.nm}(${CN[c]}市长)动用解放军救援牌！水位降低15！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！`)}
+  // AI may blast an existing dam to release water downstream
+  if(G.dams[c]&&tw<30&&G.ca[c]>=20&&Math.random()<.2){G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 ${m.nm}(${CN[c]}市长)炸坝释放拦截水量至下游！花费20。`)}
+  // Army card: one-time use, clears ALL water to zero, resets defense
+  if(G.armyCard[c]&&tw>65&&Math.random()<.25){G.armyCard[c]=false;vf.forEach(v=>{G.ws[v]=0;G.sandbags[v]=0;G.dams[v]=false;G.dike[v]=false});G.dams[c]=false;sysMsg(`🚁 ${m.nm}(${CN[c]}市长)动用解放军救援牌！所有村庄水位清零，防御重置！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！全面清零水位！`)}
   sysMsg(`${m.nm}(${CN[c]}市长)排洪${G.cd[c]}单位${c!=='C'?'至下游':'入海'}。`)})}
 
 // ===================== FLOOD COMPUTATION =====================
@@ -635,8 +640,13 @@ function computeFlood(){
   const bd=Math.min(G.cd.B,(G.ws[VFLOW.B[2]]+wi[VFLOW.B[2]])*0.7);
   if(G.dams.B)wi[VFLOW.B[2]]-=Math.min(30,wi[VFLOW.B[2]]);
   VFLOW.C.forEach((v,i)=>{wi[v]+=bd*(iflow[i]||0.33)});
-  // Apply dams per village
-  VIL.forEach(v=>{if(G.dams[v]&&!IFZ[v]){const bl=Math.min(30,wi[v]);wi[v]-=bl}});
+  // Apply sandbag barriers per village (blocks water, excess flows downstream)
+  ['A','B','C'].forEach(c=>{
+    const vf=VFLOW[c];
+    vf.forEach((v,i)=>{
+      if(G.sandbags[v]>0){const bl=Math.min(G.sandbags[v],wi[v]);wi[v]-=bl;if(i<vf.length-1)wi[vf[i+1]]+=Math.max(0,bl*0.3)}
+    });
+  });
   // Apply dikes (flood detention zones drain to next downstream village)
   ['A','B','C'].forEach(c=>{
     const vf=VFLOW[c];
@@ -646,6 +656,10 @@ function computeFlood(){
         wi[v]-=drain;wi[vf[i+1]]+=drain;
       }
     });
+  });
+  // Dam blast: if a city dam was blasted, its blocked water releases downstream
+  ['A','B','C'].forEach(c=>{
+    if(G.blasted[c]){const vf=VFLOW[c];const last=vf[vf.length-1];wi[last]+=30}
   });
   // Sea discharge cap on C3
   const c3v=VFLOW.C[2]; // C3
@@ -682,8 +696,8 @@ function computeFlood(){
     G.vilHist[v].push({r:G.round,w:Math.round(w),fl,dmg,va:Math.round(G.va[v]),mc:Object.values(G.vm[v]||{}).filter(x=>x).length,sc:Object.values(G.vm[v]||{}).filter(x=>!x).length});
     G.players.filter(p=>p.vil===v&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_')).forEach(p=>{
       const moved=G.vm[v]?.[p.id]||false;G.pa[p.id]=(G.pa[p.id]||100)-calcVLoss(moved,fl)})});
-  ['A','B','C'].forEach(c=>{if(G.dams[c]){G.ca[c]-=30;roundLoss+=30;summary+=`${CN[c]}修坝-30\n`}});
-  VIL.forEach(v=>{if(G.dams[v]&&!IFZ[v]){G.va[v]-=30;roundLoss+=30}if(G.dike[v]&&IFZ[v]){G.va[v]-=50;roundLoss+=50}});
+  ['A','B','C'].forEach(c=>{if(G.dams[c]){G.ca[c]-=30;roundLoss+=30;summary+=`${CN[c]}修坝-30\n`}if(G.blasted[c]){summary+=`${CN[c]}炸坝释放水量\n`}});
+  VIL.forEach(v=>{if(G.dike[v]&&IFZ[v]){G.va[v]-=50;roundLoss+=50}});
   G.totalLoss+=roundLoss;sysMsg(summary);genNews();
   showDecisionFeedback();
   G.hist.push({r:G.round,rain:{...G.rain},ws:{...G.ws},va:{...G.va},ca:{...G.ca},loss:roundLoss,totalLoss:G.totalLoss});
@@ -701,6 +715,7 @@ function showDecisionFeedback(){
   html+=`<div>${fl?'⚠ 本村已被淹没！留守者每人损失50':'✓ 本村安全，搬迁者白损失30'}</div>`;
   // Show if dams/dikes helped
   if(G.dams[v])html+='<div>🏗 本村修坝拦截了30单位水量</div>';
+  if(G.sandbags[v])html+=`<div>🧱 本村沙袋屏障抵挡了${G.sandbags[v]}单位水量</div>`;
   if(G.dike[v])html+='<div>💥 本村启用蓄滞洪区，排水50至下游</div>';
   html+='<div style="font-size:.72rem;color:var(--t3);margin-top:4px">💡 你只掌握局部信息——上下游的决策正在实时影响你的处境。</div>';
   html+='</div>';fb.innerHTML=html;
@@ -718,8 +733,8 @@ function genNews(){const fv=VIL.filter(v=>G.ws[v]>=FT[v]);
 
 // ===================== ROUND MANAGEMENT =====================
 function endRound(){
-  VIL.forEach(v=>{G.dams[v]=false;G.dike[v]=false;G.vm[v]={}});
-  G.dams.A=false;G.dams.B=false;G.dams.C=false;G.cd={A:0,B:0,C:0};
+  VIL.forEach(v=>{G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.sandbags[v]=0});
+  G.dams.A=false;G.dams.B=false;G.dams.C=false;G.cd={A:0,B:0,C:0};G.blasted={A:false,B:false,C:false};
   mpSaveRound();
   if(G.round>=getMR()){sysMsg('六轮结束！进入最终评分。');setTimeout(showResult,1200);return}
   G.round++;G.pi=0;genRain();showRoundTransition();
@@ -793,9 +808,8 @@ function renderMyStatus(){
   const v=G.vil,c=v?v[0]:'A',lr=G.rain[c]||0,uf=(G._upflow&&G._upflow[v])||0,w=G.ws[v]||0,th=FT[v]||30,dmg=calcDmg(w),va=G.va[v]||0,pa=G.pa.human||0,fl=w>=th;
   document.getElementById('my-identity').textContent=(RL[G.role]||'村民')+' · '+VN[v];
   let strat='';
-  if(G.role&&G.role.startsWith('MAYOR_'))strat='可选：设定排洪量 | 修建大坝(花费30拦水30) | 解放军救援牌(一次性)';
-  else if(G.role&&G.role.startsWith('LEADER_')&&IFZ[v])strat='可选：启用蓄滞洪区(花费50排水50) | 等待';
-  else if(G.role&&G.role.startsWith('LEADER_'))strat='可选：修坝(花费30拦水30) | 等待';
+  if(G.role&&G.role.startsWith('MAYOR_'))strat='可选：设定排洪量 | 修建大坝(花费30拦水30) | 炸坝(花费20释放拦水) | 解放军救援牌(一次性，清零水位)';
+  else if(G.role&&G.role.startsWith('LEADER_'))strat='可选：购置沙袋防洪屏障(花费10~50，抵挡相应水量) | 等待';
   else strat='可选：搬迁(搬+未淹损30) | 留守(不搬+淹损50)';
   document.getElementById('my-strategy').textContent='策略：'+strat;
   const wPct=clamp(w/th*100,0,100);
@@ -820,7 +834,7 @@ function renderArmyCard(){
   // Show army card status to everyone (req #7)
   let h='<div style="margin-top:8px;padding:9px 12px;border-radius:8px;background:rgba(212,168,83,.05);border:1px solid rgba(212,168,83,.15);font-size:.76rem;color:var(--t2)"><div style="font-weight:700;color:var(--am);margin-bottom:3px">🚁 解放军救援牌状态</div>';
   ['A','B','C'].forEach(c=>{h+=`<div>${CN[c]}市长：${G.armyCard[c]?'<span style="color:var(--gn)">✓ 未使用</span>':'<span style="color:var(--rd)">✗ 已使用</span>'}</div>`});
-  h+='<div style="font-size:.7rem;color:var(--t3);margin-top:3px">每位市长拥有唯一一次机会，使用后所辖村庄水位立降15</div></div>';
+  h+='<div style="font-size:.7rem;color:var(--t3);margin-top:3px">每位市长拥有唯一一次机会，使用后所辖村庄水位清零、防御重置</div></div>';
   el.innerHTML=h}
 function renderWarn(){const mx=Math.max(...VIL.map(v=>G.ws[v])),mt=Math.max(...VIL.map(v=>FT[v])),r=clamp(mx/(mt*1.2),0,1);
   let lv,cl;if(r<.25){lv='蓝色预警';cl='linear-gradient(90deg,#4472C4,#6a9ad8)'}else if(r<.5){lv='黄色预警';cl='linear-gradient(90deg,#D4A853,#e6c36a)'}else if(r<.75){lv='橙色预警';cl='linear-gradient(90deg,#DD8452,#c97a42)'}else{lv='红色预警';cl='linear-gradient(90deg,#C44E52,#d9636b)'}
@@ -902,14 +916,13 @@ function renderAct(){
       ${done?'<div style="font-size:.76rem;color:var(--gn);margin-top:5px">✓ 已选择，等待其他村民…</div>':''}`}
     else{tt.textContent='💬 村民研讨中';btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2)">村民正在研讨搬迁。你可在聊天中发言影响他们的决策。</div><button class="btn btn-o" style="margin-top:7px" onclick="hBroadcast()">向村民发防汛提醒</button>`}}
   else if(p==='LEADER_BUILD'){
-    if(G.role&&G.role.startsWith('LEADER_')){const v=G.role.replace('LEADER_',''),isF=IFZ[v];tt.textContent=`🏗 ${VN[v]}工程决策`;
-      if(isF){btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:7px">蓄滞洪区：可花50启用分洪排水50至下游。<b style="color:var(--am)">下游村庄将承受额外水量！</b></div>
-        <button class="btn btn-d" ${G.va[v]<50||G.dike[v]?'disabled':''} onclick="hDike('${v}')">${G.dike[v]?'已启用':'💥 启用蓄滞洪区(花费50)'}</button>
+    if(G.role&&G.role.startsWith('LEADER_')){const v=G.role.replace('LEADER_','');tt.textContent=`🏗 ${VN[v]}防洪决策`;
+      const maxSB=Math.min(50,G.va[v]);const done=G.sandbags[v]>0;
+      btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:7px">花费10~50村资金购置沙袋防洪屏障，可抵挡相应水量。未拦住的水量流向下游。<b style="color:var(--am)">下游村庄将承受溢出水量！</b></div>
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><input type="range" id="sb-sl" min="10" max="${Math.max(10,maxSB)}" value="${Math.min(30,maxSB)}" style="flex:1;accent-color:var(--cy)" oninput="document.getElementById('sb-v').textContent=this.value" ${done||maxSB<10?'disabled':''}><span id="sb-v" style="font-family:var(--fm);font-size:1.05rem;color:var(--cy);min-width:36px">${Math.min(30,maxSB)}</span></div>
+        <button class="btn btn-w" ${done||maxSB<10?'disabled':''} onclick="hSandbag('${v}')">${done?'已设置沙袋('+G.sandbags[v]+')':'🧱 购置沙袋防洪屏障'}</button>
         <button class="btn btn-o" onclick="sysMsg('${v}村长暂不操作。')">暂不操作</button>`}
-      else{btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:7px">普通村庄：可花30修坝拦上游水量30。</div>
-        <button class="btn btn-w" ${G.va[v]<30||G.dams[v]?'disabled':''} onclick="hVDam('${v}')">${G.dams[v]?'已修坝':'🏗 修坝拦水(花费30)'}</button>
-        <button class="btn btn-o" onclick="sysMsg('${v}村长暂不操作。')">暂不操作</button>`}}
-    else{tt.textContent='🏗 等待村长决策';btns.innerHTML='<div style="font-size:.82rem;color:var(--t2)">各村村长正在决策工程方案。你不知道他们会做什么选择。</div>'}}
+    else{tt.textContent='🏗 等待村长决策';btns.innerHTML='<div style="font-size:.82rem;color:var(--t2)">各村村长正在决策防洪方案。你不知道他们会做什么选择。</div>'}}
   else if(p==='MAYOR_DRAIN'){
     if(G.role&&G.role.startsWith('MAYOR_')){const c=G.role.replace('MAYOR_','');
       const vf=VFLOW[c],tw=vf.reduce((s,v)=>s+G.ws[v],0)+G.rain[c],mx=c==='C'?Math.min(getHyd('max_drain_C',85),tw):c==='B'?tw*.65:tw;
@@ -920,10 +933,12 @@ function renderAct(){
       ex.innerHTML=`<div style="padding:9px;background:var(--p2);border-radius:8px;border:1px solid var(--bd)">
         <div style="font-size:.8rem;font-weight:600;margin-bottom:5px">🏗 修坝(花费30拦水30)</div>
         <button class="btn btn-w" style="font-size:.78rem" ${G.ca[c]<30||G.dams[c]?'disabled':''} onclick="hCDam('${c}')">${G.dams[c]?'已修建':'修建大坝'}</button>
+        ${G.dams[c]&&!G.blasted[c]?`<button class="btn btn-d" style="font-size:.78rem;margin-left:6px" ${G.ca[c]<20?'disabled':''} onclick="hBlastDam('${c}')">💥 炸坝(花费20)</button>`:''}
+        ${G.blasted[c]?'<div style="font-size:.74rem;color:var(--rd);margin-top:4px">已炸坝，拦截水量已释放</div>':''}
       </div>
       ${G.armyCard[c]?`<div style="margin-top:8px;padding:9px;background:rgba(196,78,82,.04);border-radius:8px;border:1px solid rgba(196,78,82,.12)">
         <div style="font-size:.8rem;font-weight:600;color:var(--am);margin-bottom:5px">🚁 解放军救援牌（仅一次）</div>
-        <div style="font-size:.74rem;color:var(--t3);margin-bottom:5px">使用后你所辖三村水位各降15，全流域将收到通报。</div>
+        <div style="font-size:.74rem;color:var(--t3);margin-bottom:5px">使用后你所辖三村水位全部清零，防御设施重置。全流域将收到通报。</div>
         <button class="btn btn-d" style="font-size:.78rem" onclick="hArmyCard('${c}')">动用解放军救援</button>
       </div>`:''}`}
     else{tt.textContent='🌊 等待市长排洪';btns.innerHTML='<div style="font-size:.82rem;color:var(--t2)">市长正在决策排洪方案。排洪会将水量推向下游——你无法控制这一点。</div>'}}
@@ -962,14 +977,16 @@ function sendChat(){const inp=document.getElementById('chat-in'),t=inp.value.tri
 
 // ===================== PLAYER ACTIONS =====================
 function hVilDec(m){closeMo();G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=m;sysMsg(`你选择了${m?'搬迁':'暂不搬迁'}。`);mpSendAction(m?'evacuate':'stay',{village:G.vil});renderAct();toast(m?'已选搬迁':'已选留守',m?'gn':'am')}
+function hSandbag(v){const amt=parseInt(document.getElementById('sb-sl').value);if(G.sandbags[v]>0||G.va[v]<amt)return;G.sandbags[v]=amt;G.va[v]-=amt;sysMsg(`你投入${amt}万购置沙袋防洪屏障，可抵挡${amt}单位水量。`);mpSendAction('sandbag',{village:v,amount:amt});toast(`沙袋已就位(${amt})`,'gn');renderAll()}
 function hMayorDrain(){const c=G.role.replace('MAYOR_',''),v=parseInt(document.getElementById('drain-sl').value);G.cd[c]=v;sysMsg(`你决定${CN[c]}排洪${v}单位${c!=='C'?'至下游':'入海'}。`);mpSendAction('drain',{city:c,value:v});toast('排洪方案确认','bl');renderAct()}
 function hCDam(c){if(G.dams[c])return;G.dams[c]=true;G.ca[c]-=30;sysMsg(`${CN[c]}修建大坝！花费30拦水30。`);mpSendAction('build_dam',{city:c});toast('大坝修建成功','gn');renderAll()}
 function hVDam(v){if(G.dams[v])return;G.dams[v]=true;G.va[v]-=30;sysMsg(`${v}村修坝！花费30拦水30。`);mpSendAction('village_dam',{village:v});toast('修坝成功','gn');renderAll()}
 function hDike(v){if(G.dike[v])return;G.dike[v]=true;G.va[v]-=50;sysMsg(`${VN[v]}启用蓄滞洪区！花费50排水50至下游。`);mpSendAction('activate_dike',{village:v});toast('蓄滞洪区已启用','am');renderAll()}
 function hArmyCard(c){if(!G.armyCard[c])return;G.armyCard[c]=false;
-  VFLOW[c].forEach(v=>{G.ws[v]=Math.max(0,G.ws[v]-15)});
-  sysMsg(`🚁 你动用了解放军救援牌！${CN[c]}所有村庄水位降低15！`);sysMsg(`📢 全流域通报：${CN[c]}市长已动用唯一的解放军救援牌！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！`);mpSendAction('army_card',{city:c});toast('解放军已出动！','gn');renderAll()}
+  VFLOW[c].forEach(v=>{G.ws[v]=0;G.sandbags[v]=0;G.dams[v]=false;G.dike[v]=false});G.dams[c]=false;
+  sysMsg(`🚁 你动用了解放军救援牌！${CN[c]}所有村庄水位清零，防御重置！`);sysMsg(`📢 全流域通报：${CN[c]}市长已动用唯一的解放军救援牌！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！全面清零水位！`);mpSendAction('army_card',{city:c});toast('解放军已出动！','gn');renderAll()}
 function hBroadcast(){sysMsg(`${G.nm}向全体村民发布通知：请密切关注水情，做好撤离准备！`);toast('通知已发','bl')}
+function hBlastDam(c){if(!G.dams[c]||G.blasted[c])return;if(G.ca[c]<20){toast('市资产不足，炸坝需要20','rd');return}G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 你下令炸坝！${CN[c]}大坝被炸毁，拦截水量释放至下游。花费20。`);mpSendAction('blast_dam',{city:c});toast('大坝已炸毁！','am');renderAll()}
 
 // ===================== RESULT (with voting window req #10) =====================
 function showResult(){showScreen('S-result');
@@ -1021,11 +1038,12 @@ function showModal(t,b,btns){document.getElementById('mo-t').innerHTML=t;documen
 function closeMo(){document.getElementById('mo').classList.remove('show');clearTimeout(G._evtModalTimer)}
 function showRoleReveal(){
   const r=G.role,rn=RL[r]||'村民',v=G.vil;let d='';
-  if(r&&r.startsWith('MAYOR_')){const c=r.replace('MAYOR_','');d=`<p>作为<b>${CN[c]}市长</b>，你决定排洪量和是否修坝。排洪推向下游。</p><p style="color:var(--am)">🚁 你拥有唯一一次<b>解放军救援牌</b>，使用后所辖村庄水位降低15。全流域将收到通报。</p><p style="font-size:.8rem;color:var(--t3)">💡 你的排洪决策直接影响下游命运，但你无法预知下游的反应。</p>`}
-  else if(r&&r.startsWith('LEADER_')){const vv=r.replace('LEADER_','');d=IFZ[vv]?`<p>你是<b>${VN[vv]}村长</b>。可花50启用蓄滞洪区排水50至下游。保护本村但加重下游压力。</p>`:`<p>你是<b>${VN[vv]}村长</b>。可花30修坝拦上游水量30。</p>`;d+='<p style="font-size:.8rem;color:var(--t3)">💡 你只知道本村水情，不知道其他村长的选择。</p>'}
+  if(r&&r.startsWith('MAYOR_')){const c=r.replace('MAYOR_','');d=`<p>作为<b>${CN[c]}市长</b>，你决定排洪量、修坝和是否炸坝释放拦水。排洪推向下游。</p><p style="color:var(--am)">🚁 你拥有唯一一次<b>解放军救援牌</b>，使用后所辖村庄水位全部清零，防御重置。全流域将收到通报。</p><p style="font-size:.8rem;color:var(--t3)">💡 你的排洪决策直接影响下游命运，但你无法预知下游的反应。</p>`}
+  else if(r&&r.startsWith('LEADER_')){const vv=r.replace('LEADER_','');d=`<p>你是<b>${VN[vv]}村长</b>。可花费10~50村资金购置沙袋防洪屏障，抵挡相应水量。未拦住的水量将流向下游。</p>`;d+='<p style="font-size:.8rem;color:var(--t3)">💡 你只知道本村水情，不知道其他村长的选择。</p>'}
   else{d=`<p>你是<b>${VN[v]}普通村民</b>。每轮决策搬迁or留守。</p><p>搬+未淹=损30 | 不搬+被淹=损50 | 搬+淹=0</p><p style="color:var(--am)">注意：聊天中有隐藏角色，信息不一定可靠！</p><p style="font-size:.8rem;color:var(--t3)">💡 你不知道上游会排多少水过来，也不知道村长会不会修坝。</p>`}
   showModal(`🎭 你的角色：${rn}`,`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2.4rem">${r&&r.startsWith('MAYOR')?'🏛':r&&r.startsWith('LEADER')?'🏠':'🧑'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--cy)">${rn}</div><div style="font-size:.8rem;color:var(--t3);margin-top:3px">位置：${VN[v]||v}</div></div>${d}`)}
-function showGuide(){showModal('📖 游戏规则','<div style="font-size:.84rem;color:var(--t2);line-height:1.9"><p><b>背景</b>：2023年台风"杜苏芮"北上，海河流域遭遇"23·7"特大洪水，北京83h降雨744.8mm。</p><p><b>流域</b>：北京A(上游)→河北B(中游)→天津C(下游)，每城3村，共9村约90人参与</p><p><b>核心机制</b>：每人只掌握局部信息，需在不确定性下快速决策。你的选择影响他人，他人的选择也影响你。</p><p><b>阈值</b>：房山20 门头沟30 昌平35 涿州30 霸州40 保定35 静海40 武清50 滨海新区45</p><p><b>海排上限</b>：滨海新区(C3)入海口每轮最多排出60单位，超出部分积压。</p><p><b>村民</b>：搬+未淹=损30 | 不搬+淹=损50 | 搬+淹=0</p><p><b>市长</b>：决定排洪量(推向下游)+修坝(花费30拦30)+🚁解放军救援牌(一次性，降水位15)</p><p><b>评分</b>：村民=个人经济 | 其他=经济排名+声誉投票</p><p style="color:var(--gd)"><b>隐藏角色</b>："谣言散布者"混淆视听、"坚守老人"拒绝撤离！</p></div>')}
+function showGuide(){showModal('📖 游戏规则','<div style="font-size:.84rem;color:var(--t2);line-height:1.9"><p><b>背景</b>：2023年台风"杜苏芮"北上，海河流域遭遇"23·7"特大洪水，北京83h降雨744.8mm。</p><p><b>流域</b>：北京A(上游)→河北B(中游)→天津C(下游)，每城3村，共9村约90人参与</p><p><b>核心机制</b>：每人只掌握局部信息，需在不确定性下快速决策。你的选择影响他人，他人的选择也影响你。</p><p><b>阈值</b>：房山20 门头沟30 昌平35 涿州30 霸州40 保定35 静海40 武清50 滨海新区45</p><p><b>海排上限</b>：滨海新区(C3)入海口每轮最多排出60单位，超出部分积压。</p><p><b>村民</b>：搬+未淹=损30 | 不搬+淹=损50 | 搬+淹=0</p><p><b>村长</b>：可花费10~50村资金购买沙袋防洪屏障，抵挡相应水量，未拦住部分流向下游。</p><p><b>市长</b>：决定排洪量(推向下游)+修坝(花费30拦30)+可申请炸坝(花费20释放拦水至下游)+🚁解放军救援牌(一次性，清零本市所有村庄水位并重置防御)</p><p><b>评分</b>：村民=个人经济 | 其他=经济排名+声誉投票</p><p style="color:var(--gd)"><b>隐藏角色</b>："谣言散布者"混淆视听、"坚守老人"拒绝撤离！隐藏角色仅出现在普通村民中，村长和市长不会是隐藏角色。</p></div>')}
+function showConsent(){showModal('📋 知情同意书','<div style="font-size:.84rem;color:var(--t2);line-height:2"><p>尊敬的参与者：</p><p>您正在参与由天津大学资源安全与公共治理中心开发的"海河流域洪涝风险决策仿真"教学实验。本实验旨在通过模拟决策场景，帮助您理解多主体协同与博弈下的防洪决策过程。</p><p><b>自愿参与</b>：您的参与完全自愿。您可以在任何时候退出实验，且不会因此受到任何不利影响。</p><p><b>无风险</b>：本实验为虚拟仿真教学活动，不涉及任何人身、财务或心理风险。所有情境均为教学模拟，不代表真实事件后果。</p><p><b>匿名性</b>：实验中收集的数据（包括您的决策记录和研讨发言）仅用于教学分析和学术研究，所有数据均匿名处理，不会关联到您的个人身份信息。</p><p>如您同意参与，请点击下方"我已知悉并同意"按钮。</p></div>','<button class="btn btn-p" onclick="closeMo()">我已知悉并同意</button><button class="btn btn-o" onclick="closeMo()">返回</button>')}
 
 // ===================== HELPERS =====================
 function selRole(el,r){document.querySelectorAll('.rc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');G.pref=r}

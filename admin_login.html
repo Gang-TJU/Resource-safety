@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台登录 — 海河洪涝决策仿真平台</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--text:#2d3748;--muted:#718096;--border:#e2e8f0;--blue:#4472C4;--red:#C44E52;--radius:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.login-box h1{font-size:1.2rem;font-weight:700;color:var(--blue);text-align:center;margin-bottom:6px}
+.login-box .sub{font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:28px}
+.fg{margin-bottom:18px}
+.fg label{display:block;font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+.fg input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:.92rem;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
+.fg input:focus{border-color:var(--blue)}
+.btn{display:block;width:100%;padding:12px;border-radius:8px;font-size:.94rem;font-weight:700;cursor:pointer;border:none;background:var(--blue);color:#fff;transition:opacity .15s}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{color:var(--red);font-size:.82rem;text-align:center;margin-top:12px;min-height:20px}
+.back{display:block;text-align:center;margin-top:18px;font-size:.82rem;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--blue)}
+.icon{font-size:2.4rem;text-align:center;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="icon">🔐</div>
+  <h1>管理后台登录</h1>
+  <p class="sub">海河洪涝决策仿真平台 · 教师专用</p>
+  <form id="login-form" onsubmit="doLogin(event)">
+    <div class="fg">
+      <label>账号</label>
+      <input id="username" type="text" autocomplete="username" placeholder="请输入管理员账号" required>
+    </div>
+    <div class="fg">
+      <label>密码</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="请输入密码" required>
+    </div>
+    <button class="btn" type="submit" id="btn-login">登 录</button>
+  </form>
+  <div class="err" id="err-msg"></div>
+  <a class="back" href="/">← 返回游戏首页</a>
+</div>
+<script>
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-login');
+  const err = document.getElementById('err-msg');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '登录中...';
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    if (res.ok) {
+      window.location.href = '/admin';
+    } else {
+      const data = await res.json().catch(() => ({}));
+      err.textContent = data.detail || '登录失败，请检查账号密码';
+    }
+  } catch(ex) {
+    err.textContent = '网络错误，请重试';
+  }
+  btn.disabled = false;
+  btn.textContent = '登 录';
+}
+</script>
+</body>
+</html>

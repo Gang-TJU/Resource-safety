@@ -1,0 +1,30 @@
+- generic [ref=e32]:
+  - heading "加入演练" [level=2] [ref=e33]
+  - paragraph [ref=e34]: 选择偏好角色后系统自动分配身份（含隐藏角色盲盒），AI补齐全部角色
+  - generic [ref=e36]:
+    - generic [ref=e37]:
+      - generic [ref=e38]: 你的姓名
+      - textbox [ref=e39]: 张同学
+    - generic [ref=e40]:
+      - generic [ref=e41]: 学号
+      - textbox [active] [ref=e42]: "2024001"
+    - generic [ref=e44]: 偏好角色
+    - generic [ref=e45]:
+      - generic [ref=e46] [cursor=pointer]:
+        - heading "🏛 市长/省级指挥" [level=4] [ref=e47]
+        - paragraph [ref=e48]: 决策修坝(花费30拦水30)与排洪量，拥有一次解放军救援牌
+      - generic [ref=e49] [cursor=pointer]:
+        - heading "🏠 蓄滞洪区村长" [level=4] [ref=e50]
+        - paragraph [ref=e51]: 可花50启用蓄滞洪区排水50至下游
+      - generic [ref=e52] [cursor=pointer]:
+        - heading "🏘 普通村庄村长" [level=4] [ref=e53]
+        - paragraph [ref=e54]: 可花30修坝拦住上游水量30
+      - generic [ref=e55] [cursor=pointer]:
+        - heading "🧑 普通村民" [level=4] [ref=e56]
+        - paragraph [ref=e57]: 决策搬迁or留守，搬+未淹损30，不搬+淹损50
+    - generic [ref=e58]:
+      - generic [ref=e59]: 房间码（留空=单机模式，输入=联机模式）
+      - textbox "如 ABC123，教师创建后分享给学生" [ref=e60]
+    - button "开始游戏 · 角色盲盒分配" [ref=e61] [cursor=pointer]
+    - button "返回首页" [ref=e62] [cursor=pointer]
+    - button "教师管理后台" [ref=e63] [cursor=pointer]

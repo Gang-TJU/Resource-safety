@@ -1,0 +1,3 @@
+[POST] http://localhost:8080/api/admin/login => [200] OK
+[POST] http://localhost:8080/api/admin/login => [200] OK
+[POST] http://localhost:8080/api/admin/login => [200] OK

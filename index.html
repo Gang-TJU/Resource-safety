@@ -252,6 +252,26 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   .res-cards{grid-template-columns:1fr}
   .ro-loss-tbl{font-size:.64rem}
 }
+/* ========== DECISION ANIMATION EFFECTS ========== */
+.fx-overlay{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;
+  background:rgba(255,255,255,0);transition:background .3s,opacity .4s;opacity:0}
+.fx-overlay.fx-show{opacity:1;background:rgba(255,255,255,.7)}
+.fx-overlay.fx-danger.fx-show{background:rgba(196,78,82,.08)}
+.fx-overlay.fx-army.fx-show{background:rgba(85,168,104,.08)}
+.fx-icon{font-size:4rem;animation:fxBounce .6s cubic-bezier(.34,1.56,.64,1) both}
+.fx-text{font-size:1.3rem;font-weight:900;color:var(--cy);margin-top:12px;font-family:var(--fd);animation:fxSlideUp .5s .15s both;text-shadow:0 2px 8px rgba(0,0,0,.06)}
+.fx-danger .fx-text{color:var(--rd)}.fx-army .fx-text{color:var(--gn)}
+@keyframes fxBounce{0%{transform:scale(0) rotate(-15deg);opacity:0}50%{transform:scale(1.3) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes fxSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* Ripple effect on action buttons */
+.btn{position:relative;overflow:hidden}.btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,.4) 0%,transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.btn:active::after{opacity:1;transition:opacity 0s}
+/* Water ripple on flood */
+@keyframes waterRipple{0%{box-shadow:0 0 0 0 rgba(68,114,196,.3)}70%{box-shadow:0 0 0 12px rgba(68,114,196,0)}100%{box-shadow:0 0 0 0 rgba(68,114,196,0)}}
+.vn.flood{animation:pulseGlow 2s infinite,waterRipple 2.5s ease-out infinite}
+/* Status value change flash */
+@keyframes valFlash{0%{background:rgba(68,114,196,.15)}100%{background:transparent}}
+.sv.flash-change{animation:valFlash .8s ease-out}
 </style>
 </head>
 <body>
@@ -261,10 +281,8 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 <!-- INTRO -->
 <div id="S-intro" class="screen active">
   <div class="intro-w">
-    <div style="display:inline-block;padding:6px 18px;border-radius:99px;background:rgba(68,114,196,.08);border:1px solid rgba(68,114,196,.2);color:var(--cy);font-size:.8rem;font-weight:600;margin-bottom:24px;animation:fadeIn .6s both">天津大学资源安全与公共治理中心</div>
-    <h1>洪涝风险决策仿真平台</h1>
-    <div class="sub" style="font-size:.88rem;color:var(--t2);margin-bottom:8px">Center for Resource Security and Public Governance, Tianjin University</div>
-    <div style="font-size:.78rem;color:var(--t3);margin-bottom:22px;animation:fadeIn .7s .15s both">联系方式：刘老师，<a href="/cdn-cgi/l/email-protection#214d464d494c61554b540f4445540f424f" style="color:var(--cy);text-decoration:none"><span class="__cf_email__" data-cfemail="98f4fff4f0f5d8ecf2edb6fdfcedb6fbf6">[email&#160;protected]</span></a></div>
+    <h1 style="margin-bottom:10px">流域性洪涝风险决策仿真平台</h1>
+    <div class="sub" style="font-family:'ZCOOL KuaiLe',cursive;font-size:1rem;color:var(--cy);margin-bottom:28px;animation:fadeIn .7s .1s both">Flood Risk Decision-making Simulation Platform</div>
     <p class="desc">基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。</p>
     <div class="feat-grid">
       <div class="f"><div style="font-size:1.4rem">🌊</div><h3>流域联动机制</h3><p>上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运</p></div>
@@ -277,7 +295,12 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
       <button class="btn btn-o" onclick="showConsent()">知情同意书</button>
     </div>
     <div class="river-art"><div class="rl"></div><div class="cd cd-a">京</div><span class="af" style="left:32%">➡️</span><div class="cd cd-b">冀</div><span class="af" style="left:66%">➡️</span><div class="cd cd-c">津</div></div>
-    <div style="margin-top:32px;font-size:.72rem;color:var(--t3);animation:fadeIn .7s .6s both;line-height:1.8">© 2026 Tianjin University GIPC. All Rights Reserved.</div>
+    <div style="margin-top:36px;padding-top:20px;border-top:1px solid var(--bd);animation:fadeIn .7s .6s both;line-height:2;text-align:center">
+      <div style="font-size:.82rem;font-weight:600;color:var(--cy)">天津大学资源安全与公共治理中心</div>
+      <div style="font-size:.74rem;color:var(--t2)">Center for Resource Security and Public Governance, Tianjin University</div>
+      <div style="font-size:.74rem;color:var(--t3)">联系人：刘老师，<a href="/cdn-cgi/l/email-protection#d6bab1babebb96a2bca3f8b3b2a3f8b5b8" style="color:var(--cy);text-decoration:none"><span class="__cf_email__" data-cfemail="e08c878c888da0948a95ce858495ce838e">[email&#160;protected]</span></a></div>
+      <div style="font-size:.7rem;color:var(--t3);margin-top:4px">© 2026 Tianjin University GIPC. All Rights Reserved.</div>
+    </div>
   </div>
 </div>
 
@@ -293,7 +316,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
         <div class="fg"><label>偏好角色</label></div>
         <div class="rg" id="role-sel">
           <div class="rc sel" data-r="MAYOR" onclick="selRole(this,'MAYOR')"><h4>🏛 市长/省级指挥</h4><p>决策排洪量、修坝(花费30拦水30)、炸坝(花费20)，拥有一次解放军救援牌(清零水位)</p></div>
-          <div class="rc" data-r="VLF" onclick="selRole(this,'VLF')"><h4>🏠 蓄滞洪区村长</h4><p>可花10~50购置沙袋防洪屏障，抵挡水量</p></div>
+          <div class="rc" data-r="VLF" onclick="selRole(this,'VLF')"><h4>🏠 蓄滞洪区村长</h4><p>购置沙袋防洪屏障 + 动员村民撤离 + 灾后补偿核算</p></div>
           <div class="rc" data-r="VLN" onclick="selRole(this,'VLN')"><h4>🏘 普通村庄村长</h4><p>可花10~50购置沙袋防洪屏障，抵挡水量</p></div>
           <div class="rc" data-r="VIL" onclick="selRole(this,'VIL')"><h4>🧑 普通村民</h4><p>决策搬迁or留守，搬+未淹损30，不搬+淹损50</p></div>
         </div>
@@ -511,7 +534,7 @@ let G={nm:'张同学',sid:'2024001',pref:'MAYOR',role:null,vil:null,
   rain:{A:0,B:0,C:0},ws:{},va:{},pa:{},ca:{A:500,B:500,C:500},
   cd:{A:0,B:0,C:0},dams:{},dike:{},vm:{},players:[],roundEnded:false,
   armyCard:{A:true,B:true,C:true},_evtModalTimer:null,
-  totalLoss:0,vilHist:{},sandbags:{},blasted:{}};
+  totalLoss:0,vilHist:{},sandbags:{},blasted:{},_evacOrdered:{}};
 
 // ===================== INIT =====================
 function initGame(){
@@ -734,7 +757,7 @@ function genNews(){const fv=VIL.filter(v=>G.ws[v]>=FT[v]);
 // ===================== ROUND MANAGEMENT =====================
 function endRound(){
   VIL.forEach(v=>{G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.sandbags[v]=0});
-  G.dams.A=false;G.dams.B=false;G.dams.C=false;G.cd={A:0,B:0,C:0};G.blasted={A:false,B:false,C:false};
+  G.dams.A=false;G.dams.B=false;G.dams.C=false;G.cd={A:0,B:0,C:0};G.blasted={A:false,B:false,C:false};G._evacOrdered={};
   mpSaveRound();
   if(G.round>=getMR()){sysMsg('六轮结束！进入最终评分。');setTimeout(showResult,1200);return}
   G.round++;G.pi=0;genRain();showRoundTransition();
@@ -916,12 +939,19 @@ function renderAct(){
       ${done?'<div style="font-size:.76rem;color:var(--gn);margin-top:5px">✓ 已选择，等待其他村民…</div>':''}`}
     else{tt.textContent='💬 村民研讨中';btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2)">村民正在研讨搬迁。你可在聊天中发言影响他们的决策。</div><button class="btn btn-o" style="margin-top:7px" onclick="hBroadcast()">向村民发防汛提醒</button>`}}
   else if(p==='LEADER_BUILD'){
-    if(G.role&&G.role.startsWith('LEADER_')){const v=G.role.replace('LEADER_','');tt.textContent=`🏗 ${VN[v]}防洪决策`;
+    if(G.role&&G.role.startsWith('LEADER_')){const v=G.role.replace('LEADER_','');const isF=IFZ[v];tt.textContent=`🏗 ${VN[v]}防洪决策`;
       const maxSB=Math.min(50,G.va[v]);const done=G.sandbags[v]>0;
+      let fzExtra='';
+      if(isF){fzExtra=`<div style="margin-top:10px;padding:10px;background:rgba(196,78,82,.04);border:1px solid rgba(196,78,82,.12);border-radius:8px">
+        <div style="font-size:.8rem;font-weight:700;color:var(--rd);margin-bottom:4px">⚠ 蓄滞洪区村长特殊职责</div>
+        <div style="font-size:.78rem;color:var(--t2);line-height:1.7;margin-bottom:6px">当降雨持续增大时，你需要动员全体村民紧急撤离，以保障蓄滞洪区可以安全启用。</div>
+        <button class="btn btn-d" style="font-size:.78rem" ${G._evacOrdered&&G._evacOrdered[v]?'disabled':''} onclick="hEvacOrder('${v}')">${G._evacOrdered&&G._evacOrdered[v]?'✓ 已下达撤离令':'📢 下达全村紧急撤离令'}</button>
+        <button class="btn btn-o" style="font-size:.76rem;margin-top:6px" onclick="showCompensation('${v}')">📋 查看灾后补偿需求核算</button>
+      </div>`}
       btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:7px">花费10~50村资金购置沙袋防洪屏障，可抵挡相应水量。未拦住的水量流向下游。<b style="color:var(--am)">下游村庄将承受溢出水量！</b></div>
         <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><input type="range" id="sb-sl" min="10" max="${Math.max(10,maxSB)}" value="${Math.min(30,maxSB)}" style="flex:1;accent-color:var(--cy)" oninput="document.getElementById('sb-v').textContent=this.value" ${done||maxSB<10?'disabled':''}><span id="sb-v" style="font-family:var(--fm);font-size:1.05rem;color:var(--cy);min-width:36px">${Math.min(30,maxSB)}</span></div>
         <button class="btn btn-w" ${done||maxSB<10?'disabled':''} onclick="hSandbag('${v}')">${done?'已设置沙袋('+G.sandbags[v]+')':'🧱 购置沙袋防洪屏障'}</button>
-        <button class="btn btn-o" onclick="sysMsg('${v}村长暂不操作。')">暂不操作</button>`}
+        <button class="btn btn-o" onclick="sysMsg('${v}村长暂不操作。')">暂不操作</button>${fzExtra}`}
     else{tt.textContent='🏗 等待村长决策';btns.innerHTML='<div style="font-size:.82rem;color:var(--t2)">各村村长正在决策防洪方案。你不知道他们会做什么选择。</div>'}}
   else if(p==='MAYOR_DRAIN'){
     if(G.role&&G.role.startsWith('MAYOR_')){const c=G.role.replace('MAYOR_','');
@@ -931,9 +961,10 @@ function renderAct(){
       <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><input type="range" id="drain-sl" min="0" max="${Math.round(mx)}" value="${Math.round(mx*.45)}" style="flex:1;accent-color:var(--cy)" oninput="document.getElementById('drain-v').textContent=this.value"><span id="drain-v" style="font-family:var(--fm);font-size:1.05rem;color:var(--cy);min-width:36px">${Math.round(mx*.45)}</span></div>
       <button class="btn btn-p" onclick="hMayorDrain()">确认排洪方案</button>`;
       ex.innerHTML=`<div style="padding:9px;background:var(--p2);border-radius:8px;border:1px solid var(--bd)">
-        <div style="font-size:.8rem;font-weight:600;margin-bottom:5px">🏗 修坝(花费30拦水30)</div>
-        <button class="btn btn-w" style="font-size:.78rem" ${G.ca[c]<30||G.dams[c]?'disabled':''} onclick="hCDam('${c}')">${G.dams[c]?'已修建':'修建大坝'}</button>
-        ${G.dams[c]&&!G.blasted[c]?`<button class="btn btn-d" style="font-size:.78rem;margin-left:6px" ${G.ca[c]<20?'disabled':''} onclick="hBlastDam('${c}')">💥 炸坝(花费20)</button>`:''}
+        <div style="font-size:.8rem;font-weight:600;margin-bottom:3px">🏗 修坝(花费30拦水30)</div>
+        <div style="font-size:.7rem;color:var(--am);margin-bottom:5px">⚠ 需向国家防总申请授权后方可执行</div>
+        <button class="btn btn-w" style="font-size:.78rem" ${G.ca[c]<30||G.dams[c]?'disabled':''} onclick="hCDamConfirm('${c}')">${G.dams[c]?'✓ 已获批修建':'申请修建大坝'}</button>
+        ${G.dams[c]&&!G.blasted[c]?`<button class="btn btn-d" style="font-size:.78rem;margin-left:6px" ${G.ca[c]<20?'disabled':''} onclick="hBlastDamConfirm('${c}')">💥 申请炸坝(花费20)</button>`:''}
         ${G.blasted[c]?'<div style="font-size:.74rem;color:var(--rd);margin-top:4px">已炸坝，拦截水量已释放</div>':''}
       </div>
       ${G.armyCard[c]?`<div style="margin-top:8px;padding:9px;background:rgba(196,78,82,.04);border-radius:8px;border:1px solid rgba(196,78,82,.12)">
@@ -976,17 +1007,77 @@ function sendChat(){const inp=document.getElementById('chat-in'),t=inp.value.tri
     setTimeout(()=>aiChat(r.nm,G.ch==='VIL'?G.vil:null,pick(msgs),r.role.startsWith('LEADER_')?'村长':'村民'),800+i*700+Math.random()*1000)})}
 
 // ===================== PLAYER ACTIONS =====================
-function hVilDec(m){closeMo();G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=m;sysMsg(`你选择了${m?'搬迁':'暂不搬迁'}。`);mpSendAction(m?'evacuate':'stay',{village:G.vil});renderAct();toast(m?'已选搬迁':'已选留守',m?'gn':'am')}
-function hSandbag(v){const amt=parseInt(document.getElementById('sb-sl').value);if(G.sandbags[v]>0||G.va[v]<amt)return;G.sandbags[v]=amt;G.va[v]-=amt;sysMsg(`你投入${amt}万购置沙袋防洪屏障，可抵挡${amt}单位水量。`);mpSendAction('sandbag',{village:v,amount:amt});toast(`沙袋已就位(${amt})`,'gn');renderAll()}
-function hMayorDrain(){const c=G.role.replace('MAYOR_',''),v=parseInt(document.getElementById('drain-sl').value);G.cd[c]=v;sysMsg(`你决定${CN[c]}排洪${v}单位${c!=='C'?'至下游':'入海'}。`);mpSendAction('drain',{city:c,value:v});toast('排洪方案确认','bl');renderAct()}
-function hCDam(c){if(G.dams[c])return;G.dams[c]=true;G.ca[c]-=30;sysMsg(`${CN[c]}修建大坝！花费30拦水30。`);mpSendAction('build_dam',{city:c});toast('大坝修建成功','gn');renderAll()}
+function hVilDec(m){closeMo();G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=m;sysMsg(`你选择了${m?'搬迁':'暂不搬迁'}。`);mpSendAction(m?'evacuate':'stay',{village:G.vil});renderAct();toast(m?'已选搬迁':'已选留守',m?'gn':'am');showFx(m?'move':'stay')}
+function hSandbag(v){const amt=parseInt(document.getElementById('sb-sl').value);if(G.sandbags[v]>0||G.va[v]<amt)return;G.sandbags[v]=amt;G.va[v]-=amt;sysMsg(`你投入${amt}万购置沙袋防洪屏障，可抵挡${amt}单位水量。`);mpSendAction('sandbag',{village:v,amount:amt});toast(`沙袋已就位(${amt})`,'gn');renderAll();showFx('sandbag')}
+function hMayorDrain(){const c=G.role.replace('MAYOR_',''),v=parseInt(document.getElementById('drain-sl').value);G.cd[c]=v;sysMsg(`你决定${CN[c]}排洪${v}单位${c!=='C'?'至下游':'入海'}。`);mpSendAction('drain',{city:c,value:v});toast('排洪方案确认','bl');renderAct();showFx('drain')}
+function hCDam(c){if(G.dams[c])return;G.dams[c]=true;G.ca[c]-=30;sysMsg(`📋 国家防总已批准！${CN[c]}修建大坝，花费30拦水30。`);mpSendAction('build_dam',{city:c});toast('大坝修建成功','gn');renderAll();showFx('dam')}
 function hVDam(v){if(G.dams[v])return;G.dams[v]=true;G.va[v]-=30;sysMsg(`${v}村修坝！花费30拦水30。`);mpSendAction('village_dam',{village:v});toast('修坝成功','gn');renderAll()}
 function hDike(v){if(G.dike[v])return;G.dike[v]=true;G.va[v]-=50;sysMsg(`${VN[v]}启用蓄滞洪区！花费50排水50至下游。`);mpSendAction('activate_dike',{village:v});toast('蓄滞洪区已启用','am');renderAll()}
 function hArmyCard(c){if(!G.armyCard[c])return;G.armyCard[c]=false;
   VFLOW[c].forEach(v=>{G.ws[v]=0;G.sandbags[v]=0;G.dams[v]=false;G.dike[v]=false});G.dams[c]=false;
-  sysMsg(`🚁 你动用了解放军救援牌！${CN[c]}所有村庄水位清零，防御重置！`);sysMsg(`📢 全流域通报：${CN[c]}市长已动用唯一的解放军救援牌！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！全面清零水位！`);mpSendAction('army_card',{city:c});toast('解放军已出动！','gn');renderAll()}
+  sysMsg(`🚁 你动用了解放军救援牌！${CN[c]}所有村庄水位清零，防御重置！`);sysMsg(`📢 全流域通报：${CN[c]}市长已动用唯一的解放军救援牌！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！全面清零水位！`);mpSendAction('army_card',{city:c});toast('解放军已出动！','gn');renderAll();showFx('army')}
 function hBroadcast(){sysMsg(`${G.nm}向全体村民发布通知：请密切关注水情，做好撤离准备！`);toast('通知已发','bl')}
-function hBlastDam(c){if(!G.dams[c]||G.blasted[c])return;if(G.ca[c]<20){toast('市资产不足，炸坝需要20','rd');return}G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 你下令炸坝！${CN[c]}大坝被炸毁，拦截水量释放至下游。花费20。`);mpSendAction('blast_dam',{city:c});toast('大坝已炸毁！','am');renderAll()}
+function hBlastDam(c){if(!G.dams[c]||G.blasted[c])return;if(G.ca[c]<20){toast('市资产不足，炸坝需要20','rd');return}G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 你下令炸坝！${CN[c]}大坝被炸毁，拦截水量释放至下游。花费20。`);mpSendAction('blast_dam',{city:c});toast('大坝已炸毁！','am');renderAll();showFx('blast')}
+// Dam/blast with 国家防总 authorization confirmation
+function hCDamConfirm(c){showModal('🏗 修坝授权申请','<p>修建大坝属于重大水利工程，需向<b style="color:var(--cy)">国家防汛抗旱总指挥部</b>申请授权。</p><p style="font-size:.82rem;color:var(--t2)">申请内容：'+CN[c]+'辖区修建大坝，花费30万拦水30单位。</p><p style="font-size:.78rem;color:var(--gn);margin-top:6px">✓ 国家防总已审批通过，授权执行。</p>','<button class="btn btn-p" onclick="closeMo();hCDam(\''+c+'\')">确认修建</button><button class="btn btn-o" onclick="closeMo()">取消</button>')}
+function hBlastDamConfirm(c){showModal('💥 炸坝授权申请','<p>炸坝属于<b style="color:var(--rd)">极端紧急措施</b>，需向<b style="color:var(--cy)">国家防汛抗旱总指挥部</b>申请特别授权。</p><p style="font-size:.82rem;color:var(--t2)">申请内容：'+CN[c]+'辖区炸毁已建大坝，释放拦截水量至下游，花费20万。</p><p style="font-size:.82rem;color:var(--am)">⚠ 炸坝后拦截水量将全部释放至下游，造成下游水位急剧上升！</p><p style="font-size:.78rem;color:var(--gn);margin-top:6px">✓ 国家防总已审批通过，授权执行。</p>','<button class="btn btn-d" onclick="closeMo();hBlastDam(\''+c+'\')">确认炸坝</button><button class="btn btn-o" onclick="closeMo()">取消</button>')}
+// Flood zone leader evacuation order
+function hEvacOrder(v){G._evacOrdered=G._evacOrdered||{};if(G._evacOrdered[v])return;G._evacOrdered[v]=true;
+  const vils=G.players.filter(p=>p.vil===v&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_'));
+  vils.forEach(p=>{G.vm[v]=G.vm[v]||{};if(G.vm[v][p.id]===undefined)G.vm[v][p.id]=true});
+  sysMsg(`📢 ${VN[v]}村长下达紧急撤离令！全体村民立即转移！`);addNews(`📢 ${VN[v]}蓄滞洪区下达全村紧急撤离令`);
+  toast('撤离令已下达','am');showFx('evac');renderAll()}
+// Compensation discussion modal for flood zone leaders
+function showCompensation(v){
+  const pop=G.players.filter(p=>p.vil===v&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_')).length;
+  const perH=Math.round(G.va[v]/Math.max(1,pop));
+  const totalDmg=G.vilHist[v]?G.vilHist[v].reduce((s,h)=>s+h.dmg,0):0;
+  showModal('📋 蓄滞洪区灾后补偿需求核算',`
+<div style="font-size:.84rem;color:var(--t2);line-height:2">
+<p><b>📍 ${VN[v]}</b> · 蓄滞洪区 · 共${pop}户</p>
+<div style="padding:10px;background:var(--p2);border-radius:8px;margin:8px 0">
+<div style="font-weight:700;margin-bottom:6px">损失结构核算</div>
+<table style="width:100%;border-collapse:collapse;font-size:.78rem"><tbody>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">房屋/建筑损失</td><td style="text-align:right;font-family:var(--fm)">${Math.round(totalDmg*0.4)}万</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">农田/养殖损失</td><td style="text-align:right;font-family:var(--fm)">${Math.round(totalDmg*0.3)}万</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">转移安置费用</td><td style="text-align:right;font-family:var(--fm)">${Math.round(totalDmg*0.15)}万</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">个人财产损失</td><td style="text-align:right;font-family:var(--fm)">${Math.round(totalDmg*0.15)}万</td></tr>
+<tr style="font-weight:700"><td style="padding:4px 6px">累计总损失</td><td style="text-align:right;font-family:var(--fm);color:var(--rd)">${totalDmg}万</td></tr>
+</tbody></table>
+<div style="font-size:.74rem;color:var(--t3);margin-top:4px">户均损失约 ${perH} 万</div>
+</div>
+<div style="font-weight:700;margin:10px 0 6px">补偿责任主体讨论方案</div>
+<table style="width:100%;border-collapse:collapse;font-size:.78rem"><thead><tr style="border-bottom:1.5px solid var(--bd)"><th style="padding:4px 6px;text-align:left;color:var(--t3)">方案</th><th style="padding:4px 6px;color:var(--t3)">补偿主体</th><th style="padding:4px 6px;color:var(--t3)">比例</th></tr></thead><tbody>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">方案A</td><td style="padding:4px 6px">中央财政全额补偿</td><td style="padding:4px 6px">国家100%</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">方案B</td><td style="padding:4px 6px">上下游共担</td><td style="padding:4px 6px">国家40% + 被保护城市40% + 地方20%</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">方案C</td><td style="padding:4px 6px">受益者付费</td><td style="padding:4px 6px">下游被保护城市按受益比承担</td></tr>
+</tbody></table>
+<div style="margin-top:10px;padding:10px;background:rgba(68,114,196,.05);border:1px solid rgba(68,114,196,.15);border-radius:8px">
+<div style="font-weight:700;color:var(--cy);margin-bottom:4px">📖 国家现行补偿规则</div>
+<div style="font-size:.78rem;line-height:1.8">
+• <b>《蓄滞洪区运用补偿暂行办法》(2000年)</b>：国务院令第286号，明确蓄滞洪区运用后由国家给予补偿。<br>
+• <b>补偿范围</b>：农作物、专业养殖和经济林水产损失；住房损失；家庭农业生产机械和役畜及家庭主要耐用消费品损失。<br>
+• <b>补偿标准</b>：农作物按前三年平均年产值的50%~70%补偿；住房按损失的70%补偿；其他按损失的50%补偿。<br>
+• <b>资金来源</b>：中央财政拨付，由省级人民政府统一组织发放。<br>
+• <b>现实困境</b>：补偿标准偏低、资金到位慢、未覆盖间接损失（如务工收入中断、心理创伤等）。
+</div></div>
+</div>`,'<button class="btn btn-p" onclick="closeMo()">关闭</button>')}
+// ── Decision animation effects (item 5) ──
+function showFx(type){
+  const fx=document.createElement('div');fx.className='fx-overlay';
+  if(type==='sandbag'){fx.innerHTML='<div class="fx-icon">🧱</div><div class="fx-text">沙袋防线已部署！</div>'}
+  else if(type==='dam'){fx.innerHTML='<div class="fx-icon">🏗</div><div class="fx-text">大坝修建完成！</div>'}
+  else if(type==='blast'){fx.innerHTML='<div class="fx-icon">💥</div><div class="fx-text">大坝爆破！水量释放！</div>';fx.classList.add('fx-danger')}
+  else if(type==='army'){fx.innerHTML='<div class="fx-icon">🚁</div><div class="fx-text">解放军驰援！水位清零！</div>';fx.classList.add('fx-army')}
+  else if(type==='evac'){fx.innerHTML='<div class="fx-icon">📢</div><div class="fx-text">紧急撤离令已下达！</div>';fx.classList.add('fx-danger')}
+  else if(type==='drain'){fx.innerHTML='<div class="fx-icon">🌊</div><div class="fx-text">排洪方案执行中…</div>'}
+  else if(type==='move'){fx.innerHTML='<div class="fx-icon">🚶</div><div class="fx-text">已转移至安置点</div>'}
+  else if(type==='stay'){fx.innerHTML='<div class="fx-icon">🏠</div><div class="fx-text">选择留守家园</div>';fx.classList.add('fx-danger')}
+  else return;
+  document.body.appendChild(fx);
+  requestAnimationFrame(()=>fx.classList.add('fx-show'));
+  setTimeout(()=>{fx.classList.remove('fx-show');setTimeout(()=>fx.remove(),400)},1800);
+}
 
 // ===================== RESULT (with voting window req #10) =====================
 function showResult(){showScreen('S-result');

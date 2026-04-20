@@ -1,0 +1,35 @@
+- generic [ref=e3]:
+  - heading "流域性洪涝风险决策仿真平台" [level=1] [ref=e4]
+  - generic [ref=e5]: Flood Risk Decision-making Simulation Platform
+  - paragraph [ref=e6]: 基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]: 🌊
+      - heading "流域联动机制" [level=3] [ref=e10]
+      - paragraph [ref=e11]: 上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运
+    - generic [ref=e12]:
+      - generic [ref=e13]: 🤖
+      - heading "AI协同推演" [level=3] [ref=e14]
+      - paragraph [ref=e15]: 单人即可体验完整游戏，每村5+名AI村民自主研讨发言做决策
+    - generic [ref=e16]:
+      - generic [ref=e17]: 🎯
+      - heading "有限理性博弈" [level=3] [ref=e18]
+      - paragraph [ref=e19]: 每人只掌握局部信息，需在不确定性下快速决策，体验集体困境
+  - generic [ref=e20]:
+    - button "进入游戏大厅" [ref=e21] [cursor=pointer]
+    - button "游戏规则速览" [ref=e22] [cursor=pointer]
+    - button "知情同意书" [ref=e23] [cursor=pointer]
+  - generic [ref=e24]:
+    - generic [ref=e26]: 京
+    - generic [ref=e27]: ➡️
+    - generic [ref=e28]: 冀
+    - generic [ref=e29]: ➡️
+    - generic [ref=e30]: 津
+  - generic [ref=e31]:
+    - generic [ref=e32]: 天津大学资源安全与公共治理中心
+    - generic [ref=e33]: Center for Resource Security and Public Governance, Tianjin University
+    - generic [ref=e34]:
+      - text: 联系人：刘老师，
+      - link "lglhm@tju.edu.cn" [ref=e35] [cursor=pointer]:
+        - /url: mailto:lglhm@tju.edu.cn
+    - generic [ref=e36]: © 2026 Tianjin University GIPC. All Rights Reserved.

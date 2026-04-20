@@ -1,0 +1,14 @@
+- generic [ref=e2]:
+  - generic [ref=e3]: 🔐
+  - heading "管理后台登录" [level=1] [ref=e4]
+  - paragraph [ref=e5]: 海河洪涝决策仿真平台 · 教师专用
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]: 账号
+      - textbox "请输入管理员账号" [ref=e9]: admin
+    - generic [ref=e10]:
+      - generic [ref=e11]: 密码
+      - textbox "请输入密码" [active] [ref=e12]
+    - button "登 录" [ref=e13] [cursor=pointer]
+  - link "← 返回游戏首页" [ref=e15] [cursor=pointer]:
+    - /url: /

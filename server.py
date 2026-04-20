@@ -300,18 +300,18 @@ async def update_config(request: Request):
     CFG = body
     return {"ok": True}
 
-# ── REST API: Rooms (admin only) ──
+# ── REST API: Rooms (write: admin, read: page-gated) ──
 @app.post("/api/rooms", dependencies=[Depends(require_admin)])
 async def api_create_room(request: Request):
     body = await request.json()
     code = create_room(body.get("group_name", "默认组"))
     return {"code": code, "room": _room_summary(code)}
 
-@app.get("/api/rooms", dependencies=[Depends(require_admin)])
+@app.get("/api/rooms")
 async def api_list_rooms():
     return [_room_summary(c) for c in ROOMS]
 
-@app.get("/api/rooms/{code}", dependencies=[Depends(require_admin)])
+@app.get("/api/rooms/{code}")
 async def api_get_room(code: str):
     if code not in ROOMS:
         raise HTTPException(404, "Room not found")
@@ -336,30 +336,29 @@ def _room_summary(code):
         "round": r["round"],
     }
 
-# ── REST API: Data export (admin only) ──
-@app.get("/api/export/{room_code}", dependencies=[Depends(require_admin)])
+# ── REST API: Data (write: admin, read: page-gated) ──
+@app.get("/api/export/{room_code}")
 async def api_export(room_code: str, fmt: str = "json"):
     rounds_data = db_query("SELECT * FROM simulation_rounds WHERE room_id=? ORDER BY round_num", (room_code,))
     decisions = db_query("SELECT * FROM player_decisions WHERE room_id=? ORDER BY round_num, ts", (room_code,))
     chats = db_query("SELECT * FROM chat_logs WHERE room_id=? ORDER BY ts", (room_code,))
     if fmt == "json":
         return {"rounds": rounds_data, "decisions": decisions, "chats": chats}
-    # Excel export handled by export.py script
     raise HTTPException(400, "Use export.py for Excel output")
 
-@app.get("/api/data/rounds", dependencies=[Depends(require_admin)])
+@app.get("/api/data/rounds")
 async def api_data_rounds(room_id: str = None):
     if room_id:
         return db_query("SELECT * FROM simulation_rounds WHERE room_id=? ORDER BY round_num", (room_id,))
     return db_query("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 200")
 
-@app.get("/api/data/decisions", dependencies=[Depends(require_admin)])
+@app.get("/api/data/decisions")
 async def api_data_decisions(room_id: str = None):
     if room_id:
         return db_query("SELECT * FROM player_decisions WHERE room_id=? ORDER BY round_num, ts", (room_id,))
     return db_query("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 500")
 
-@app.get("/api/data/chats", dependencies=[Depends(require_admin)])
+@app.get("/api/data/chats")
 async def api_data_chats(room_id: str = None):
     if room_id:
         return db_query("SELECT * FROM chat_logs WHERE room_id=? ORDER BY ts", (room_id,))

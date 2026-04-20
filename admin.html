@@ -80,33 +80,33 @@ let currentTab = 'rooms';
 let config = {};
 let rooms = [];
 
-// ── Auth helpers ──
+// ── Robust fetch helper (never redirects, always returns data or null) ──
 async function safeFetch(url, opts) {
   try {
     opts = opts || {};
-    opts.credentials = 'same-origin';
+    opts.credentials = 'include';
     const res = await fetch(url, opts);
-    if (res.status === 401) { window.location.href = '/admin'; return null; }
-    // Handle non-JSON responses gracefully
     const ct = res.headers.get('content-type') || '';
     if (!res.ok) {
-      if (ct.includes('json')) { const d = await res.json(); throw new Error(d.detail || d.message || `HTTP ${res.status}`); }
-      throw new Error(`HTTP ${res.status}`);
+      let detail = `HTTP ${res.status}`;
+      try {
+        if (ct.includes('json')) { const d = await res.json(); detail = d.detail || d.message || detail; }
+        else { const t = await res.text(); if (t && t.length < 200) detail += ': ' + t; }
+      } catch(_){}
+      throw new Error(detail);
     }
     if (ct.includes('json')) return await res.json();
-    // If response is HTML (e.g., login page redirect), treat as auth failure
     const txt = await res.text();
-    if (txt.includes('<!DOCTYPE') || txt.includes('<html')) { window.location.href = '/admin'; return null; }
-    try { return JSON.parse(txt); } catch(e) { throw new Error('非JSON响应'); }
+    try { return JSON.parse(txt); } catch(e) { throw new Error('服务器返回了非JSON内容 (content-type: '+ct+')'); }
   } catch(e) {
-    console.error('safeFetch error:', e);
+    console.error('safeFetch error for ' + url + ':', e);
     toast('请求失败: ' + e.message, 'var(--red)');
     return null;
   }
 }
 
 async function doLogout() {
-  await fetch(API + '/api/admin/logout', { method: 'POST' });
+  await fetch(API + '/api/admin/logout', { method: 'POST', credentials: 'include' });
   window.location.href = '/admin';
 }
 
@@ -176,10 +176,40 @@ function toast(msg, color) {
 
 // ── Rooms ──
 async function loadRooms() {
+  document.getElementById('tab-rooms').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
   const data = await safeFetch(API + '/api/rooms');
-  if (data === null) { document.getElementById('tab-rooms').innerHTML = '<div class="card"><p style="color:var(--red)">加载失败，请刷新页面重试</p></div>'; return; }
+  if (data === null) {
+    document.getElementById('tab-rooms').innerHTML = `<div class="card">
+      <p style="color:var(--red);margin-bottom:10px">房间列表加载失败</p>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">请确认服务器已启动（python server.py）并检查浏览器控制台(F12)的错误信息。</p>
+      <button class="btn btn-primary btn-sm" onclick="loadRooms()">重新加载</button>
+      <button class="btn btn-outline btn-sm" onclick="runDiag()" style="margin-left:8px">运行诊断</button>
+      <pre id="diag-out" style="margin-top:10px;font-size:.72rem;background:var(--bg);padding:8px;border-radius:6px;display:none;white-space:pre-wrap;border:1px solid var(--border)"></pre>
+    </div>`;
+    return;
+  }
   rooms = data;
   renderRooms();
+}
+async function runDiag() {
+  const el = document.getElementById('diag-out');
+  el.style.display = 'block';
+  el.textContent = '正在诊断...\n';
+  const endpoints = ['/api/rooms', '/api/config', '/api/data/rounds'];
+  for (const ep of endpoints) {
+    try {
+      const t0 = Date.now();
+      const res = await fetch(ep, {credentials:'include'});
+      const ms = Date.now() - t0;
+      const ct = res.headers.get('content-type') || '(无)';
+      const body = await res.text();
+      const preview = body.length > 120 ? body.substring(0, 120) + '...' : body;
+      el.textContent += `\n[${ep}] ${res.status} ${res.statusText} (${ms}ms)\n  Content-Type: ${ct}\n  Body: ${preview}\n`;
+    } catch(e) {
+      el.textContent += `\n[${ep}] 网络错误: ${e.message}\n`;
+    }
+  }
+  el.textContent += '\n诊断完成。请将以上信息提供给技术支持。';
 }
 function renderRooms() {
   const el = document.getElementById('tab-rooms');
@@ -226,8 +256,12 @@ function copyCode(code) {
 
 // ── Config ──
 async function loadConfig() {
+  document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
   const data = await safeFetch(API + '/api/config');
-  if (data === null) { document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--red)">加载失败，请刷新页面重试</p></div>'; return; }
+  if (data === null) {
+    document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--red);margin-bottom:10px">配置加载失败</p><button class="btn btn-primary btn-sm" onclick="loadConfig()">重新加载</button></div>';
+    return;
+  }
   config = data;
   renderConfig();
 }
@@ -309,13 +343,14 @@ async function saveConfig() {
 
 // ── Data ──
 async function loadData() {
+  document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
   const [rounds, decisions, chats] = await Promise.all([
     safeFetch(API+'/api/data/rounds'),
     safeFetch(API+'/api/data/decisions'),
     safeFetch(API+'/api/data/chats'),
   ]);
   if (rounds === null || decisions === null || chats === null) {
-    document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--red)">加载失败，请刷新页面重试</p></div>';
+    document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--red);margin-bottom:10px">数据加载失败</p><button class="btn btn-primary btn-sm" onclick="loadData()">重新加载</button></div>';
     return;
   }
   renderData(rounds, decisions, chats);

@@ -61,7 +61,7 @@ async function doLogin(e) {
       }),
     });
     if (res.ok) {
-      window.location.href = '/admin';
+      window.location.href = '/admin.html';
     } else {
       const data = await res.json().catch(() => ({}));
       err.textContent = data.detail || '登录失败，请检查账号密码';

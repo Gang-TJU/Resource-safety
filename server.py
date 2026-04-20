@@ -250,6 +250,16 @@ async def serve_admin(request: Request):
 async def serve_admin_slash(request: Request):
     return RedirectResponse("/admin", status_code=302)
 
+@app.get("/admin.html")
+async def serve_admin_html_direct():
+    """Direct access to admin panel (bypasses cookie check)"""
+    return FileResponse(str(BASE / "admin.html"), media_type="text/html")
+
+@app.get("/admin_login.html")
+async def serve_admin_login_direct():
+    """Direct access to admin login page"""
+    return FileResponse(str(BASE / "admin_login.html"), media_type="text/html")
+
 @app.post("/api/admin/login")
 async def admin_login(request: Request):
     body = await request.json()

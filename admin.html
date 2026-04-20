@@ -61,6 +61,13 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
   </div>
 </div>
 <div class="container">
+  <div class="card" id="server-url-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
+    <label style="font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap">服务器地址:</label>
+    <input id="api-base-url" value="" placeholder="留空=当前页面地址" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
+    <button class="btn btn-outline btn-sm" onclick="applyServerUrl()" style="white-space:nowrap">应用</button>
+    <span id="server-status" style="font-size:.74rem;color:var(--muted)"></span>
+  </div>
+  <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="rooms">房间管理</button>
     <button class="tab" data-tab="config">参数配置</button>
@@ -75,10 +82,69 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 <div id="toast-area"></div>
 
 <script>
-const API = '';
+let API = '';
 let currentTab = 'rooms';
 let config = {};
 let rooms = [];
+
+function applyServerUrl() {
+  const input = document.getElementById('api-base-url').value.trim();
+  API = input.replace(/\/+$/, '');  // strip trailing slashes
+  checkHealth();
+}
+
+async function checkHealth() {
+  const statusEl = document.getElementById('server-status');
+  const errorEl = document.getElementById('health-error');
+  statusEl.textContent = '检查中...';
+  statusEl.style.color = 'var(--muted)';
+  errorEl.classList.add('hidden');
+  try {
+    const res = await fetch(API + '/api/health', { credentials: 'include' });
+    const ct = res.headers.get('content-type') || '';
+    const bodyText = await res.text();
+    if (!ct.includes('json')) {
+      // Got HTML back instead of JSON
+      statusEl.textContent = '连接异常';
+      statusEl.style.color = 'var(--red)';
+      errorEl.classList.remove('hidden');
+      errorEl.innerHTML = `
+        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">服务器连接诊断失败</h3>
+        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
+        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回类型:</b> <code>${ct}</code> (期望 application/json)</p>
+        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回内容:</b> <code>${bodyText.substring(0, 200)}${bodyText.length > 200 ? '...' : ''}</code></p>
+        <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
+          <b>可能原因与解决方案:</b><br>
+          1. 服务器未启动 - 请执行 <code>python server.py</code><br>
+          2. 反向代理拦截了API请求 - 在上方"服务器地址"中填入后端直连地址(如 http://localhost:8080)<br>
+          3. Cookie问题导致返回登录页 - 尝试直接访问 <a href="/admin.html" style="color:var(--blue)">/admin.html</a>
+        </div>`;
+      return;
+    }
+    let data;
+    try { data = JSON.parse(bodyText); } catch(e) { throw new Error('JSON parse failed'); }
+    if (data.ok) {
+      statusEl.textContent = 'v' + (data.version || '?') + ' 已连接';
+      statusEl.style.color = 'var(--green)';
+      errorEl.classList.add('hidden');
+      loadRooms();
+    }
+  } catch(e) {
+    statusEl.textContent = '无法连接';
+    statusEl.style.color = 'var(--red)';
+    errorEl.classList.remove('hidden');
+    errorEl.innerHTML = `
+      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到服务器</h3>
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>错误:</b> <code>${e.message}</code></p>
+      <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
+        <b>请确认:</b><br>
+        1. 后端服务已启动: <code>python server.py</code><br>
+        2. 上方"服务器地址"填写正确(如 http://localhost:8080)<br>
+        3. 网络可以访问该地址
+      </div>`;
+  }
+}
 
 // ── Robust fetch helper (never redirects, always returns data or null) ──
 async function safeFetch(url, opts) {
@@ -424,8 +490,8 @@ async function doExport() {
   } catch(e) { toast('导出失败: ' + e.message, 'var(--red)'); }
 }
 
-// Init
-loadRooms();
+// Init - check health first, then load rooms
+checkHealth();
 </script>
 </body>
 </html>

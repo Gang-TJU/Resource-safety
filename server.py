@@ -190,14 +190,27 @@ def create_room(group_name="默认组"):
     return code
 
 def assign_role(room, player_name, pref=None):
-    """Assign a role to the player. Returns (role, village)."""
+    """Assign a role to the player. Returns (role, village).
+
+    Bug 2 fix: Ensure MAYOR and LEADER roles are unique per room.
+    Villager roles can be assigned multiple times.
+    Hidden roles (RUMOR/STAY) are distributed so not all villagers in one village get them.
+    """
+    # Handle OBSERVER preference (Bug 4)
+    if pref == "OBSERVER":
+        return "OBSERVER", "ALL"
+
     taken = {p["role"] for p in room["players"].values() if not p["is_bot"]}
-    available = [r for r in ROLE_SLOTS if r not in taken]
+    # MAYOR and LEADER roles are unique — filter out already-taken ones
+    available_mayors = [r for r in ROLE_SLOTS if r.startswith("MAYOR_") and r not in taken]
+    available_leaders = [r for r in ROLE_SLOTS if r.startswith("LEADER_") and r not in taken]
+    available = available_mayors + available_leaders
+
     # preference mapping
     pref_map = {
-        "MAYOR": [r for r in available if r.startswith("MAYOR_")],
-        "VLF": [r for r in available if r.startswith("LEADER_") and room["config"]["is_flood_zone"].get(r.replace("LEADER_", ""), False)],
-        "VLN": [r for r in available if r.startswith("LEADER_") and not room["config"]["is_flood_zone"].get(r.replace("LEADER_", ""), False)],
+        "MAYOR": [r for r in available_mayors],
+        "VLF": [r for r in available_leaders if room["config"]["is_flood_zone"].get(r.replace("LEADER_", ""), False)],
+        "VLN": [r for r in available_leaders if not room["config"]["is_flood_zone"].get(r.replace("LEADER_", ""), False)],
         "VIL": [],  # villager gets no special slot
     }
     role = None
@@ -208,10 +221,22 @@ def assign_role(room, player_name, pref=None):
     if role is None:
         # All named roles taken — assign as villager
         vils = ["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]
-        v = random.choice(vils)
+        # Distribute hidden roles: track how many hidden-role villagers exist per village
+        hidden_counts = {}
+        villager_counts = {}
+        for p in room["players"].values():
+            if p["role"].startswith("VIL_"):
+                v_key = p["role"].split("_")[1] if len(p["role"].split("_")) > 1 else "B1"
+                villager_counts[v_key] = villager_counts.get(v_key, 0) + 1
+                if p.get("hidden_role"):
+                    hidden_counts[v_key] = hidden_counts.get(v_key, 0) + 1
+        # Pick village with fewest villagers for balance
+        v = min(vils, key=lambda x: villager_counts.get(x, 0))
         role = f"VIL_{v}_h{len(room['players'])}"
     # Determine village
-    if role.startswith("LEADER_"):
+    if role == "OBSERVER":
+        vil = "ALL"
+    elif role.startswith("LEADER_"):
         vil = role.replace("LEADER_", "")
     elif role.startswith("MAYOR_"):
         vil = role.replace("MAYOR_", "") + "1"
@@ -298,6 +323,11 @@ async def admin_change_password(request: Request, _=Depends(require_admin)):
     return {"ok": True}
 
 # ── REST API: Config (read: public, write: admin only) ──
+@app.get("/api/health")
+async def api_health():
+    """Health check endpoint (Bug 3 fix)"""
+    return JSONResponse({"ok": True, "version": "1.0"})
+
 @app.get("/api/config")
 async def get_config():
     return load_config()

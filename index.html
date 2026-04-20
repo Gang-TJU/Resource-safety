@@ -298,7 +298,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
     <div style="margin-top:36px;padding-top:20px;border-top:1px solid var(--bd);animation:fadeIn .7s .6s both;line-height:2;text-align:center">
       <div style="font-size:.82rem;font-weight:600;color:var(--cy)">天津大学资源安全与公共治理中心</div>
       <div style="font-size:.74rem;color:var(--t2)">Center for Resource Security and Public Governance, Tianjin University</div>
-      <div style="font-size:.74rem;color:var(--t3)">联系人：刘老师，<a href="/cdn-cgi/l/email-protection#2f43484347426f5b455a014a4b5a014c41" style="color:var(--cy);text-decoration:none"><span class="__cf_email__" data-cfemail="640803080c0924100e114a0100114a070a">[email&#160;protected]</span></a></div>
+      <div style="font-size:.74rem;color:var(--t3)">联系人：刘老师，<a href="/cdn-cgi/l/email-protection#4a262d2622270a3e203f642f2e3f642924" style="color:var(--cy);text-decoration:none"><span class="__cf_email__" data-cfemail="08646f646065487c627d266d6c7d266b66">[email&#160;protected]</span></a></div>
       <div style="font-size:.7rem;color:var(--t3);margin-top:4px">© 2026 Tianjin University GIPC. All Rights Reserved.</div>
     </div>
   </div>
@@ -314,17 +314,44 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
         <div class="fg"><label>你的姓名</label><input id="inp-name" value="张同学"></div>
         <div class="fg"><label>学号</label><input id="inp-sid" value="2024001"></div>
         <div class="fg"><label>偏好角色</label></div>
-        <div class="rg" id="role-sel">
+        <div class="rg" id="role-sel" style="grid-template-columns:1fr 1fr">
           <div class="rc sel" data-r="MAYOR" onclick="selRole(this,'MAYOR')"><h4>🏛 市长/省级指挥</h4><p>决策排洪量、修坝(花费30拦水30)、炸坝(花费20)，拥有一次解放军救援牌(清零水位)</p></div>
           <div class="rc" data-r="VLF" onclick="selRole(this,'VLF')"><h4>🏠 蓄滞洪区村长</h4><p>购置沙袋防洪屏障 + 动员村民撤离 + 灾后补偿核算</p></div>
           <div class="rc" data-r="VLN" onclick="selRole(this,'VLN')"><h4>🏘 普通村庄村长</h4><p>可花10~50购置沙袋防洪屏障，抵挡水量</p></div>
           <div class="rc" data-r="VIL" onclick="selRole(this,'VIL')"><h4>🧑 普通村民</h4><p>决策搬迁or留守，搬+未淹损30，不搬+淹损50</p></div>
+          <div class="rc" data-r="OBSERVER" onclick="selRole(this,'OBSERVER')" style="grid-column:1/-1;border-color:var(--gd);background:rgba(212,168,83,.04)"><h4>👁 教师/观察者 (上帝视角)</h4><p>可看到所有玩家决策、所有村庄水位、所有聊天频道。不参与投票或决策。拥有"开始游戏"按钮(联机模式)。</p></div>
         </div>
         <div class="fg"><label>房间码（留空=单机模式，输入=联机模式）</label><input id="inp-room" placeholder="如 ABC123，教师创建后分享给学生"></div>
         <button class="btn btn-p" style="width:100%;margin-top:12px" onclick="startGame()">开始游戏 · 角色盲盒分配</button>
         <button class="btn btn-o" style="width:100%" onclick="showScreen('S-intro')">返回首页</button>
         <button class="btn btn-o" style="width:100%" onclick="window.location='/admin'">教师管理后台</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- WAITING ROOM (multiplayer) -->
+<div id="S-waiting" class="screen">
+  <div style="max-width:600px;margin:60px auto;text-align:center;padding:20px">
+    <div class="pnl fade-in" style="padding:30px">
+      <div style="font-size:2.5rem;margin-bottom:16px">⏳</div>
+      <h2 style="font-size:1.4rem;margin-bottom:8px" id="wait-title">等待教师开始游戏...</h2>
+      <p style="color:var(--t2);font-size:.88rem;margin-bottom:20px" id="wait-subtitle">你已加入房间，请等待教师点击"开始游戏"</p>
+      <div style="margin-bottom:16px;padding:14px;background:var(--p2);border-radius:9px;border:1px solid var(--bd)">
+        <div style="font-size:.78rem;color:var(--t3);margin-bottom:4px">房间码</div>
+        <div style="font-family:var(--fm);font-size:1.6rem;font-weight:700;color:var(--cy);letter-spacing:3px" id="wait-room-code">------</div>
+      </div>
+      <div style="margin-bottom:16px;padding:14px;background:rgba(68,114,196,.04);border-radius:9px;border:1px solid rgba(68,114,196,.15)">
+        <div style="font-size:.78rem;color:var(--t3);margin-bottom:4px">你的角色</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--cy)" id="wait-role">分配中...</div>
+        <div style="font-size:.82rem;color:var(--t2);margin-top:4px" id="wait-village"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:.82rem;font-weight:600;color:var(--t2);margin-bottom:8px">已加入的玩家</div>
+        <div id="wait-player-list" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+      </div>
+      <div id="wait-start-area"></div>
+      <button class="btn btn-o" style="margin-top:12px" onclick="mpDisconnect();showScreen('S-lobby')">退出房间</button>
     </div>
   </div>
 </div>
@@ -491,16 +518,111 @@ function mpConnect(code,name,sid,pref){
   const s=io({transports:['websocket','polling']});
   MP.socket=s;MP.roomCode=code;MP.enabled=true;
   s.on('connect',()=>{s.emit('join_room',{code,name,student_id:sid,pref});toast('已连接服务器','gn')});
-  s.on('role_assigned',d=>{G.role=d.role;G.vil=d.village;MP.roomCode=d.room_code;if(d.config)applyConfig(d.config);toast('角色分配: '+(RL[d.role]||d.role),'bl')});
-  s.on('player_joined',d=>{sysMsg(`${d.name} 加入了房间 (${RL[d.role]||d.role})`);toast(d.name+' 加入','gn')});
+  s.on('role_assigned',d=>{
+    G.role=d.role;G.vil=d.village;MP.roomCode=d.room_code;
+    if(d.config)applyConfig(d.config);
+    // Update waiting room UI
+    const rl=RL[d.role]||d.role;
+    const waitRole=document.getElementById('wait-role');if(waitRole)waitRole.textContent=rl;
+    const waitVil=document.getElementById('wait-village');if(waitVil)waitVil.textContent=d.village==='ALL'?'全局视角':VN[d.village]||d.village;
+    const waitCode=document.getElementById('wait-room-code');if(waitCode)waitCode.textContent=d.room_code;
+    // If OBSERVER, show start button
+    if(d.role==='OBSERVER'){
+      MP.isHost=true;
+      const sa=document.getElementById('wait-start-area');
+      if(sa)sa.innerHTML='<button class="btn btn-p" style="width:100%;font-size:1.1rem;padding:14px 30px;margin-top:8px" onclick="mpStartGame()">开始游戏</button>';
+      const wt=document.getElementById('wait-title');if(wt)wt.textContent='等待玩家加入...';
+      const ws=document.getElementById('wait-subtitle');if(ws)ws.textContent='你是教师/观察者。当所有玩家就绪后，点击下方按钮开始游戏。';
+    }
+    // Update player list
+    if(d.players)updateWaitingPlayerList(d.players);
+    toast('角色分配: '+rl,'bl');
+  });
+  s.on('player_joined',d=>{
+    sysMsg(`${d.name} 加入了房间 (${RL[d.role]||d.role})`);toast(d.name+' 加入','gn');
+    // Add to waiting room player list
+    const pl=document.getElementById('wait-player-list');
+    if(pl){const tag=document.createElement('span');tag.style.cssText='padding:4px 10px;background:rgba(68,114,196,.08);border:1px solid rgba(68,114,196,.15);border-radius:99px;font-size:.78rem;color:var(--cy)';tag.textContent=d.name+' ('+( RL[d.role]||d.role)+')';pl.appendChild(tag)}
+  });
   s.on('player_left',d=>{sysMsg(`${d.name} 离开了房间`)});
-  s.on('game_started',d=>{toast('游戏开始！','gn');if(d.config)applyConfig(d.config)});
-  s.on('action_broadcast',d=>{sysMsg(`[${d.name}] ${d.action}: ${JSON.stringify(d.value)}`);renderAll()});
-  s.on('chat_broadcast',d=>{G.msgs.push({tp:'ai',nm:d.name,ct:d.content,ch:d.channel||'ALL',vil:d.village,rl:RL[d.role]||'',tm:now()});renderChat()});
+  s.on('game_started',d=>{
+    toast('游戏开始！','gn');
+    if(d.config)applyConfig(d.config);
+    if(d.players){
+      // Store multiplayer player info
+      MP.mpPlayers=d.players;
+    }
+    // Start the game -- for OBSERVER, use observer mode; for others, normal game
+    if(G.role==='OBSERVER'){
+      initObserverGame(d);
+    }else{
+      initGame();
+    }
+  });
+  s.on('action_broadcast',d=>{
+    sysMsg(`[${d.name}] ${d.action}: ${JSON.stringify(d.value)}`);
+    // For observer: track all actions
+    if(G.role==='OBSERVER'&&G._observerActions){
+      G._observerActions.push({...d,ts:now()});
+      renderObserverDashboard();
+    }
+    renderAll();
+  });
+  s.on('chat_broadcast',d=>{G.msgs.push({tp:'ai',nm:d.name,ct:d.content,ch:d.channel||'ALL',vil:d.village,rl:RL[d.role]||'',tm:now()});renderChat();
+    // Observer sees all chats
+    if(G.role==='OBSERVER'&&G._observerChats){G._observerChats.push({...d,ts:now()});renderObserverDashboard()}
+  });
   s.on('phase_changed',d=>{G.pi=d.phase_index;renderAll();startTimer()});
   s.on('game_finished',()=>{toast('游戏结束','am');showResult()});
   s.on('error',d=>{toast(d.msg||'连接错误','rd')});
   s.on('disconnect',()=>{toast('断开连接','rd')});
+}
+function mpDisconnect(){if(MP.socket){MP.socket.disconnect();MP.socket=null}MP.enabled=false;MP.roomCode=null;MP.isHost=false}
+function mpStartGame(){if(MP.socket&&MP.roomCode){MP.socket.emit('start_game',{code:MP.roomCode});toast('正在开始游戏...','bl')}}
+function updateWaitingPlayerList(players){
+  const pl=document.getElementById('wait-player-list');if(!pl)return;
+  pl.innerHTML=players.map(p=>`<span style="padding:4px 10px;background:${p.is_bot?'rgba(85,168,104,.08)':'rgba(68,114,196,.08)'};border:1px solid ${p.is_bot?'rgba(85,168,104,.15)':'rgba(68,114,196,.15)'};border-radius:99px;font-size:.78rem;color:${p.is_bot?'var(--gn)':'var(--cy)'}">${p.name} (${RL[p.role]||p.role})${p.is_bot?' AI':''}</span>`).join('');
+}
+// Observer mode: teacher/observer "god view"
+function initObserverGame(d){
+  G._observerActions=[];G._observerChats=[];
+  G.round=1;G.pi=0;G.msgs=[];G.news=[];G.votes={};G.voted=false;G.hist=[];G.roundEnded=false;G.totalLoss=0;G.vilHist={};
+  VIL.forEach(v=>{G.ws[v]=0;G.va[v]=500;G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.vilHist[v]=[];G.sandbags[v]=0});
+  G.ca={A:500,B:500,C:500};G.cd={A:0,B:0,C:0};G.dams.A=false;G.dams.B=false;G.dams.C=false;
+  G.armyCard={A:true,B:true,C:true};G.blasted={A:false,B:false,C:false};
+  G._upflow={};VIL.forEach(v=>G._upflow[v]=0);G._justFlooded={};G._seaDischarge=0;
+  G.players=[];genRain();
+  showScreen('S-game');renderAll();startTimer();
+  // Override action panel for observer
+  renderObserverDashboard();
+  sysMsg('你以教师/观察者身份加入，可看到所有玩家的决策和聊天。');
+}
+function renderObserverDashboard(){
+  const btns=document.getElementById('act-btns');const ex=document.getElementById('act-extra');const tt=document.getElementById('act-title');
+  if(!btns)return;
+  tt.textContent='👁 教师视角 · 全局监控';
+  let html='<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:8px">你正在以<b style="color:var(--gd)">上帝视角</b>观察所有玩家。你不参与决策或投票。</div>';
+  // Recent actions
+  const acts=G._observerActions||[];
+  if(acts.length){
+    html+='<div style="font-size:.8rem;font-weight:700;color:var(--cy);margin:8px 0 4px">最近玩家行动 ('+acts.length+')</div>';
+    html+='<div style="max-height:180px;overflow-y:auto;background:var(--p2);border-radius:7px;padding:6px;border:1px solid var(--bd)">';
+    acts.slice(-15).reverse().forEach(a=>{html+=`<div style="font-size:.74rem;padding:3px 6px;border-bottom:1px solid rgba(0,0,0,.04)"><span style="color:var(--cy);font-weight:600">${a.name}</span> <span style="color:var(--t3)">(${RL[a.role]||a.role})</span> ${a.action}: ${JSON.stringify(a.value)} <span style="color:var(--t3);font-size:.66rem">${a.ts||''}</span></div>`});
+    html+='</div>';
+  }else{
+    html+='<div style="font-size:.78rem;color:var(--t3);padding:10px;text-align:center">暂无玩家行动</div>';
+  }
+  // Recent chats across all channels
+  const chats=G._observerChats||[];
+  if(chats.length){
+    html+='<div style="font-size:.8rem;font-weight:700;color:var(--gn);margin:8px 0 4px">全频道聊天 ('+chats.length+')</div>';
+    html+='<div style="max-height:160px;overflow-y:auto;background:var(--p2);border-radius:7px;padding:6px;border:1px solid var(--bd)">';
+    chats.slice(-15).reverse().forEach(c=>{html+=`<div style="font-size:.74rem;padding:3px 6px;border-bottom:1px solid rgba(0,0,0,.04)"><span style="color:var(--gn);font-weight:600">${c.name}</span> <span style="color:var(--t3)">[${c.channel||'ALL'}${c.village?' '+c.village:''}]</span> ${c.content}</div>`});
+    html+='</div>';
+  }
+  btns.innerHTML=html;
+  // Advance phase button for teacher
+  if(ex)ex.innerHTML='<button class="btn btn-p" style="width:100%;margin-top:8px" onclick="mpEmit(\'advance_phase\',{})">推进下一阶段</button>';
 }
 function mpEmit(evt,data){if(MP.enabled&&MP.socket){data.code=MP.roomCode;MP.socket.emit(evt,data)}}
 function mpSendAction(action,value){mpEmit('player_action',{action,value})}
@@ -518,7 +640,7 @@ const MR=6;
 const PH=['WEATHER','VIL_DISCUSS','LEADER_BUILD','MAYOR_DRAIN','COMPUTE','ROUND_END'];
 const PHL={WEATHER:'🌧 公布降雨量',VIL_DISCUSS:'💬 村民研讨表决',LEADER_BUILD:'🏗 村长工程决策',MAYOR_DRAIN:'🌊 市长排洪决策',COMPUTE:'📝 水量结算',ROUND_END:'✅ 回合结算'};
 const PHT={WEATHER:20,VIL_DISCUSS:60,LEADER_BUILD:50,MAYOR_DRAIN:45,COMPUTE:8,ROUND_END:12};
-const RL={MAYOR_A:'北京市长',MAYOR_B:'河北省长',MAYOR_C:'天津市长',LEADER_A1:'房山村长(蓄洪)',LEADER_A2:'门头沟村长',LEADER_A3:'昌平村长',LEADER_B1:'涿州村长(蓄洪)',LEADER_B2:'霸州村长',LEADER_B3:'保定村长',LEADER_C1:'静海村长(蓄洪)',LEADER_C2:'武清村长',LEADER_C3:'滨海新区村长(入海)'};
+const RL={MAYOR_A:'北京市长',MAYOR_B:'河北省长',MAYOR_C:'天津市长',LEADER_A1:'房山村长(蓄洪)',LEADER_A2:'门头沟村长',LEADER_A3:'昌平村长',LEADER_B1:'涿州村长(蓄洪)',LEADER_B2:'霸州村长',LEADER_B3:'保定村长',LEADER_C1:'静海村长(蓄洪)',LEADER_C2:'武清村长',LEADER_C3:'滨海新区村长(入海)',OBSERVER:'教师/观察者'};
 const NAMES_M=['李明辉','王建国','赵德铭'];
 const NAMES_L=['钱家富','孙保民','周安平','吴治水','郑大河','冯守正','蒋防汛','韩安澜','曹明德'];
 const NAMES_V=['陈大爷','林阿姨','黄大叔','何大妈','刘老师','杨大哥','胡大姐','马老伯','曹大婶','卢师傅','韩大嫂','魏大爷','朱阿姨','沈老师','许大叔','高大妈','谢大哥','丁大姐','彭老伯','董大婶','范大爷','蒋阿姨','袁老师','邹大叔','潘大妈','邓大哥','唐大姐','于师傅','萧大婶','姚大嫂'];
@@ -926,6 +1048,8 @@ function showVilDetail(v){
   showModal(`📍 ${VN[v]} 详情`,stats+scene+htbl,'<button class="btn btn-p" onclick="closeMo()">关闭</button>')}
 
 function renderAct(){
+  // Observer mode: show dashboard instead of normal actions
+  if(G.role==='OBSERVER'){renderObserverDashboard();return}
   const p=PH[G.pi]||'WEATHER',btns=document.getElementById('act-btns'),ex=document.getElementById('act-extra'),tt=document.getElementById('act-title');
   btns.innerHTML='';ex.innerHTML='';
   if(p==='WEATHER'){tt.textContent='🌧 天气预报';
@@ -990,7 +1114,8 @@ function renderNews(){document.getElementById('news-list').innerHTML=G.news.map(
 
 // ===================== CHAT =====================
 function renderChat(){const ct=document.getElementById('chat-msgs');
-  const f=G.msgs.filter(m=>{if(G.ch==='ALL')return m.ch==='ALL';return m.ch==='VIL'&&m.vil===G.vil});
+  // Observer sees ALL messages regardless of channel filter
+  const f=G.role==='OBSERVER'?G.msgs:G.msgs.filter(m=>{if(G.ch==='ALL')return m.ch==='ALL';return m.ch==='VIL'&&m.vil===G.vil});
   ct.innerHTML=f.slice(-60).map(m=>{const cls=m.tp==='sys'?'sys':m.tp==='ai'?'ai':'';
     return `<div class="dm ${cls}"><div class="dn">${m.nm}<span class="d-role">${m.rl||''}</span> <span style="font-size:.6rem;color:var(--t3)">${m.tm}</span></div><div>${m.ct}</div></div>`}).join('');
   ct.scrollTop=ct.scrollHeight;
@@ -1152,8 +1277,21 @@ function mobTab(panel){
 }
 function startGame(){G.nm=document.getElementById('inp-name').value.trim()||'张同学';G.sid=document.getElementById('inp-sid').value.trim()||'2024001';
   const roomCode=(document.getElementById('inp-room')?.value||'').trim().toUpperCase();
-  if(roomCode){mpConnect(roomCode,G.nm,G.sid,G.pref);toast('正在连接房间 '+roomCode+'...','bl');setTimeout(()=>{initGame()},1500)}
-  else{loadServerConfig().then(()=>initGame()).catch(()=>initGame())}
+  if(roomCode){
+    // Multiplayer mode: connect to server, show waiting room
+    showScreen('S-waiting');
+    document.getElementById('wait-room-code').textContent=roomCode;
+    document.getElementById('wait-role').textContent='分配中...';
+    document.getElementById('wait-village').textContent='';
+    document.getElementById('wait-player-list').innerHTML='';
+    document.getElementById('wait-start-area').innerHTML='';
+    mpConnect(roomCode,G.nm,G.sid,G.pref);
+    toast('正在连接房间 '+roomCode+'...','bl');
+  }
+  else{
+    // Single player mode: load config then init locally
+    loadServerConfig().then(()=>initGame()).catch(()=>initGame());
+  }
 }
 function restart(){initGame()}
 function now(){return new Date().toLocaleTimeString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit'})}

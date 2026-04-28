@@ -63,7 +63,7 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 <div class="container">
   <div class="card" id="server-url-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
     <label style="font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap">云端 API 地址:</label>
-    <input id="api-base-url" value="https://haihe-flood-api.lglhm.workers.dev" placeholder="API地址" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
+    <input id="api-base-url" value="" placeholder="默认使用当前域名相对路径" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
     <button class="btn btn-outline btn-sm" onclick="applyServerUrl()" style="white-space:nowrap">应用连接</button>
     <span id="server-status" style="font-size:.74rem;color:var(--muted)"></span>
   </div>
@@ -82,8 +82,8 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 <div id="toast-area"></div>
 
 <script>
-// 默认初始化为你部署的 Cloudflare Worker 线上地址
-let API = 'https://haihe-flood-api.lglhm.workers.dev';
+// 修改为相对路径，与自定义域名合并
+let API = ''; 
 let currentTab = 'rooms';
 let config = {};
 let rooms = [];
@@ -101,7 +101,7 @@ async function checkHealth() {
   statusEl.style.color = 'var(--muted)';
   errorEl.classList.add('hidden');
   try {
-    // 因为后端是 Worker，跨域时无需带 credentials 也能检查 health
+    // 当前已配置同域名路由，直接请求相对路径即可
     const res = await fetch(API + '/api/health');
     const ct = res.headers.get('content-type') || '';
     const bodyText = await res.text();
@@ -111,13 +111,13 @@ async function checkHealth() {
       statusEl.style.color = 'var(--red)';
       errorEl.classList.remove('hidden');
       errorEl.innerHTML = `
-        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">云端服务连接失败</h3>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API}/api/health</code></p>
+        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">API 路由连接失败</h3>
+        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
         <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回类型:</b> <code>${ct}</code> (期望 application/json)</p>
         <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
           <b>可能原因与解决方案:</b><br>
-          1. Cloudflare Worker 未成功部署或地址拼写错误。<br>
-          2. 请确认上方"云端 API 地址"填写正确。
+          1. Cloudflare 的 <b>Workers 路由</b> 未正确配置 (需配置为 <code>${window.location.hostname}/api/*</code>)。<br>
+          2. 路由配置刚刚修改，全球 CDN 节点尚未完全刷新（请等待 1-2 分钟后再试）。
         </div>`;
       return;
     }
@@ -136,7 +136,7 @@ async function checkHealth() {
     errorEl.classList.remove('hidden');
     errorEl.innerHTML = `
       <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到云端服务器</h3>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API}/api/health</code></p>
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
       <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>错误:</b> <code>${e.message}</code></p>
       <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
         <b>请确认:</b><br>

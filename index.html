@@ -251,7 +251,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
     <p class="desc">基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。</p>
     
     <div class="feat-grid">
-      <div class="f"><div style="font-size:1.4rem">🌊</div><h3>流域联动机制</h3><p>上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运</p></div>
+      <div class="f"><div style="font-size:1.4rem">🌊</div><h3>流域联动机制</h3><p>上游排水推推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运</p></div>
       <div class="f"><div style="font-size:1.4rem">🤖</div><h3>AI协同推演</h3><p>单人即可体验完整游戏，每村5+名AI村民自主研讨发言做决策</p></div>
       <div class="f"><div style="font-size:1.4rem">☁️</div><h3>云端汇聚计算</h3><p>数据通过Cloudflare Serverless架构无缝上报，后台实时分析</p></div>
     </div>
@@ -418,7 +418,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 
 <script>
 // ===================== CLOUDFLARE API INTEGRATION =====================
-const API = 'https://haihe-flood-api.lglhm.workers.dev';
+const API = ''; // 修改为相对路径，适配自定义域名 resil-hub.cn 
 let SERVER_CFG = null;
 
 async function loadServerConfig(){
@@ -601,7 +601,7 @@ function genRain(){
 function startTimer(){clearInterval(G.timer);G.ts=PHT[PH[G.pi]]||20;G._tsMax=G.ts;updTimer();G.timer=setInterval(()=>{G.ts--;updTimer();if(G.ts<=0){clearInterval(G.timer);autoPhase()}},1000)}
 function updTimer(){const el=document.getElementById('g-timer');if(!el)return;el.textContent=`${String(Math.floor(G.ts/60)).padStart(2,'0')}:${String(G.ts%60).padStart(2,'0')}`;const pct=G._tsMax?G.ts/G._tsMax:1;el.style.color=G.ts<=10?'var(--rd)':G.ts<=20?'var(--am)':'var(--cy)';el.style.opacity=G.ts<=5?.6+Math.abs(Math.sin(Date.now()/300))*.4:1}
 function advancePhase(){clearInterval(G.timer);closeMo();execPhase(PH[G.pi]);G.pi++;if(G.pi>=PH.length){endRound();return}renderAll();startTimer();runAIPhase(PH[G.pi])}
-function autoPhase(){const p=PH[G.pi];if(p==='VIL_DISCUSS'&&G.role&&G.role.startsWith('VIL_')&&!G.vm[G.vil]?.human){G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=false;sysMsg('时间到！系统默认你选择"暂不搬迁"。')}advancePhase()}
+function autoPhase(){const p=PH[G.pi];if(p==='VIL_DISCUSS'&&G.role&&G.role.startsWith('VIL_')) {G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=false;sysMsg('时间到！系统默认你选择"暂不搬迁"。')}advancePhase()}
 function execPhase(p){
   if(p==='WEATHER'){sysMsg(`【天气预报】北京降水${G.rain.A}mm | 河北降水${G.rain.B}mm | 天津降水${G.rain.C}mm`)}
   else if(p==='VIL_DISCUSS'){aiVilDiscuss();let mc=0,sc=0;VIL.forEach(v=>{Object.values(G.vm[v]||{}).forEach(m=>{if(m)mc++;else sc++})});sysMsg(`【村民表决完成】搬迁${mc}人，留守${sc}人。`)}
@@ -752,7 +752,7 @@ function genNews(){const fv=VIL.filter(v=>G.ws[v]>=FT[v]);
 function endRound(){
   VIL.forEach(v=>{G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.sandbags[v]=0});
   G.dams.A=false;G.dams.B=false;G.dams.C=false;G.cd={A:0,B:0,C:0};G.blasted={A:false,B:false,C:false};G._evacOrdered={};
-  mpSaveRound(); // Save this round data to Cloudflare DB
+  mpSaveRound(); 
   if(G.round>=getMR()){sysMsg('六轮结束！进入最终评分。');setTimeout(showResult,1200);return}
   G.round++;G.pi=0;genRain();showRoundTransition();
 }
@@ -1118,7 +1118,7 @@ function showRoleReveal(){
   const r=G.role,rn=RL[r]||'村民',v=G.vil;let d='';
   if(r&&r.startsWith('MAYOR_')){const c=r.replace('MAYOR_','');d=`<p>作为<b>${CN[c]}市长</b>，你决定排洪量、修坝和是否炸坝释放拦水。排洪推向下游。</p><p style="color:var(--am)">🚁 你拥有唯一一次<b>解放军救援牌</b>，使用后所辖村庄水位全部清零，防御重置。全流域将收到通报。</p><p style="font-size:.8rem;color:var(--t3)">💡 你的排洪决策直接影响下游命运，但你无法预知下游的反应。</p>`}
   else if(r&&r.startsWith('LEADER_')){const vv=r.replace('LEADER_','');d=`<p>你是<b>${VN[vv]}村长</b>。可花费10~50村资金购置沙袋防洪屏障，抵挡相应水量。未拦住的水量将流向下游。</p>`;d+='<p style="font-size:.8rem;color:var(--t3)">💡 你只知道本村水情，不知道其他村长的选择。</p>'}
-  else if(r==='OBSERVER'){d='<p>你是<b>教师/观察者</b>。你可以查看所有玩家的决策和聊天，但不能参与投票或干预决策流程。</p>';}
+  else if(r=== 'OBSERVER'){d='<p>你是<b>教师/观察者</b>。你可以查看所有玩家的决策和聊天，但不能参与投票或干预决策流程。</p>';}
   else{d=`<p>你是<b>${VN[v]}普通村民</b>。每轮决策搬迁or留守。</p><p>搬+未淹=损30 | 不搬+被淹=损50 | 搬+淹=0</p><p style="color:var(--am)">注意：聊天中有隐藏角色，信息不一定可靠！</p><p style="font-size:.8rem;color:var(--t3)">💡 你不知道上游会排多少水过来，也不知道村长会不会修坝。</p>`}
   showModal(`🎭 你的角色：${rn}`,`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2.4rem">${r&&r.startsWith('MAYOR')?'🏛':r&&r.startsWith('LEADER')?'🏠':'🧑'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--cy)">${rn}</div><div style="font-size:.8rem;color:var(--t3);margin-top:3px">位置：${VN[v]||v||'全局'}</div></div>${d}`)}
 function showGuide(){showModal('📖 游戏规则','<div style="font-size:.84rem;color:var(--t2);line-height:1.9"><p><b>背景</b>：2023年台风"杜苏芮"北上，海河流域遭遇"23·7"特大洪水，北京83h降雨744.8mm。</p><p><b>流域</b>：北京A(上游)→河北B(中游)→天津C(下游)，每城3村，共9村约90人参与</p><p><b>核心机制</b>：每人只掌握局部信息，需在不确定性下快速决策。你的选择影响他人，他人的选择也影响你。</p><p><b>阈值</b>：房山20 门头沟30 昌平35 涿州30 霸州40 保定35 静海40 武清50 滨海新区45</p><p><b>海排上限</b>：滨海新区(C3)入海口每轮最多排出60单位，超出部分积压。</p><p><b>村民</b>：搬+未淹=损30 | 不搬+淹=损50 | 搬+淹=0</p><p><b>村长</b>：可花费10~50村资金购买沙袋防洪屏障，抵挡相应水量，未拦住部分流向下游。</p><p><b>市长</b>：决定排洪量(推向下游)+修坝(花费30拦30)+可申请炸坝(花费20释放拦水至下游)+🚁解放军救援牌(一次性，清零本市所有村庄水位并重置防御)</p><p><b>评分</b>：村民=个人经济 | 其他=经济排名+声誉投票</p><p style="color:var(--gd)"><b>隐藏角色</b>："谣言散布者"混淆视听、"坚守老人"拒绝撤离！隐藏角色仅出现在普通村民中，村长和市长不会是隐藏角色。</p></div>')}
@@ -1146,7 +1146,6 @@ function startGame(){
   
   toast('正在连接云端节点...', 'bl');
   
-  // Directly start the game logic 
   loadServerConfig().then(()=>{
     toast('已同步云端，开始推演', 'gn');
     initGame();

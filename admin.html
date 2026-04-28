@@ -289,20 +289,27 @@ function renderRooms() {
     </div>
     <div class="stat-grid">
       <div class="stat-box"><div class="sv">${rooms.length}</div><div class="sl">房间总数</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='waiting').length}</div><div class="sl">等待中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='playing').length}</div><div class="sl">进行中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.reduce((s,r)=>s+r.player_count,0)}</div><div class="sl">总玩家数</div></div>
+      <div class="stat-box"><div class="sv">${rooms.filter(r=>(r.status||'').toLowerCase()==='waiting').length}</div><div class="sl">等待中</div></div>
+      <div class="stat-box"><div class="sv">${rooms.filter(r=>(r.status||'').toLowerCase()==='playing').length}</div><div class="sl">进行中</div></div>
+      <div class="stat-box"><div class="sv">${rooms.reduce((s,r)=>s+(r.player_count||(r.players||[]).length||0),0)}</div><div class="sl">总玩家数</div></div>
     </div>
-    <div class="room-grid">${rooms.map(r => `
+    <div class="room-grid">${rooms.map(r => {
+      const st = (r.status||'').toLowerCase();
+      const isWaiting = st === 'waiting';
+      const isPlaying = st === 'playing';
+      const players = r.players || [];
+      return `
       <div class="room-card">
         <div class="code">${r.code}</div>
-        <div class="meta">${r.group_name} · ${r.player_count}人 · 第${r.round}轮</div>
-        <span class="status status-${r.status}">${r.status==='waiting'?'等待加入':r.status==='playing'?'游戏中':'已结束'}</span>
-        <div style="margin-top:10px;display:flex;gap:6px">
+        <div class="meta">${r.group_name || ''} · ${r.player_count||players.length||0}人${r.round?' · 第'+r.round+'轮':''}</div>
+        <span class="status status-${st}">${isWaiting?'等待加入':isPlaying?'游戏中':'已结束'}</span>
+        ${players.length?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">'+players.map(p=>'<span style="font-size:.7rem;padding:2px 7px;background:rgba(68,114,196,.06);border:1px solid rgba(68,114,196,.12);border-radius:99px;color:#4472C4">'+p.name+'</span>').join('')+'</div>':''}
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+          ${isWaiting?'<button class="btn btn-primary btn-sm" onclick="startRoom(\''+r.code+'\')">开始游戏</button>':''}
           <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制房间码</button>
           <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
         </div>
-      </div>`).join('')}
+      </div>`}).join('')}
     </div>`;
 }
 async function createRoom() {
@@ -318,6 +325,16 @@ async function deleteRoom(code) {
 }
 function copyCode(code) {
   navigator.clipboard.writeText(code).then(() => toast('已复制: ' + code));
+}
+async function startRoom(code) {
+  if (!confirm('确定开始房间 ' + code + ' 的游戏？所有已加入的玩家将同步进入游戏。')) return;
+  // 即时禁用按钮防止重复点击
+  const btn = event.target; if(btn) { btn.disabled = true; btn.textContent = '启动中...'; }
+  const data = await safeFetch(API + '/api/rooms/' + code + '/start', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({})
+  });
+  if (data && data.ok) { toast('游戏已开始: ' + code); loadRooms(); }
+  else { if(btn) { btn.disabled = false; btn.textContent = '开始游戏'; } }
 }
 
 // ── Config ──

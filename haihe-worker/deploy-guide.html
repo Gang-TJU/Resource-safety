@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudflare D1 部署指南 — 海河洪涝决策仿真平台</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--text:#1a202c;--muted:#718096;--border:#e2e8f0;--blue:#4472C4;--green:#38a169;--amber:#dd6b20;--red:#e53e3e;--code-bg:#1e293b;--code:#e2e8f0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:0 0 60px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#4472C4 100%);color:#fff;padding:48px 24px;text-align:center}
+.hero h1{font-size:1.8rem;font-weight:800;margin-bottom:8px}
+.hero p{font-size:1rem;opacity:.85;max-width:600px;margin:0 auto}
+.container{max-width:820px;margin:0 auto;padding:0 20px}
+.toc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin:24px auto;max-width:820px}
+.toc h2{font-size:1rem;color:var(--blue);margin-bottom:12px}
+.toc ol{padding-left:20px}.toc li{margin:4px 0;font-size:.92rem}
+.toc a{color:var(--blue);text-decoration:none}.toc a:hover{text-decoration:underline}
+.step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;margin:20px 0;position:relative}
+.step-num{position:absolute;top:-14px;left:24px;background:var(--blue);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700}
+.step h2{font-size:1.15rem;font-weight:700;margin-bottom:16px;padding-left:20px;color:var(--text)}
+.step h3{font-size:.95rem;font-weight:700;margin:18px 0 8px;color:var(--text)}
+.step p,.step li{font-size:.9rem;margin:6px 0}
+.step ul,.step ol{padding-left:20px}
+pre{background:var(--code-bg);color:var(--code);border-radius:8px;padding:16px 20px;overflow-x:auto;font-size:.84rem;line-height:1.6;margin:10px 0;position:relative}
+code{font-family:'JetBrains Mono','Fira Code',Consolas,monospace}
+.inline-code{background:#edf2f7;color:#e53e3e;padding:2px 6px;border-radius:4px;font-size:.84rem}
+.warn{background:#fffaf0;border:1px solid #fbd38d;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.88rem}
+.warn::before{content:"⚠️ ";font-weight:700}
+.ok{background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.88rem}
+.ok::before{content:"✅ ";font-weight:700}
+.info{background:#ebf8ff;border:1px solid #90cdf4;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.88rem}
+.info::before{content:"💡 ";font-weight:700}
+.diagram{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;margin:16px 0;font-family:monospace;font-size:.82rem;line-height:1.8;white-space:pre;overflow-x:auto;text-align:center}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.86rem}
+th{background:#edf2f7;padding:8px 12px;text-align:left;font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:7px 12px;border-bottom:1px solid var(--border)}
+.highlight{background:#fefcbf;padding:1px 4px;border-radius:3px}
+.copy-hint{color:var(--muted);font-size:.76rem;position:absolute;top:8px;right:12px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Cloudflare D1 部署指南</h1>
+  <p>海河流域洪涝风险决策仿真平台 — 数据库部署全流程</p>
+</div>
+
+<div class="toc container">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#s0">架构说明：为什么用 Cloudflare D1</a></li>
+    <li><a href="#s1">在你的电脑上安装 Wrangler 工具</a></li>
+    <li><a href="#s2">登录 Cloudflare 账号</a></li>
+    <li><a href="#s3">创建 D1 数据库</a></li>
+    <li><a href="#s4">建表（导入 schema.sql）</a></li>
+    <li><a href="#s5">配置 wrangler.toml（填入 database_id）</a></li>
+    <li><a href="#s6">部署 Worker（API 上线）</a></li>
+    <li><a href="#s7">验证部署</a></li>
+    <li><a href="#s8">将 admin.html 连接到 Worker</a></li>
+    <li><a href="#s9">配置 Nginx 转发（可选）</a></li>
+    <li><a href="#s10">常见问题排查</a></li>
+  </ol>
+</div>
+
+<!-- ============ STEP 0 ============ -->
+<div class="container">
+<div class="step" id="s0">
+  <div class="step-num">0</div>
+  <h2>架构说明</h2>
+
+  <h3>当前问题</h3>
+  <p>你的服务器 <span class="inline-code">www.resil-hub.cn</span> 上 Nginx 把所有 <span class="inline-code">/api/*</span> 请求都返回了 index.html（HTML），管理后台因此报 "非JSON内容" 错误。</p>
+
+  <h3>解决方案</h3>
+  <p>把数据库放到 Cloudflare D1（免费、全球部署的 SQLite），用 Cloudflare Worker 提供 API。管理后台直接请求 Worker URL，完全绕过 Nginx。</p>
+
+  <div class="diagram">
+浏览器 (admin.html)
+    │
+    │ 直接请求（不经过 Nginx）
+    ▼
+Cloudflare Worker    ←─── 你即将部署的 API 服务
+ (haihe-api.xxx.workers.dev)
+    │
+    ▼
+Cloudflare D1 数据库  ←─── 3 张表，存储全部教学数据
+ (simulation_rounds / player_decisions / chat_logs)
+  </div>
+
+  <div class="info">Cloudflare D1 免费额度：每天 500万次读 + 10万次写，对教学平台绰绰有余。</div>
+</div>
+
+<!-- ============ STEP 1 ============ -->
+<div class="step" id="s1">
+  <div class="step-num">1</div>
+  <h2>在你的电脑上安装 Wrangler 工具</h2>
+
+  <p>Wrangler 是 Cloudflare 官方 CLI，用于管理 D1 和 Worker。</p>
+
+  <h3>先确认 Node.js 已安装</h3>
+  <pre><span class="copy-hint">在终端中执行</span>
+node -v</pre>
+  <p>如果输出 <span class="inline-code">v18.x.x</span> 或更高版本，继续下一步。<br>如果提示找不到命令，先去 <a href="https://nodejs.org" target="_blank">nodejs.org</a> 下载安装 LTS 版本。</p>
+
+  <h3>安装 Wrangler</h3>
+  <pre><span class="copy-hint">复制粘贴执行</span>
+npm install -g wrangler</pre>
+
+  <h3>验证安装</h3>
+  <pre>wrangler --version</pre>
+  <p>应输出类似 <span class="inline-code">wrangler 3.x.x</span>。</p>
+</div>
+
+<!-- ============ STEP 2 ============ -->
+<div class="step" id="s2">
+  <div class="step-num">2</div>
+  <h2>登录 Cloudflare 账号</h2>
+
+  <pre><span class="copy-hint">复制粘贴执行</span>
+wrangler login</pre>
+
+  <p>执行后会自动打开浏览器，跳转到 Cloudflare 登录页面。</p>
+  <ol>
+    <li>如果没有账号，点击 "Sign Up" 免费注册</li>
+    <li>登录后页面会提示 "Wrangler is now authorized"</li>
+    <li>回到终端，看到 <span class="inline-code">Successfully logged in.</span> 即可</li>
+  </ol>
+
+  <div class="info">如果你在服务器上操作（无浏览器），用 <span class="inline-code">wrangler login --browser=false</span>，它会给你一个链接，复制到本地浏览器中打开完成授权。</div>
+</div>
+
+<!-- ============ STEP 3 ============ -->
+<div class="step" id="s3">
+  <div class="step-num">3</div>
+  <h2>创建 D1 数据库</h2>
+
+  <pre><span class="copy-hint">复制粘贴执行</span>
+wrangler d1 create haihe-flood-db</pre>
+
+  <p>执行成功后，终端会输出类似以下内容：</p>
+  <pre>
+✅ Successfully created DB 'haihe-flood-db' in region APAC
+Created your new D1 database.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "haihe-flood-db"
+database_id = "<span class="highlight">a1b2c3d4-e5f6-7890-abcd-ef1234567890</span>"</pre>
+
+  <div class="warn"><strong>关键操作：</strong>把上面输出的 <span class="inline-code">database_id</span> 值（那串带横线的字符）复制下来，后面要用。每个人的 ID 都不同。</div>
+</div>
+
+<!-- ============ STEP 4 ============ -->
+<div class="step" id="s4">
+  <div class="step-num">4</div>
+  <h2>建表（导入 schema.sql）</h2>
+
+  <p>先进入项目文件夹（<span class="inline-code">haihe-worker</span> 目录），确认 <span class="inline-code">schema.sql</span> 文件存在：</p>
+  <pre><span class="copy-hint">复制粘贴执行</span>
+cd haihe-worker
+ls schema.sql</pre>
+
+  <p>然后执行建表：</p>
+  <pre><span class="copy-hint">复制粘贴执行</span>
+wrangler d1 execute haihe-flood-db --remote --file=schema.sql</pre>
+
+  <div class="warn"><span class="inline-code">--remote</span> 参数很重要！不加的话只会在本地创建，不会部署到 Cloudflare 云端。</div>
+
+  <p>验证表是否创建成功：</p>
+  <pre><span class="copy-hint">复制粘贴执行</span>
+wrangler d1 execute haihe-flood-db --remote --command="SELECT name FROM sqlite_master WHERE type='table'"</pre>
+
+  <p>应输出 3 张表名：</p>
+  <pre>
+┌────────────────────┐
+│ name               │
+├────────────────────┤
+│ simulation_rounds  │
+│ player_decisions   │
+│ chat_logs          │
+└────────────────────┘</pre>
+
+  <div class="ok">看到 3 张表名，说明数据库建表成功。</div>
+</div>
+
+<!-- ============ STEP 5 ============ -->
+<div class="step" id="s5">
+  <div class="step-num">5</div>
+  <h2>配置 wrangler.toml（填入 database_id）</h2>
+
+  <p>用任意文本编辑器打开 <span class="inline-code">haihe-worker/wrangler.toml</span>：</p>
+  <pre><span class="copy-hint">wrangler.toml 文件内容</span>
+name = "haihe-api"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "haihe-flood-db"
+database_id = "<span class="highlight">把步骤3复制的ID粘贴到这里</span>"
+
+[vars]
+ALLOWED_ORIGIN = "https://www.resil-hub.cn"</pre>
+
+  <p><strong>只需改一个地方：</strong>把 <span class="inline-code">database_id</span> 的值替换为步骤 3 中复制的那串 ID。</p>
+
+  <p>例如：</p>
+  <pre>database_id = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"</pre>
+</div>
+
+<!-- ============ STEP 6 ============ -->
+<div class="step" id="s6">
+  <div class="step-num">6</div>
+  <h2>部署 Worker（API 上线）</h2>
+
+  <p>确保当前在 <span class="inline-code">haihe-worker</span> 目录下：</p>
+  <pre><span class="copy-hint">复制粘贴执行</span>
+wrangler deploy</pre>
+
+  <p>执行成功后输出类似：</p>
+  <pre>
+Total Upload: 6.21 KiB / gzip: 2.34 KiB
+Your worker has access to the following bindings:
+- D1 Databases:
+  - DB: haihe-flood-db
+Uploaded haihe-api (1.82 sec)
+Deployed haihe-api triggers (0.23 sec)
+  <span class="highlight">https://haihe-api.你的账号名.workers.dev</span></pre>
+
+  <div class="warn"><strong>关键操作：</strong>记下最后一行的 URL（<span class="inline-code">https://haihe-api.xxx.workers.dev</span>），这就是你的 API 地址。</div>
+</div>
+
+<!-- ============ STEP 7 ============ -->
+<div class="step" id="s7">
+  <div class="step-num">7</div>
+  <h2>验证部署</h2>
+
+  <h3>7a. 健康检查</h3>
+  <p>在浏览器中直接打开（或用 curl）：</p>
+  <pre><span class="copy-hint">把 xxx 替换为你的账号名</span>
+https://haihe-api.xxx.workers.dev/api/health</pre>
+
+  <p>期望返回：</p>
+  <pre>{"ok":true,"version":"1.0","db":"cloudflare-d1"}</pre>
+
+  <div class="ok">看到这个 JSON 说明 Worker + D1 都正常运行。</div>
+
+  <h3>7b. 写入测试</h3>
+  <pre><span class="copy-hint">在终端中执行（替换 xxx）</span>
+curl -X POST https://haihe-api.xxx.workers.dev/api/data/rounds \
+  -H "Content-Type: application/json" \
+  -d '{"room_id":"TEST001","round_num":1,"rainfall_A":38,"rainfall_B":36,"rainfall_C":23}'</pre>
+  <p>期望返回：<span class="inline-code">{"ok":true}</span></p>
+
+  <h3>7c. 读取测试</h3>
+  <pre><span class="copy-hint">在终端中执行（替换 xxx）</span>
+curl https://haihe-api.xxx.workers.dev/api/data/rounds</pre>
+  <p>期望返回包含刚写入数据的 JSON 数组。</p>
+
+  <h3>7d. 清理测试数据</h3>
+  <pre><span class="copy-hint">复制粘贴执行</span>
+wrangler d1 execute haihe-flood-db --remote --command="DELETE FROM simulation_rounds WHERE room_id='TEST001'"</pre>
+</div>
+
+<!-- ============ STEP 8 ============ -->
+<div class="step" id="s8">
+  <div class="step-num">8</div>
+  <h2>将 admin.html 连接到 Worker</h2>
+
+  <p>打开 <span class="inline-code">http://www.resil-hub.cn/admin.html</span>，在页面顶部找到 <strong>"服务器地址"</strong> 输入框。</p>
+
+  <p>填入你的 Worker URL：</p>
+  <pre>https://haihe-api.xxx.workers.dev</pre>
+
+  <p>然后点击 <strong>"应用"</strong> 按钮。</p>
+
+  <div class="ok">如果右侧显示 <span class="inline-code" style="color:var(--green)">v1.0 已连接</span>，说明管理后台已成功连接到 Cloudflare D1 数据库，"加载失败" 问题彻底解决。</div>
+
+  <div class="info">每次打开 admin.html 都需要重新填入地址。如果想永久生效，可以修改 admin.html 中第 78 行的 <span class="inline-code">let API = ''</span> 为 <span class="inline-code">let API = 'https://haihe-api.xxx.workers.dev'</span>。</div>
+</div>
+
+<!-- ============ STEP 9 ============ -->
+<div class="step" id="s9">
+  <div class="step-num">9</div>
+  <h2>配置 Nginx 转发（可选，推荐）</h2>
+
+  <p>如果你希望 admin.html 不需要手动填 Worker URL，可以让 Nginx 自动转发 <span class="inline-code">/api/</span> 到 Worker：</p>
+
+  <p>SSH 登录到你的服务器，编辑 Nginx 配置文件：</p>
+  <pre><span class="copy-hint">在服务器上执行</span>
+sudo nano /etc/nginx/conf.d/haihe.conf</pre>
+
+  <p>在 <span class="inline-code">server { }</span> 块内<strong>加入</strong>以下内容（放在其他 location 前面）：</p>
+  <pre><span class="copy-hint">添加到 Nginx 配置中（替换 xxx）</span>
+# API 请求转发到 Cloudflare Worker
+location /api/ {
+    proxy_pass https://haihe-api.xxx.workers.dev;
+    proxy_ssl_server_name on;
+    proxy_set_header Host haihe-api.xxx.workers.dev;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_http_version 1.1;
+}</pre>
+
+  <p>保存后验证并重载：</p>
+  <pre><span class="copy-hint">在服务器上执行</span>
+sudo nginx -t && sudo systemctl reload nginx</pre>
+
+  <div class="ok">配置后，<span class="inline-code">http://www.resil-hub.cn/api/health</span> 将返回 JSON 而不是 HTML，admin.html 中 "服务器地址" 留空即可正常工作。</div>
+</div>
+
+<!-- ============ STEP 10 ============ -->
+<div class="step" id="s10">
+  <div class="step-num">10</div>
+  <h2>常见问题排查</h2>
+
+  <table>
+    <tr>
+      <th style="width:40%">问题现象</th>
+      <th>原因与解决</th>
+    </tr>
+    <tr>
+      <td><span class="inline-code">wrangler: command not found</span></td>
+      <td>Node.js 未安装或 npm 全局路径不在 PATH 中。执行 <span class="inline-code">npm install -g wrangler</span> 后重开终端。</td>
+    </tr>
+    <tr>
+      <td><span class="inline-code">D1_ERROR: no such table: simulation_rounds</span></td>
+      <td>建表时忘了加 <span class="inline-code">--remote</span>。重新执行步骤 4 的命令。</td>
+    </tr>
+    <tr>
+      <td>Worker 部署后返回 <span class="inline-code">500 Internal Error</span></td>
+      <td>查看日志：<span class="inline-code">wrangler tail</span>（实时查看 Worker 日志）。通常是 database_id 写错了。</td>
+    </tr>
+    <tr>
+      <td>admin.html 填入 Worker URL 后仍报错</td>
+      <td>检查浏览器控制台(F12)的具体错误。如果是 CORS 错误，确认 Worker 代码中的 cors headers 正确。</td>
+    </tr>
+    <tr>
+      <td>Nginx 配置后 <span class="inline-code">/api/</span> 返回 502</td>
+      <td><span class="inline-code">proxy_ssl_server_name on;</span> 是否遗漏。Nginx 代理 HTTPS 后端时必须加这一行。</td>
+    </tr>
+    <tr>
+      <td>想查看数据库中有哪些数据</td>
+      <td><span class="inline-code">wrangler d1 execute haihe-flood-db --remote --command="SELECT count(*) FROM simulation_rounds"</span></td>
+    </tr>
+    <tr>
+      <td>想清空所有数据重新开始</td>
+      <td><span class="inline-code">wrangler d1 execute haihe-flood-db --remote --command="DELETE FROM simulation_rounds; DELETE FROM player_decisions; DELETE FROM chat_logs"</span></td>
+    </tr>
+    <tr>
+      <td>想修改 Worker 代码后重新部署</td>
+      <td>编辑 <span class="inline-code">src/worker.js</span> 后重新执行 <span class="inline-code">wrangler deploy</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ============ SUMMARY ============ -->
+<div class="step" style="border:2px solid var(--blue);background:#f8faff">
+  <h2 style="padding-left:0;text-align:center;color:var(--blue)">完整命令速查（复制粘贴版）</h2>
+  <pre><span class="copy-hint">按顺序逐行执行</span>
+# ① 安装工具
+npm install -g wrangler
+
+# ② 登录
+wrangler login
+
+# ③ 创建数据库（记下输出的 database_id）
+wrangler d1 create haihe-flood-db
+
+# ④ 进入项目目录
+cd haihe-worker
+
+# ⑤ 编辑 wrangler.toml，把 database_id 替换为③的输出值
+#    （用 nano/vim/记事本 均可）
+
+# ⑥ 建表
+wrangler d1 execute haihe-flood-db --remote --file=schema.sql
+
+# ⑦ 部署（记下输出的 Worker URL）
+wrangler deploy
+
+# ⑧ 验证
+curl https://haihe-api.你的账号名.workers.dev/api/health
+# 应返回: {"ok":true,"version":"1.0","db":"cloudflare-d1"}
+
+# ⑨ 打开管理后台，在"服务器地址"中填入 Worker URL，点击"应用"
+# 完成！</pre>
+</div>
+
+</div>
+</body>
+</html>

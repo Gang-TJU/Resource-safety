@@ -62,9 +62,9 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 </div>
 <div class="container">
   <div class="card" id="server-url-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
-    <label style="font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap">服务器地址:</label>
-    <input id="api-base-url" value="" placeholder="留空=当前页面地址" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
-    <button class="btn btn-outline btn-sm" onclick="applyServerUrl()" style="white-space:nowrap">应用</button>
+    <label style="font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap">云端 API 地址:</label>
+    <input id="api-base-url" value="" placeholder="默认使用当前域名相对路径" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
+    <button class="btn btn-outline btn-sm" onclick="applyServerUrl()" style="white-space:nowrap">应用连接</button>
     <span id="server-status" style="font-size:.74rem;color:var(--muted)"></span>
   </div>
   <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
@@ -82,14 +82,15 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 <div id="toast-area"></div>
 
 <script>
-let API = '';
+// 修改为相对路径，自动适配自定义域名
+let API = ''; 
 let currentTab = 'rooms';
 let config = {};
 let rooms = [];
 
 function applyServerUrl() {
   const input = document.getElementById('api-base-url').value.trim();
-  API = input.replace(/\/+$/, '');  // strip trailing slashes
+  API = input.replace(/\/+$/, '');
   checkHealth();
 }
 
@@ -100,31 +101,31 @@ async function checkHealth() {
   statusEl.style.color = 'var(--muted)';
   errorEl.classList.add('hidden');
   try {
-    const res = await fetch(API + '/api/health', { credentials: 'include' });
+    // 当前已配置同域名路由，直接请求相对路径即可
+    const res = await fetch(API + '/api/health');
     const ct = res.headers.get('content-type') || '';
     const bodyText = await res.text();
+    
     if (!ct.includes('json')) {
-      // Got HTML back instead of JSON
       statusEl.textContent = '连接异常';
       statusEl.style.color = 'var(--red)';
       errorEl.classList.remove('hidden');
       errorEl.innerHTML = `
-        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">服务器连接诊断失败</h3>
+        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">云端 API 路由诊断失败</h3>
         <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
         <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回类型:</b> <code>${ct}</code> (期望 application/json)</p>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回内容:</b> <code>${bodyText.substring(0, 200)}${bodyText.length > 200 ? '...' : ''}</code></p>
         <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
           <b>可能原因与解决方案:</b><br>
-          1. 服务器未启动 - 请执行 <code>python server.py</code><br>
-          2. 反向代理拦截了API请求 - 在上方"服务器地址"中填入后端直连地址(如 http://localhost:8080)<br>
-          3. Cookie问题导致返回登录页 - 尝试直接访问 <a href="/admin.html" style="color:var(--blue)">/admin.html</a>
+          1. Cloudflare 的 <b>Workers 路由</b> 未正确配置 (需配置为 <code>*${window.location.hostname}/api/*</code>)。<br>
+          2. Cloudflare Worker 未成功部署或 D1 数据库绑定失效。
         </div>`;
       return;
     }
     let data;
     try { data = JSON.parse(bodyText); } catch(e) { throw new Error('JSON parse failed'); }
+    
     if (data.ok) {
-      statusEl.textContent = 'v' + (data.version || '?') + ' 已连接';
+      statusEl.textContent = 'v' + (data.version || '?') + ' 已连接 (Cloudflare D1)';
       statusEl.style.color = 'var(--green)';
       errorEl.classList.add('hidden');
       loadRooms();
@@ -134,23 +135,15 @@ async function checkHealth() {
     statusEl.style.color = 'var(--red)';
     errorEl.classList.remove('hidden');
     errorEl.innerHTML = `
-      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到服务器</h3>
+      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到云端数据库</h3>
       <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>错误:</b> <code>${e.message}</code></p>
-      <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
-        <b>请确认:</b><br>
-        1. 后端服务已启动: <code>python server.py</code><br>
-        2. 上方"服务器地址"填写正确(如 http://localhost:8080)<br>
-        3. 网络可以访问该地址
-      </div>`;
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>错误:</b> <code>${e.message}</code></p>`;
   }
 }
 
-// ── Robust fetch helper (never redirects, always returns data or null) ──
 async function safeFetch(url, opts) {
   try {
     opts = opts || {};
-    opts.credentials = 'include';
     const res = await fetch(url, opts);
     const ct = res.headers.get('content-type') || '';
     if (!res.ok) {
@@ -163,7 +156,7 @@ async function safeFetch(url, opts) {
     }
     if (ct.includes('json')) return await res.json();
     const txt = await res.text();
-    try { return JSON.parse(txt); } catch(e) { throw new Error('服务器返回了非JSON内容 (content-type: '+ct+')'); }
+    try { return JSON.parse(txt); } catch(e) { throw new Error('服务器返回了非JSON内容'); }
   } catch(e) {
     console.error('safeFetch error for ' + url + ':', e);
     toast('请求失败: ' + e.message, 'var(--red)');
@@ -171,48 +164,14 @@ async function safeFetch(url, opts) {
   }
 }
 
+// 在云端模式下，退出登录和修改密码通过 Worker 处理
 async function doLogout() {
-  await fetch(API + '/api/admin/logout', { method: 'POST', credentials: 'include' });
-  window.location.href = '/admin';
+  await fetch(API + '/api/admin/logout', { method: 'POST' });
+  window.location.href = '/';
 }
 
 function showChangePw() {
-  const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:999;display:flex;align-items:center;justify-content:center" id="pw-overlay" onclick="if(event.target===this)this.remove()">
-    <div style="background:#fff;border-radius:12px;padding:28px;width:360px;box-shadow:0 8px 30px rgba(0,0,0,.12)">
-      <h3 style="margin-bottom:16px;font-size:1rem">修改密码</h3>
-      <div class="fg" style="margin-bottom:12px"><label>原密码</label><input id="pw-old" type="password"></div>
-      <div class="fg" style="margin-bottom:12px"><label>新密码</label><input id="pw-new" type="password"></div>
-      <div class="fg" style="margin-bottom:16px"><label>确认新密码</label><input id="pw-confirm" type="password"></div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="doChangePw()">确认修改</button>
-        <button class="btn btn-outline" onclick="document.getElementById('pw-overlay').remove()">取消</button>
-      </div>
-      <div id="pw-err" style="color:var(--red);font-size:.82rem;margin-top:8px"></div>
-    </div>
-  </div>`;
-  document.body.insertAdjacentHTML('beforeend', html);
-}
-
-async function doChangePw() {
-  const oldPw = document.getElementById('pw-old').value;
-  const newPw = document.getElementById('pw-new').value;
-  const confirm = document.getElementById('pw-confirm').value;
-  const errEl = document.getElementById('pw-err');
-  if (newPw !== confirm) { errEl.textContent = '两次密码不一致'; return; }
-  if (newPw.length < 4) { errEl.textContent = '新密码至少4个字符'; return; }
-  try {
-    const res = await fetch(API + '/api/admin/change-password', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ old_password: oldPw, new_password: newPw })
-    });
-    if (res.ok) {
-      document.getElementById('pw-overlay').remove();
-      toast('密码已修改');
-    } else {
-      const data = await res.json().catch(() => ({}));
-      errEl.textContent = data.detail || '修改失败';
-    }
-  } catch(e) { errEl.textContent = '网络错误'; }
+  toast('云端模式下暂不支持在线修改密码，请通过代码更新。', 'var(--amber)');
 }
 
 // Tab switching
@@ -247,181 +206,83 @@ async function loadRooms() {
   if (data === null) {
     document.getElementById('tab-rooms').innerHTML = `<div class="card">
       <p style="color:var(--red);margin-bottom:10px">房间列表加载失败</p>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">请确认服务器已启动（python server.py）并检查浏览器控制台(F12)的错误信息。</p>
       <button class="btn btn-primary btn-sm" onclick="loadRooms()">重新加载</button>
-      <button class="btn btn-outline btn-sm" onclick="runDiag()" style="margin-left:8px">运行诊断</button>
-      <pre id="diag-out" style="margin-top:10px;font-size:.72rem;background:var(--bg);padding:8px;border-radius:6px;display:none;white-space:pre-wrap;border:1px solid var(--border)"></pre>
     </div>`;
     return;
   }
   rooms = data;
   renderRooms();
 }
-async function runDiag() {
-  const el = document.getElementById('diag-out');
-  el.style.display = 'block';
-  el.textContent = '正在诊断...\n';
-  const endpoints = ['/api/rooms', '/api/config', '/api/data/rounds'];
-  for (const ep of endpoints) {
-    try {
-      const t0 = Date.now();
-      const res = await fetch(ep, {credentials:'include'});
-      const ms = Date.now() - t0;
-      const ct = res.headers.get('content-type') || '(无)';
-      const body = await res.text();
-      const preview = body.length > 120 ? body.substring(0, 120) + '...' : body;
-      el.textContent += `\n[${ep}] ${res.status} ${res.statusText} (${ms}ms)\n  Content-Type: ${ct}\n  Body: ${preview}\n`;
-    } catch(e) {
-      el.textContent += `\n[${ep}] 网络错误: ${e.message}\n`;
-    }
-  }
-  el.textContent += '\n诊断完成。请将以上信息提供给技术支持。';
-}
+
 function renderRooms() {
   const el = document.getElementById('tab-rooms');
   el.innerHTML = `
     <div class="card">
       <h3>创建新房间</h3>
       <div style="display:flex;gap:10px;align-items:end">
-        <div class="fg" style="flex:1"><label>组名</label><input id="new-group" value="A组" placeholder="如 A组、实验组"></div>
+        <div class="fg" style="flex:1"><label>组名</label><input id="new-group" value="实验组" placeholder="如 A组、实验组"></div>
         <button class="btn btn-primary" onclick="createRoom()">创建房间</button>
       </div>
     </div>
     <div class="stat-grid">
       <div class="stat-box"><div class="sv">${rooms.length}</div><div class="sl">房间总数</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>(r.status||'').toLowerCase()==='waiting').length}</div><div class="sl">等待中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>(r.status||'').toLowerCase()==='playing').length}</div><div class="sl">进行中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.reduce((s,r)=>s+(r.player_count||(r.players||[]).length||0),0)}</div><div class="sl">总玩家数</div></div>
+      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='WAITING').length}</div><div class="sl">等待中</div></div>
+      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='PLAYING').length}</div><div class="sl">进行中</div></div>
     </div>
-    <div class="room-grid">${rooms.map(r => {
-      const st = (r.status||'').toLowerCase();
-      const isWaiting = st === 'waiting';
-      const isPlaying = st === 'playing';
-      const players = r.players || [];
-      return `
+    <div class="room-grid">${rooms.map(r => `
       <div class="room-card">
         <div class="code">${r.code}</div>
-        <div class="meta">${r.group_name || ''} · ${r.player_count||players.length||0}人${r.round?' · 第'+r.round+'轮':''}</div>
-        <span class="status status-${st}">${isWaiting?'等待加入':isPlaying?'游戏中':'已结束'}</span>
-        ${players.length?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">'+players.map(p=>'<span style="font-size:.7rem;padding:2px 7px;background:rgba(68,114,196,.06);border:1px solid rgba(68,114,196,.12);border-radius:99px;color:#4472C4">'+p.name+'</span>').join('')+'</div>':''}
-        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-          ${isWaiting?'<button class="btn btn-primary btn-sm" onclick="startRoom(\''+r.code+'\')">开始游戏</button>':''}
-          <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制房间码</button>
+        <div class="meta">${r.group_name || ''}</div>
+        <span class="status status-${r.status.toLowerCase()}">${r.status === 'WAITING' ? '等待学生加入' : '推演进行中'}</span>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          ${r.status === 'WAITING' ? `<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 一键开启全班</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制码</button>
           <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
         </div>
-      </div>`}).join('')}
+      </div>`).join('')}
     </div>`;
 }
+
 async function createRoom() {
   const name = document.getElementById('new-group').value || '默认组';
   const data = await safeFetch(API + '/api/rooms', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({group_name: name}) });
   if (data) { toast('房间已创建: ' + data.code); loadRooms(); }
 }
+
 async function deleteRoom(code) {
   if (!confirm('确定删除房间 ' + code + '？')) return;
   await safeFetch(API + '/api/rooms/' + code, { method: 'DELETE' });
-  toast('已删除', 'var(--red)');
   loadRooms();
 }
+
 function copyCode(code) {
   navigator.clipboard.writeText(code).then(() => toast('已复制: ' + code));
 }
+
 async function startRoom(code) {
-  if (!confirm('确定开始房间 ' + code + ' 的游戏？所有已加入的玩家将同步进入游戏。')) return;
-  // 即时禁用按钮防止重复点击
-  const btn = event.target; if(btn) { btn.disabled = true; btn.textContent = '启动中...'; }
-  const data = await safeFetch(API + '/api/rooms/' + code + '/start', {
-    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({})
-  });
-  if (data && data.ok) { toast('游戏已开始: ' + code); loadRooms(); }
-  else { if(btn) { btn.disabled = false; btn.textContent = '开始游戏'; } }
+  await safeFetch(API + '/api/rooms/' + code + '/start', { method: 'POST' });
+  toast('推演指令已下发！');
+  loadRooms();
 }
 
 // ── Config ──
 async function loadConfig() {
   document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
   const data = await safeFetch(API + '/api/config');
-  if (data === null) {
-    document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--red);margin-bottom:10px">配置加载失败</p><button class="btn btn-primary btn-sm" onclick="loadConfig()">重新加载</button></div>';
-    return;
-  }
+  if (data === null) return;
   config = data;
   renderConfig();
 }
+
 function renderConfig() {
   const el = document.getElementById('tab-config');
-  const g = config.game || {};
-  const h = config.hydrology || {};
-  const e = config.economy || {};
-  const ft = config.flood_thresholds || {};
   el.innerHTML = `
-    <div class="card"><h3>游戏基本参数</h3>
-      <div class="form-row"><div class="fg"><label>总轮数</label><input id="cfg-rounds" type="number" value="${g.max_rounds||6}"></div></div>
-      <div style="font-size:.78rem;color:var(--muted);margin-top:4px">阶段倒计时(秒)：</div>
-      <div class="form-row">${Object.entries(g.phase_timers||{}).map(([k,v])=>`<div class="fg"><label>${k}</label><input id="cfg-pt-${k}" type="number" value="${v}"></div>`).join('')}</div>
-    </div>
-    <div class="card"><h3>水文参数</h3>
-      <div class="form-row">
-        <div class="fg"><label>降雨基数</label><input id="cfg-rain-base" type="number" value="${h.rainfall_base||18}"></div>
-        <div class="fg"><label>每轮递增</label><input id="cfg-rain-inc" type="number" value="${h.rainfall_round_increment||8}"></div>
-        <div class="fg"><label>波动范围</label><input id="cfg-rain-spread" type="number" value="${h.rainfall_spread||12}"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>自然衰减率</label><input id="cfg-decay" type="number" step="0.01" value="${h.natural_decay||0.85}"></div>
-        <div class="fg"><label>天津最大排量</label><input id="cfg-maxC" type="number" value="${h.max_drain_C||75}"></div>
-      </div>
-    </div>
-    <div class="card"><h3>淹没阈值</h3>
-      <div class="form-row">${Object.entries(ft).map(([k,v])=>`<div class="fg"><label>${k} (${(config.villages||{})[k]||k})</label><input id="cfg-ft-${k}" type="number" value="${v}"></div>`).join('')}</div>
-    </div>
-    <div class="card"><h3>经济参数</h3>
-      <div class="form-row">
-        <div class="fg"><label>初始村资产</label><input id="cfg-iva" type="number" value="${e.initial_village_asset||500}"></div>
-        <div class="fg"><label>初始市资产</label><input id="cfg-ica" type="number" value="${e.initial_city_asset||500}"></div>
-        <div class="fg"><label>初始个人资产</label><input id="cfg-ipa" type="number" value="${e.initial_personal_asset||100}"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>修坝费用</label><input id="cfg-dam-cost" type="number" value="${e.dam_cost||30}"></div>
-        <div class="fg"><label>修坝拦水量</label><input id="cfg-dam-block" type="number" value="${e.dam_block||30}"></div>
-        <div class="fg"><label>蓄洪区费用</label><input id="cfg-dike-cost" type="number" value="${e.dike_cost||50}"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>蓄洪区排水量</label><input id="cfg-dike-drain" type="number" value="${e.dike_drain||50}"></div>
-        <div class="fg"><label>军牌降水位</label><input id="cfg-army" type="number" value="${e.army_card_reduction||15}"></div>
-        <div class="fg"><label>搬+未淹损失</label><input id="cfg-move-loss" type="number" value="${e.move_no_flood_loss||30}"></div>
-      </div>
+    <div class="card"><h3>全局配置说明</h3>
+      <p style="font-size:.84rem;color:var(--muted);">目前仿真平台基于云端 Serverless 架构，默认参数由系统代码固定。<br>云端动态覆盖配置功能正在升级中。</p>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="btn btn-primary" onclick="saveConfig()">保存配置</button>
       <button class="btn btn-outline" onclick="loadConfig()">重新加载</button>
     </div>`;
-}
-async function saveConfig() {
-  const g = (id) => document.getElementById(id);
-  const n = (id) => parseFloat(g(id).value);
-  config.game.max_rounds = n('cfg-rounds');
-  ['WEATHER','VIL_DISCUSS','LEADER_BUILD','MAYOR_DRAIN','COMPUTE','ROUND_END'].forEach(k => {
-    config.game.phase_timers[k] = n('cfg-pt-'+k);
-  });
-  config.hydrology.rainfall_base = n('cfg-rain-base');
-  config.hydrology.rainfall_round_increment = n('cfg-rain-inc');
-  config.hydrology.rainfall_spread = n('cfg-rain-spread');
-  config.hydrology.natural_decay = n('cfg-decay');
-  config.hydrology.max_drain_C = n('cfg-maxC');
-  Object.keys(config.flood_thresholds).forEach(k => {
-    config.flood_thresholds[k] = n('cfg-ft-'+k);
-  });
-  config.economy.initial_village_asset = n('cfg-iva');
-  config.economy.initial_city_asset = n('cfg-ica');
-  config.economy.initial_personal_asset = n('cfg-ipa');
-  config.economy.dam_cost = n('cfg-dam-cost');
-  config.economy.dam_block = n('cfg-dam-block');
-  config.economy.dike_cost = n('cfg-dike-cost');
-  config.economy.dike_drain = n('cfg-dike-drain');
-  config.economy.army_card_reduction = n('cfg-army');
-  config.economy.move_no_flood_loss = n('cfg-move-loss');
-  await fetch(API + '/api/config', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(config) });
-  toast('配置已保存');
 }
 
 // ── Data ──
@@ -432,12 +293,9 @@ async function loadData() {
     safeFetch(API+'/api/data/decisions'),
     safeFetch(API+'/api/data/chats'),
   ]);
-  if (rounds === null || decisions === null || chats === null) {
-    document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--red);margin-bottom:10px">数据加载失败</p><button class="btn btn-primary btn-sm" onclick="loadData()">重新加载</button></div>';
-    return;
-  }
-  renderData(rounds, decisions, chats);
+  if (rounds && decisions && chats) renderData(rounds, decisions, chats);
 }
+
 function renderData(rounds, decisions, chats) {
   const el = document.getElementById('tab-data');
   el.innerHTML = `
@@ -445,16 +303,11 @@ function renderData(rounds, decisions, chats) {
       <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">回合记录</div></div>
       <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">决策记录</div></div>
       <div class="stat-box"><div class="sv">${chats.length}</div><div class="sl">聊天记录</div></div>
-      <div class="stat-box"><div class="sv">${new Set(rounds.map(r=>r.room_id)).size}</div><div class="sl">房间数</div></div>
+      <div class="stat-box"><div class="sv">${new Set(rounds.map(r=>r.room_id)).size}</div><div class="sl">活跃房间</div></div>
     </div>
-    <div class="card"><h3>回合数据 (最近200条)</h3>
-      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>房间</th><th>轮</th><th>降雨A</th><th>降雨B</th><th>降雨C</th><th>轮损失</th><th>累计损失</th><th>时间</th></tr></thead><tbody>
-      ${rounds.slice(0,50).map(r=>`<tr><td>${r.room_id}</td><td>${r.round_num}</td><td>${r.rainfall_A?.toFixed(0)||'-'}</td><td>${r.rainfall_B?.toFixed(0)||'-'}</td><td>${r.rainfall_C?.toFixed(0)||'-'}</td><td style="color:var(--red)">${r.round_loss?.toFixed(0)||'-'}</td><td>${r.total_loss?.toFixed(0)||'-'}</td><td style="font-size:.72rem;color:var(--muted)">${r.ts||''}</td></tr>`).join('')}
-      </tbody></table></div>
-    </div>
-    <div class="card"><h3>玩家决策 (最近100条)</h3>
-      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>房间</th><th>轮</th><th>玩家</th><th>角色</th><th>操作</th><th>值</th><th>时间</th></tr></thead><tbody>
-      ${decisions.slice(0,100).map(d=>`<tr><td>${d.room_id}</td><td>${d.round_num}</td><td>${d.player_name||''}</td><td>${d.role||''}</td><td>${d.action_type}</td><td>${d.action_value||''}</td><td style="font-size:.72rem;color:var(--muted)">${d.ts||''}</td></tr>`).join('')}
+    <div class="card"><h3>最近回合数据 (Top 50)</h3>
+      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>房间</th><th>轮</th><th>损失</th><th>时间</th></tr></thead><tbody>
+      ${rounds.slice(0,50).map(r=>`<tr><td>${r.room_id}</td><td>${r.round_num}</td><td style="color:var(--red)">${r.round_loss?.toFixed(0)||'-'}</td><td>${r.ts||''}</td></tr>`).join('')}
       </tbody></table></div>
     </div>`;
 }
@@ -463,51 +316,33 @@ function renderData(rounds, decisions, chats) {
 function renderExport() {
   const el = document.getElementById('tab-export');
   el.innerHTML = `
-    <div class="card"><h3>数据导出</h3>
-      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">将仿真数据导出为 Excel 或 JSON 格式，用于课后分析和研究。</p>
+    <div class="card"><h3>云端数据导出</h3>
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">将 Cloudflare D1 数据库中的仿真数据导出为 JSON 格式，便于课后进行科研分析。</p>
       <div class="form-row two">
-        <div class="fg"><label>房间代码 (留空=全部)</label><input id="exp-room" placeholder="如 ABC123"></div>
-        <div class="fg"><label>格式</label><select id="exp-fmt"><option value="json">JSON (浏览器下载)</option><option value="xlsx">Excel (服务端生成)</option></select></div>
+        <div class="fg"><label>房间代码 (留空=导出全部)</label><input id="exp-room" placeholder="如 ABC123"></div>
       </div>
       <div style="margin-top:12px;display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="doExport()">导出数据</button>
+        <button class="btn btn-primary" onclick="doExport()">下载完整 JSON 数据</button>
       </div>
       <div id="export-result" style="margin-top:14px"></div>
-    </div>
-    <div class="card"><h3>命令行导出 (Excel/CSV)</h3>
-      <p style="font-size:.84rem;color:var(--muted);line-height:1.8">在服务器上执行以下命令导出完整 Excel 文件：</p>
-      <pre style="background:var(--bg);padding:12px;border-radius:6px;font-size:.82rem;line-height:1.6;overflow-x:auto;border:1px solid var(--border)">
-# 导出所有数据为 Excel
-python export.py --format xlsx
-
-# 导出指定房间
-python export.py --room ABC123 --format xlsx
-
-# 导出为 CSV
-python export.py --format csv</pre>
     </div>`;
 }
+
 async function doExport() {
   const room = document.getElementById('exp-room').value.trim();
-  const fmt = document.getElementById('exp-fmt').value;
-  let url = API + '/api/export/' + (room || '_all') + '?fmt=' + fmt;
+  let url = API + '/api/export/' + (room || '_all');
   try {
     const res = await fetch(url);
     const data = await res.json();
-    if (fmt === 'json') {
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `haihe_export_${room||'all'}_${Date.now()}.json`;
-      a.click();
-      toast('JSON已下载');
-    } else {
-      document.getElementById('export-result').innerHTML = `<p style="color:var(--amber);font-size:.84rem">Excel导出请在服务器执行: <code>python export.py --room ${room} --format xlsx</code></p>`;
-    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `haihe_simulation_data_${room||'all'}_${Date.now()}.json`;
+    a.click();
+    toast('JSON文件已成功下载');
   } catch(e) { toast('导出失败: ' + e.message, 'var(--red)'); }
 }
 
-// Init - check health first, then load rooms
 checkHealth();
 </script>
 </body>

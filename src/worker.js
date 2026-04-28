@@ -1,11 +1,9 @@
-// src/worker.js 完整代码
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
 
-    // 跨域设置，允许任何前端调用
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE",
@@ -15,11 +13,10 @@ export default {
     if (method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
-      // 1. 健康检查与配置
       if (path === "/api/health") return Response.json({ ok: true, version: "2.0", db: "D1" }, { headers: corsHeaders });
       if (path === "/api/config") return Response.json({}, { headers: corsHeaders });
 
-      // 2. 房间管理 (Rooms API)
+      // Rooms API
       if (path === "/api/rooms" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM rooms ORDER BY created_at DESC LIMIT 50").all();
         return Response.json(results || [], { headers: corsHeaders });
@@ -33,7 +30,6 @@ export default {
         return Response.json({ code }, { headers: corsHeaders });
       }
 
-      // 正则匹配具体的房间操作
       const roomMatch = path.match(/^\/api\/rooms\/([^\/]+)(?:\/(join|start))?$/);
       if (roomMatch) {
         const code = roomMatch[1];
@@ -83,7 +79,7 @@ export default {
         }
       }
 
-      // 3. 数据上报 (Data Collection)
+      // Data Collection
       if (path === "/api/data/decisions" && method === "POST") {
         const d = await request.json();
         await env.DB.prepare("INSERT INTO player_decisions (room_id, round_num, player_id, player_name, role, village, action_type, action_value) VALUES (?,?,?,?,?,?,?,?)")
@@ -104,7 +100,7 @@ export default {
         return Response.json({ ok: true }, { headers: corsHeaders });
       }
 
-      // 4. 后台数据读取 (Data Retrieval)
+      // Data Retrieval
       if (path === "/api/data/rounds" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 200").all();
         return Response.json(results || [], { headers: corsHeaders });
@@ -118,7 +114,7 @@ export default {
         return Response.json(results || [], { headers: corsHeaders });
       }
 
-      // 5. 导出接口
+      // Export
       if (path.startsWith("/api/export/")) {
         const room = path.split('/')[3];
         const where = room === '_all' ? "" : `WHERE room_id = '${room}'`;

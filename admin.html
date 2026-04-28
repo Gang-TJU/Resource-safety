@@ -53,91 +53,45 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 </head>
 <body>
 <div class="top-bar">
-  <h1>海河洪涝决策仿真平台 · 管理后台</h1>
+  <h1>海河洪涝决策仿真平台 · 教师后台</h1>
   <div style="display:flex;align-items:center;gap:16px">
-    <a href="/">← 返回游戏</a>
-    <button class="btn btn-outline btn-sm" onclick="showChangePw()" style="font-size:.78rem;padding:5px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)">修改密码</button>
-    <button onclick="doLogout()" style="font-size:.78rem;padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--red);background:transparent;color:var(--red);font-weight:600">退出登录</button>
+    <a href="/">← 返回首页</a>
   </div>
 </div>
 <div class="container">
-  <div class="card" id="server-url-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
-    <label style="font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap">云端 API 地址:</label>
-    <input id="api-base-url" value="" placeholder="默认使用当前域名相对路径" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
-    <button class="btn btn-outline btn-sm" onclick="applyServerUrl()" style="white-space:nowrap">应用连接</button>
-    <span id="server-status" style="font-size:.74rem;color:var(--muted)"></span>
-  </div>
   <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="rooms">房间管理</button>
-    <button class="tab" data-tab="config">参数配置</button>
-    <button class="tab" data-tab="data">数据查看</button>
-    <button class="tab" data-tab="export">数据导出</button>
+    <button class="tab active" data-tab="rooms">控制台</button>
+    <button class="tab" data-tab="data">数据看板</button>
+    <button class="tab" data-tab="export">实验导出</button>
   </div>
   <div id="tab-rooms"></div>
-  <div id="tab-config" class="hidden"></div>
   <div id="tab-data" class="hidden"></div>
   <div id="tab-export" class="hidden"></div>
 </div>
 <div id="toast-area"></div>
 
 <script>
-// 修改为相对路径，自动适配自定义域名
-let API = ''; 
+// 【强制锁定后端 API】绕开所有物理服务器的干扰
+let API = 'https://api.resil-hub.cn'; 
 let currentTab = 'rooms';
-let config = {};
 let rooms = [];
 
-function applyServerUrl() {
-  const input = document.getElementById('api-base-url').value.trim();
-  API = input.replace(/\/+$/, '');
-  checkHealth();
-}
-
 async function checkHealth() {
-  const statusEl = document.getElementById('server-status');
   const errorEl = document.getElementById('health-error');
-  statusEl.textContent = '检查中...';
-  statusEl.style.color = 'var(--muted)';
-  errorEl.classList.add('hidden');
   try {
-    // 当前已配置同域名路由，直接请求相对路径即可
     const res = await fetch(API + '/api/health');
-    const ct = res.headers.get('content-type') || '';
-    const bodyText = await res.text();
-    
-    if (!ct.includes('json')) {
-      statusEl.textContent = '连接异常';
-      statusEl.style.color = 'var(--red)';
-      errorEl.classList.remove('hidden');
-      errorEl.innerHTML = `
-        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">云端 API 路由诊断失败</h3>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回类型:</b> <code>${ct}</code> (期望 application/json)</p>
-        <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
-          <b>可能原因与解决方案:</b><br>
-          1. Cloudflare 的 <b>Workers 路由</b> 未正确配置 (需配置为 <code>*${window.location.hostname}/api/*</code>)。<br>
-          2. Cloudflare Worker 未成功部署或 D1 数据库绑定失效。
-        </div>`;
-      return;
-    }
-    let data;
-    try { data = JSON.parse(bodyText); } catch(e) { throw new Error('JSON parse failed'); }
-    
+    const data = await res.json();
     if (data.ok) {
-      statusEl.textContent = 'v' + (data.version || '?') + ' 已连接 (Cloudflare D1)';
-      statusEl.style.color = 'var(--green)';
       errorEl.classList.add('hidden');
       loadRooms();
     }
   } catch(e) {
-    statusEl.textContent = '无法连接';
-    statusEl.style.color = 'var(--red)';
     errorEl.classList.remove('hidden');
     errorEl.innerHTML = `
-      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到云端数据库</h3>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>错误:</b> <code>${e.message}</code></p>`;
+      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到云端 API</h3>
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API}/api/health</code></p>
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请确保你已在 Cloudflare 中为 Worker 绑定了此域名！</b></p>`;
   }
 }
 
@@ -145,33 +99,13 @@ async function safeFetch(url, opts) {
   try {
     opts = opts || {};
     const res = await fetch(url, opts);
-    const ct = res.headers.get('content-type') || '';
-    if (!res.ok) {
-      let detail = `HTTP ${res.status}`;
-      try {
-        if (ct.includes('json')) { const d = await res.json(); detail = d.detail || d.message || detail; }
-        else { const t = await res.text(); if (t && t.length < 200) detail += ': ' + t; }
-      } catch(_){}
-      throw new Error(detail);
-    }
-    if (ct.includes('json')) return await res.json();
-    const txt = await res.text();
-    try { return JSON.parse(txt); } catch(e) { throw new Error('服务器返回了非JSON内容'); }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
   } catch(e) {
-    console.error('safeFetch error for ' + url + ':', e);
-    toast('请求失败: ' + e.message, 'var(--red)');
+    console.error('Fetch error:', e);
+    toast('请求失败', 'var(--red)');
     return null;
   }
-}
-
-// 在云端模式下，退出登录和修改密码通过 Worker 处理
-async function doLogout() {
-  await fetch(API + '/api/admin/logout', { method: 'POST' });
-  window.location.href = '/';
-}
-
-function showChangePw() {
-  toast('云端模式下暂不支持在线修改密码，请通过代码更新。', 'var(--amber)');
 }
 
 // Tab switching
@@ -180,11 +114,10 @@ document.querySelectorAll('.tab').forEach(t => {
     currentTab = t.dataset.tab;
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     t.classList.add('active');
-    ['rooms','config','data','export'].forEach(id => {
+    ['rooms','data','export'].forEach(id => {
       document.getElementById('tab-'+id).classList.toggle('hidden', id !== currentTab);
     });
     if (currentTab === 'rooms') loadRooms();
-    if (currentTab === 'config') loadConfig();
     if (currentTab === 'data') loadData();
     if (currentTab === 'export') renderExport();
   });
@@ -203,13 +136,7 @@ function toast(msg, color) {
 async function loadRooms() {
   document.getElementById('tab-rooms').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
   const data = await safeFetch(API + '/api/rooms');
-  if (data === null) {
-    document.getElementById('tab-rooms').innerHTML = `<div class="card">
-      <p style="color:var(--red);margin-bottom:10px">房间列表加载失败</p>
-      <button class="btn btn-primary btn-sm" onclick="loadRooms()">重新加载</button>
-    </div>`;
-    return;
-  }
+  if (data === null) return;
   rooms = data;
   renderRooms();
 }
@@ -221,13 +148,8 @@ function renderRooms() {
       <h3>创建新房间</h3>
       <div style="display:flex;gap:10px;align-items:end">
         <div class="fg" style="flex:1"><label>组名</label><input id="new-group" value="实验组" placeholder="如 A组、实验组"></div>
-        <button class="btn btn-primary" onclick="createRoom()">创建房间</button>
+        <button class="btn btn-primary" onclick="createRoom()">新建推演</button>
       </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rooms.length}</div><div class="sl">房间总数</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='WAITING').length}</div><div class="sl">等待中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='PLAYING').length}</div><div class="sl">进行中</div></div>
     </div>
     <div class="room-grid">${rooms.map(r => `
       <div class="room-card">
@@ -236,7 +158,6 @@ function renderRooms() {
         <span class="status status-${r.status.toLowerCase()}">${r.status === 'WAITING' ? '等待学生加入' : '推演进行中'}</span>
         <div style="margin-top:10px;display:flex;gap:6px">
           ${r.status === 'WAITING' ? `<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 一键开启全班</button>` : ''}
-          <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制码</button>
           <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
         </div>
       </div>`).join('')}
@@ -246,7 +167,7 @@ function renderRooms() {
 async function createRoom() {
   const name = document.getElementById('new-group').value || '默认组';
   const data = await safeFetch(API + '/api/rooms', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({group_name: name}) });
-  if (data) { toast('房间已创建: ' + data.code); loadRooms(); }
+  if (data) { toast('房间已创建'); loadRooms(); }
 }
 
 async function deleteRoom(code) {
@@ -255,34 +176,11 @@ async function deleteRoom(code) {
   loadRooms();
 }
 
-function copyCode(code) {
-  navigator.clipboard.writeText(code).then(() => toast('已复制: ' + code));
-}
-
 async function startRoom(code) {
+  if(!confirm(`确定开启房间 ${code}？开启后全班将同步进入第一轮！`)) return;
   await safeFetch(API + '/api/rooms/' + code + '/start', { method: 'POST' });
-  toast('推演指令已下发！');
+  toast('发令枪已下达！');
   loadRooms();
-}
-
-// ── Config ──
-async function loadConfig() {
-  document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
-  const data = await safeFetch(API + '/api/config');
-  if (data === null) return;
-  config = data;
-  renderConfig();
-}
-
-function renderConfig() {
-  const el = document.getElementById('tab-config');
-  el.innerHTML = `
-    <div class="card"><h3>全局配置说明</h3>
-      <p style="font-size:.84rem;color:var(--muted);">目前仿真平台基于云端 Serverless 架构，默认参数由系统代码固定。<br>云端动态覆盖配置功能正在升级中。</p>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="btn btn-outline" onclick="loadConfig()">重新加载</button>
-    </div>`;
 }
 
 // ── Data ──
@@ -297,34 +195,25 @@ async function loadData() {
 }
 
 function renderData(rounds, decisions, chats) {
-  const el = document.getElementById('tab-data');
-  el.innerHTML = `
+  document.getElementById('tab-data').innerHTML = `
     <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">回合记录</div></div>
-      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">决策记录</div></div>
-      <div class="stat-box"><div class="sv">${chats.length}</div><div class="sl">聊天记录</div></div>
-      <div class="stat-box"><div class="sv">${new Set(rounds.map(r=>r.room_id)).size}</div><div class="sl">活跃房间</div></div>
-    </div>
-    <div class="card"><h3>最近回合数据 (Top 50)</h3>
-      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>房间</th><th>轮</th><th>损失</th><th>时间</th></tr></thead><tbody>
-      ${rounds.slice(0,50).map(r=>`<tr><td>${r.room_id}</td><td>${r.round_num}</td><td style="color:var(--red)">${r.round_loss?.toFixed(0)||'-'}</td><td>${r.ts||''}</td></tr>`).join('')}
-      </tbody></table></div>
+      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">回合数据上报</div></div>
+      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">玩家决策记录</div></div>
+      <div class="stat-box"><div class="sv">${chats.length}</div><div class="sl">研讨聊天记录</div></div>
     </div>`;
 }
 
 // ── Export ──
 function renderExport() {
-  const el = document.getElementById('tab-export');
-  el.innerHTML = `
-    <div class="card"><h3>云端数据导出</h3>
-      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">将 Cloudflare D1 数据库中的仿真数据导出为 JSON 格式，便于课后进行科研分析。</p>
+  document.getElementById('tab-export').innerHTML = `
+    <div class="card"><h3>D1 云端数据导出</h3>
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">将云端数据库中的仿真数据导出为 JSON 格式，便于分析。</p>
       <div class="form-row two">
-        <div class="fg"><label>房间代码 (留空=导出全部)</label><input id="exp-room" placeholder="如 ABC123"></div>
+        <div class="fg"><label>房间代码 (留空=全部)</label><input id="exp-room" placeholder="如 R1234"></div>
       </div>
-      <div style="margin-top:12px;display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="doExport()">下载完整 JSON 数据</button>
+      <div style="margin-top:12px">
+        <button class="btn btn-primary" onclick="doExport()">下载 JSON 数据</button>
       </div>
-      <div id="export-result" style="margin-top:14px"></div>
     </div>`;
 }
 
@@ -339,8 +228,8 @@ async function doExport() {
     a.href = URL.createObjectURL(blob);
     a.download = `haihe_simulation_data_${room||'all'}_${Date.now()}.json`;
     a.click();
-    toast('JSON文件已成功下载');
-  } catch(e) { toast('导出失败: ' + e.message, 'var(--red)'); }
+    toast('文件已下载');
+  } catch(e) { toast('导出失败', 'var(--red)'); }
 }
 
 checkHealth();

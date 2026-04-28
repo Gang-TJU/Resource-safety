@@ -1,331 +1,136 @@
-/**
- * 海河洪涝决策仿真平台 — Cloudflare Worker (D1 数据 API)
- *
- * 提供 RESTful 接口供 admin.html 和 index.html 读写仿真数据
- * 绑定 Cloudflare D1 数据库 (SQLite 兼容)
- */
-
-// 角色槽位（与 server.py 和 index.html 一致）
-const ROLE_SLOTS = [
-  'MAYOR_A','MAYOR_B','MAYOR_C',
-  'LEADER_A1','LEADER_A2','LEADER_A3',
-  'LEADER_B1','LEADER_B2','LEADER_B3',
-  'LEADER_C1','LEADER_C2','LEADER_C3'
-];
-
-function roleToVillage(role) {
-  if (role.startsWith('LEADER_')) return role.replace('LEADER_', '');
-  if (role.startsWith('MAYOR_')) return role.replace('MAYOR_', '') + '1';
-  if (role.startsWith('VIL_')) return role.split('_')[1];
-  return null;
-}
-
-function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
-function prefToRole(pref) {
-  if (pref === 'MAYOR') return 'MAYOR_A';
-  if (pref === 'VLF') return 'LEADER_B1';
-  if (pref === 'VLN') return 'LEADER_B2';
-  if (pref === 'OBSERVER') return 'OBSERVER';
-  return null; // VIL or unknown → sequential assignment
-}
-
-// 分配角色：按照已占用槽位分配下一个可用角色
-function assignRole(players, pref) {
-  const taken = new Set(players.map(p => p.role));
-
-  // OBSERVER 角色（教师/观察者）不占用游戏槽位
-  if (pref === 'OBSERVER' && !taken.has('OBSERVER')) {
-    return { role: 'OBSERVER', village: 'ALL' };
-  }
-
-  // 尝试偏好角色
-  const prefRole = prefToRole(pref);
-  if (prefRole && !taken.has(prefRole)) {
-    return { role: prefRole, village: roleToVillage(prefRole) };
-  }
-
-  // 顺序分配空闲槽位
-  for (const slot of ROLE_SLOTS) {
-    if (!taken.has(slot)) {
-      return { role: slot, village: roleToVillage(slot) };
-    }
-  }
-
-  // 所有命名槽位已满，分配为普通村民
-  const vilCounts = {};
-  ['A1','A2','A3','B1','B2','B3','C1','C2','C3'].forEach(v => vilCounts[v] = 0);
-  players.forEach(p => {
-    if (p.role && p.role.startsWith('VIL_')) {
-      const v = p.role.split('_')[1];
-      vilCounts[v] = (vilCounts[v] || 0) + 1;
-    }
-  });
-  // 找最少人的村
-  let minV = 'B1', minC = Infinity;
-  Object.entries(vilCounts).forEach(([v, c]) => { if (c < minC) { minC = c; minV = v; } });
-  const idx = vilCounts[minV];
-  return { role: `VIL_${minV}_${idx}`, village: minV };
-}
-
+// src/worker.js 完整代码
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
-    const origin = request.headers.get('Origin') || '*';
+    const method = request.method;
 
-    const cors = {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true',
+    // 跨域设置，允许任何前端调用
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE",
+      "Access-Control-Allow-Headers": "Content-Type",
     };
 
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: cors });
-    }
+    if (method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
-      return await route(path, request, env, cors);
+      // 1. 健康检查与配置
+      if (path === "/api/health") return Response.json({ ok: true, version: "2.0", db: "D1" }, { headers: corsHeaders });
+      if (path === "/api/config") return Response.json({}, { headers: corsHeaders });
+
+      // 2. 房间管理 (Rooms API)
+      if (path === "/api/rooms" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM rooms ORDER BY created_at DESC LIMIT 50").all();
+        return Response.json(results || [], { headers: corsHeaders });
+      }
+
+      if (path === "/api/rooms" && method === "POST") {
+        const body = await request.json();
+        const groupName = body.group_name || '默认组';
+        const code = 'R' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        await env.DB.prepare("INSERT INTO rooms (code, group_name, status, players) VALUES (?, ?, 'WAITING', '[]')").bind(code, groupName).run();
+        return Response.json({ code }, { headers: corsHeaders });
+      }
+
+      // 正则匹配具体的房间操作
+      const roomMatch = path.match(/^\/api\/rooms\/([^\/]+)(?:\/(join|start))?$/);
+      if (roomMatch) {
+        const code = roomMatch[1];
+        const action = roomMatch[2];
+
+        if (method === "DELETE") {
+          await env.DB.prepare("DELETE FROM rooms WHERE code = ?").bind(code).run();
+          return Response.json({ ok: true }, { headers: corsHeaders });
+        }
+
+        if (method === "GET") {
+          const { results } = await env.DB.prepare("SELECT * FROM rooms WHERE code = ?").bind(code).all();
+          if (results.length === 0) return Response.json({ detail: 'Room not found' }, { status: 404, headers: corsHeaders });
+          const room = results[0];
+          room.players = JSON.parse(room.players || '[]');
+          return Response.json(room, { headers: corsHeaders });
+        }
+
+        if (method === "POST" && action === "start") {
+          await env.DB.prepare("UPDATE rooms SET status = 'PLAYING' WHERE code = ?").bind(code).run();
+          return Response.json({ ok: true }, { headers: corsHeaders });
+        }
+
+        if (method === "POST" && action === "join") {
+          const body = await request.json();
+          const { results } = await env.DB.prepare("SELECT * FROM rooms WHERE code = ?").bind(code).all();
+          
+          if (results.length === 0) {
+            await env.DB.prepare("INSERT INTO rooms (code, group_name, status, players) VALUES (?, '自主房间', 'WAITING', '[]')").bind(code).run();
+          } else if (results[0].status !== 'WAITING') {
+            return Response.json({ detail: "房间已在游戏中，无法加入" }, { status: 400, headers: corsHeaders });
+          }
+
+          const roomQuery = await env.DB.prepare("SELECT players FROM rooms WHERE code = ?").bind(code).all();
+          let players = JSON.parse(roomQuery.results[0].players || '[]');
+          
+          let assignedRole = body.pref || 'VIL';
+          let assignedVillage = 'B1';
+          if (assignedRole === 'OBSERVER') assignedVillage = 'ALL';
+          else if (assignedRole.startsWith('MAYOR_')) assignedVillage = assignedRole.replace('MAYOR_', '') + '1';
+          else if (assignedRole.startsWith('LEADER_')) assignedVillage = assignedRole.replace('LEADER_', '');
+
+          players.push({ name: body.name || '玩家', role: assignedRole, village: assignedVillage });
+          await env.DB.prepare("UPDATE rooms SET players = ? WHERE code = ?").bind(JSON.stringify(players), code).run();
+          
+          return Response.json({ role: assignedRole, village: assignedVillage, players }, { headers: corsHeaders });
+        }
+      }
+
+      // 3. 数据上报 (Data Collection)
+      if (path === "/api/data/decisions" && method === "POST") {
+        const d = await request.json();
+        await env.DB.prepare("INSERT INTO player_decisions (room_id, round_num, player_id, player_name, role, village, action_type, action_value) VALUES (?,?,?,?,?,?,?,?)")
+          .bind(d.room_id, d.round_num, d.player_id, d.player_name, d.role, d.village, d.action_type, d.action_value).run();
+        return Response.json({ ok: true }, { headers: corsHeaders });
+      }
+      if (path === "/api/data/chats" && method === "POST") {
+        const c = await request.json();
+        await env.DB.prepare("INSERT INTO chat_logs (room_id, round_num, player_id, player_name, role, channel, village, content, msg_type) VALUES (?,?,?,?,?,?,?,?,?)")
+          .bind(c.room_id, c.round_num, c.player_id, c.player_name, c.role, c.channel, c.village, c.content, c.msg_type).run();
+        return Response.json({ ok: true }, { headers: corsHeaders });
+      }
+      if (path === "/api/data/rounds" && method === "POST") {
+        const r = await request.json();
+        await env.DB.prepare(`INSERT INTO simulation_rounds (room_id, round_num, rainfall_A, rainfall_B, rainfall_C, round_loss, total_loss) VALUES (?,?,?,?,?,?,?)`)
+          .bind(r.room_id, r.round_num, r.rainfall_A||0, r.rainfall_B||0, r.rainfall_C||0, r.round_loss||0, r.total_loss||0).run();
+        await env.DB.prepare("UPDATE rooms SET rounds_played = ? WHERE code = ?").bind(r.round_num, r.room_id).run();
+        return Response.json({ ok: true }, { headers: corsHeaders });
+      }
+
+      // 4. 后台数据读取 (Data Retrieval)
+      if (path === "/api/data/rounds" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 200").all();
+        return Response.json(results || [], { headers: corsHeaders });
+      }
+      if (path === "/api/data/decisions" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 200").all();
+        return Response.json(results || [], { headers: corsHeaders });
+      }
+      if (path === "/api/data/chats" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 200").all();
+        return Response.json(results || [], { headers: corsHeaders });
+      }
+
+      // 5. 导出接口
+      if (path.startsWith("/api/export/")) {
+        const room = path.split('/')[3];
+        const where = room === '_all' ? "" : `WHERE room_id = '${room}'`;
+        const rounds = (await env.DB.prepare(`SELECT * FROM simulation_rounds ${where}`).all()).results;
+        const decisions = (await env.DB.prepare(`SELECT * FROM player_decisions ${where}`).all()).results;
+        const chats = (await env.DB.prepare(`SELECT * FROM chat_logs ${where}`).all()).results;
+        return Response.json({ rounds, decisions, chats }, { headers: corsHeaders });
+      }
+
+      return new Response("Not Found", { status: 404, headers: corsHeaders });
     } catch (e) {
-      return json({ detail: 'Internal Error: ' + e.message }, cors, 500);
+      return Response.json({ error: e.message }, { status: 500, headers: corsHeaders });
     }
   }
 };
-
-// ========== 路由 ==========
-
-async function route(path, request, env, cors) {
-  const method = request.method;
-  const db = env.DB;
-  const params = new URL(request.url).searchParams;
-
-  // --- 健康检查 ---
-  if (path === '/api/health') {
-    return json({ ok: true, version: '2.0', db: 'cloudflare-d1' }, cors);
-  }
-
-  // --- 房间管理 (同步大厅) ---
-
-  // GET /api/rooms — 房间列表
-  if (path === '/api/rooms' && method === 'GET') {
-    const r = await db.prepare(
-      'SELECT code, group_name, status, players, created_at, started_at FROM rooms ORDER BY created_at DESC'
-    ).all();
-    return json(r.results.map(row => ({
-      ...row,
-      players: JSON.parse(row.players || '[]'),
-      player_count: JSON.parse(row.players || '[]').length,
-    })), cors);
-  }
-
-  // POST /api/rooms — 创建房间
-  if (path === '/api/rooms' && method === 'POST') {
-    const b = await request.json();
-    const code = generateCode();
-    const groupName = b.group_name || '默认组';
-    const config = JSON.stringify(b.config || {});
-    await db.prepare(
-      'INSERT INTO rooms (code, group_name, status, players, config) VALUES (?, ?, ?, ?, ?)'
-    ).bind(code, groupName, 'WAITING', '[]', config).run();
-    return json({ ok: true, code, status: 'WAITING' }, cors);
-  }
-
-  // 参数化房间路由
-  const roomMatch = path.match(/^\/api\/rooms\/([A-Z0-9]{4,8})$/);
-  const roomJoinMatch = path.match(/^\/api\/rooms\/([A-Z0-9]{4,8})\/join$/);
-  const roomStartMatch = path.match(/^\/api\/rooms\/([A-Z0-9]{4,8})\/start$/);
-  const roomFinishMatch = path.match(/^\/api\/rooms\/([A-Z0-9]{4,8})\/finish$/);
-
-  // GET /api/rooms/{code} — 轮询房间状态
-  if (roomMatch && method === 'GET') {
-    const code = roomMatch[1];
-    const r = await db.prepare(
-      'SELECT code, group_name, status, players, config, created_at, started_at, finished_at FROM rooms WHERE code = ?'
-    ).bind(code).first();
-    if (!r) return json({ detail: 'Room not found' }, cors, 404);
-    return json({
-      ...r,
-      players: JSON.parse(r.players || '[]'),
-      config: JSON.parse(r.config || '{}'),
-      player_count: JSON.parse(r.players || '[]').length,
-    }, cors);
-  }
-
-  // DELETE /api/rooms/{code} — 删除房间
-  if (roomMatch && method === 'DELETE') {
-    const code = roomMatch[1];
-    await db.prepare('DELETE FROM rooms WHERE code = ?').bind(code).run();
-    return json({ ok: true }, cors);
-  }
-
-  // POST /api/rooms/{code}/join — 加入房间
-  if (roomJoinMatch && method === 'POST') {
-    const code = roomJoinMatch[1];
-    const b = await request.json();
-    const room = await db.prepare('SELECT * FROM rooms WHERE code = ?').bind(code).first();
-    if (!room) return json({ detail: 'Room not found' }, cors, 404);
-    if (room.status !== 'WAITING') return json({ detail: 'Room is not accepting players (status: ' + room.status + ')' }, cors, 400);
-
-    const players = JSON.parse(room.players || '[]');
-
-    // 检查是否已加入（按 student_id 去重）
-    const existing = players.find(p => p.student_id === b.student_id);
-    if (existing) {
-      return json({
-        ok: true, already_joined: true,
-        role: existing.role, village: existing.village, players
-      }, cors);
-    }
-
-    // 分配角色
-    const { role, village } = assignRole(players, b.pref);
-    const player = {
-      name: b.name || '未命名',
-      student_id: b.student_id || '',
-      pref: b.pref || '',
-      role, village,
-      joined_at: new Date().toISOString()
-    };
-    players.push(player);
-
-    await db.prepare('UPDATE rooms SET players = ? WHERE code = ?')
-      .bind(JSON.stringify(players), code).run();
-
-    return json({ ok: true, role, village, players }, cors);
-  }
-
-  // POST /api/rooms/{code}/start — 教师启动游戏
-  if (roomStartMatch && method === 'POST') {
-    const code = roomStartMatch[1];
-    const room = await db.prepare('SELECT status FROM rooms WHERE code = ?').bind(code).first();
-    if (!room) return json({ detail: 'Room not found' }, cors, 404);
-    if (room.status !== 'WAITING') return json({ detail: 'Room already started' }, cors, 400);
-
-    await db.prepare("UPDATE rooms SET status = 'PLAYING', started_at = datetime('now') WHERE code = ?")
-      .bind(code).run();
-    return json({ ok: true, status: 'PLAYING' }, cors);
-  }
-
-  // POST /api/rooms/{code}/finish — 结束游戏
-  if (roomFinishMatch && method === 'POST') {
-    const code = roomFinishMatch[1];
-    await db.prepare("UPDATE rooms SET status = 'FINISHED', finished_at = datetime('now') WHERE code = ?")
-      .bind(code).run();
-    return json({ ok: true, status: 'FINISHED' }, cors);
-  }
-
-  // --- 轮次数据 ---
-  if (path === '/api/data/rounds') {
-    if (method === 'GET') {
-      const roomId = params.get('room_id');
-      const sql = roomId
-        ? 'SELECT * FROM simulation_rounds WHERE room_id = ? ORDER BY round_num'
-        : 'SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 200';
-      const bind = roomId ? [roomId] : [];
-      const r = await db.prepare(sql).bind(...bind).all();
-      return json(r.results, cors);
-    }
-    if (method === 'POST') {
-      const b = await request.json();
-      await db.prepare(`
-        INSERT INTO simulation_rounds
-        (room_id, round_num, rainfall_A, rainfall_B, rainfall_C,
-         water_A1, water_A2, water_A3, water_B1, water_B2, water_B3,
-         water_C1, water_C2, water_C3,
-         asset_A1, asset_A2, asset_A3, asset_B1, asset_B2, asset_B3,
-         asset_C1, asset_C2, asset_C3,
-         city_asset_A, city_asset_B, city_asset_C,
-         round_loss, total_loss)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      `).bind(
-        b.room_id, b.round_num,
-        b.rainfall_A||0, b.rainfall_B||0, b.rainfall_C||0,
-        b.water_A1||0, b.water_A2||0, b.water_A3||0,
-        b.water_B1||0, b.water_B2||0, b.water_B3||0,
-        b.water_C1||0, b.water_C2||0, b.water_C3||0,
-        b.asset_A1||0, b.asset_A2||0, b.asset_A3||0,
-        b.asset_B1||0, b.asset_B2||0, b.asset_B3||0,
-        b.asset_C1||0, b.asset_C2||0, b.asset_C3||0,
-        b.city_asset_A||0, b.city_asset_B||0, b.city_asset_C||0,
-        b.round_loss||0, b.total_loss||0
-      ).run();
-      return json({ ok: true }, cors);
-    }
-  }
-
-  // --- 决策数据 ---
-  if (path === '/api/data/decisions') {
-    if (method === 'GET') {
-      const roomId = params.get('room_id');
-      const sql = roomId
-        ? 'SELECT * FROM player_decisions WHERE room_id = ? ORDER BY round_num, ts'
-        : 'SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 500';
-      const bind = roomId ? [roomId] : [];
-      const r = await db.prepare(sql).bind(...bind).all();
-      return json(r.results, cors);
-    }
-    if (method === 'POST') {
-      const b = await request.json();
-      const val = typeof b.action_value === 'string' ? b.action_value : JSON.stringify(b.action_value || '');
-      await db.prepare(`
-        INSERT INTO player_decisions
-        (room_id, round_num, player_id, player_name, role, village, action_type, action_value)
-        VALUES (?,?,?,?,?,?,?,?)
-      `).bind(b.room_id, b.round_num, b.player_id, b.player_name, b.role, b.village, b.action_type, val).run();
-      return json({ ok: true }, cors);
-    }
-  }
-
-  // --- 聊天数据 ---
-  if (path === '/api/data/chats') {
-    if (method === 'GET') {
-      const roomId = params.get('room_id');
-      const sql = roomId
-        ? 'SELECT * FROM chat_logs WHERE room_id = ? ORDER BY ts'
-        : 'SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 500';
-      const bind = roomId ? [roomId] : [];
-      const r = await db.prepare(sql).bind(...bind).all();
-      return json(r.results, cors);
-    }
-    if (method === 'POST') {
-      const b = await request.json();
-      await db.prepare(`
-        INSERT INTO chat_logs
-        (room_id, round_num, player_id, player_name, role, channel, village, content, msg_type)
-        VALUES (?,?,?,?,?,?,?,?,?)
-      `).bind(b.room_id, b.round_num, b.player_id, b.player_name, b.role, b.channel||'ALL', b.village, b.content, b.msg_type||'player').run();
-      return json({ ok: true }, cors);
-    }
-  }
-
-  // --- 整局数据导出 ---
-  if (path.startsWith('/api/export/') && method === 'GET') {
-    const roomCode = path.replace('/api/export/', '');
-    const [rounds, decisions, chats] = await Promise.all([
-      db.prepare('SELECT * FROM simulation_rounds WHERE room_id=? ORDER BY round_num').bind(roomCode).all(),
-      db.prepare('SELECT * FROM player_decisions WHERE room_id=? ORDER BY round_num, ts').bind(roomCode).all(),
-      db.prepare('SELECT * FROM chat_logs WHERE room_id=? ORDER BY ts').bind(roomCode).all(),
-    ]);
-    return json({ rounds: rounds.results, decisions: decisions.results, chats: chats.results }, cors);
-  }
-
-  // --- 默认配置 ---
-  if (path === '/api/config' && method === 'GET') {
-    return json({ ok: true, source: 'worker-default' }, cors);
-  }
-
-  return json({ detail: 'Not Found: ' + path }, cors, 404);
-}
-
-function json(data, cors, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors },
-  });
-}

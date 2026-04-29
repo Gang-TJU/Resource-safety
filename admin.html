@@ -53,45 +53,64 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 </head>
 <body>
 <div class="top-bar">
-  <h1>海河洪涝决策仿真平台 · 教师后台</h1>
+  <h1>海河洪涝决策仿真平台 · 管理后台 (V2.0 云原生)</h1>
   <div style="display:flex;align-items:center;gap:16px">
-    <a href="/">← 返回首页</a>
+    <a href="/">← 返回游戏大厅</a>
+    <button class="btn btn-outline btn-sm" onclick="showChangePw()" style="font-size:.78rem;padding:5px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)">修改密码</button>
+    <button onclick="doLogout()" style="font-size:.78rem;padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--red);background:transparent;color:var(--red);font-weight:600">退出登录</button>
   </div>
 </div>
 <div class="container">
-  <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="rooms">控制台</button>
-    <button class="tab" data-tab="data">数据看板</button>
-    <button class="tab" data-tab="export">实验导出</button>
+  <div class="card" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
+    <span id="server-status" style="font-size:.85rem;font-weight:600;color:var(--muted)">正在连接云端 API...</span>
   </div>
+  
+  <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
+  
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="rooms">房间管理</button>
+    <button class="tab" data-tab="config">参数配置</button>
+    <button class="tab" data-tab="data">数据看板</button>
+    <button class="tab" data-tab="export">数据导出</button>
+  </div>
+  
   <div id="tab-rooms"></div>
+  <div id="tab-config" class="hidden"></div>
   <div id="tab-data" class="hidden"></div>
   <div id="tab-export" class="hidden"></div>
 </div>
 <div id="toast-area"></div>
 
 <script>
-// 【强制锁定后端 API】绕开所有物理服务器的干扰
-let API = 'https://api.resil-hub.cn'; 
+// 【核心防断联设计】：强制锁死云端 API 子域名
+const API = 'https://api.resil-hub.cn'; 
 let currentTab = 'rooms';
+let config = {};
 let rooms = [];
 
 async function checkHealth() {
+  const statusEl = document.getElementById('server-status');
   const errorEl = document.getElementById('health-error');
   try {
     const res = await fetch(API + '/api/health');
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('json')) throw new Error('API 返回了非 JSON 格式数据');
+    
     const data = await res.json();
     if (data.ok) {
+      statusEl.textContent = '✅ 已连接云端: ' + API + ' (D1数据库)';
+      statusEl.style.color = 'var(--green)';
       errorEl.classList.add('hidden');
       loadRooms();
     }
   } catch(e) {
+    statusEl.textContent = '❌ 无法连接云端 API';
+    statusEl.style.color = 'var(--red)';
     errorEl.classList.remove('hidden');
     errorEl.innerHTML = `
-      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到云端 API</h3>
+      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">连接失败诊断</h3>
       <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API}/api/health</code></p>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请确保你已在 Cloudflare 中为 Worker 绑定了此域名！</b></p>`;
+      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px">请检查网络或刷新页面重试。</p>`;
   }
 }
 
@@ -102,22 +121,31 @@ async function safeFetch(url, opts) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch(e) {
-    console.error('Fetch error:', e);
+    console.error('safeFetch error for ' + url + ':', e);
     toast('请求失败', 'var(--red)');
     return null;
   }
 }
 
-// Tab switching
+async function doLogout() {
+  toast('云端模式下，请直接关闭页面即可。', 'var(--blue)');
+}
+
+function showChangePw() {
+  toast('云端模式下暂不支持在线修改密码，请通过代码配置更新。', 'var(--amber)');
+}
+
+// Tab 切换逻辑
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     currentTab = t.dataset.tab;
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     t.classList.add('active');
-    ['rooms','data','export'].forEach(id => {
+    ['rooms','config','data','export'].forEach(id => {
       document.getElementById('tab-'+id).classList.toggle('hidden', id !== currentTab);
     });
     if (currentTab === 'rooms') loadRooms();
+    if (currentTab === 'config') loadConfig();
     if (currentTab === 'data') loadData();
     if (currentTab === 'export') renderExport();
   });
@@ -136,7 +164,10 @@ function toast(msg, color) {
 async function loadRooms() {
   document.getElementById('tab-rooms').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
   const data = await safeFetch(API + '/api/rooms');
-  if (data === null) return;
+  if (data === null) {
+    document.getElementById('tab-rooms').innerHTML = `<div class="card"><p style="color:var(--red);margin-bottom:10px">房间列表加载失败</p><button class="btn btn-primary btn-sm" onclick="loadRooms()">重新加载</button></div>`;
+    return;
+  }
   rooms = data;
   renderRooms();
 }
@@ -148,8 +179,13 @@ function renderRooms() {
       <h3>创建新房间</h3>
       <div style="display:flex;gap:10px;align-items:end">
         <div class="fg" style="flex:1"><label>组名</label><input id="new-group" value="实验组" placeholder="如 A组、实验组"></div>
-        <button class="btn btn-primary" onclick="createRoom()">新建推演</button>
+        <button class="btn btn-primary" onclick="createRoom()">创建推演房间</button>
       </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="sv">${rooms.length}</div><div class="sl">房间总数</div></div>
+      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='WAITING').length}</div><div class="sl">等待中</div></div>
+      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='PLAYING').length}</div><div class="sl">推演进行中</div></div>
     </div>
     <div class="room-grid">${rooms.map(r => `
       <div class="room-card">
@@ -158,6 +194,7 @@ function renderRooms() {
         <span class="status status-${r.status.toLowerCase()}">${r.status === 'WAITING' ? '等待学生加入' : '推演进行中'}</span>
         <div style="margin-top:10px;display:flex;gap:6px">
           ${r.status === 'WAITING' ? `<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 一键开启全班</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制房间码</button>
           <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
         </div>
       </div>`).join('')}
@@ -167,20 +204,44 @@ function renderRooms() {
 async function createRoom() {
   const name = document.getElementById('new-group').value || '默认组';
   const data = await safeFetch(API + '/api/rooms', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({group_name: name}) });
-  if (data) { toast('房间已创建'); loadRooms(); }
+  if (data) { toast('房间已创建: ' + data.code); loadRooms(); }
 }
 
 async function deleteRoom(code) {
-  if (!confirm('确定删除房间 ' + code + '？')) return;
+  if (!confirm('确定删除房间 ' + code + '？此操作不可逆！')) return;
   await safeFetch(API + '/api/rooms/' + code, { method: 'DELETE' });
   loadRooms();
 }
 
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => toast('已复制房间码: ' + code));
+}
+
 async function startRoom(code) {
-  if(!confirm(`确定开启房间 ${code}？开启后全班将同步进入第一轮！`)) return;
+  if(!confirm('确定开启游戏？开启后全班将同步进入第一轮！')) return;
   await safeFetch(API + '/api/rooms/' + code + '/start', { method: 'POST' });
-  toast('发令枪已下达！');
+  toast('推演指令已下发！');
   loadRooms();
+}
+
+// ── Config ──
+async function loadConfig() {
+  document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
+  const data = await safeFetch(API + '/api/config');
+  if (data === null) return;
+  config = data;
+  renderConfig();
+}
+
+function renderConfig() {
+  const el = document.getElementById('tab-config');
+  el.innerHTML = `
+    <div class="card"><h3>全局参数配置说明</h3>
+      <p style="font-size:.84rem;color:var(--muted);line-height:1.7;">平台现已升级至 Cloudflare Serverless 云原生架构。您的水文模型参数（降雨量、衰减系数、资产损失等）现已由前端硬编码和 Worker API 共同维护，无需手动调整，平台即可支撑百人级高并发推演。</p>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn btn-outline" onclick="loadConfig()">重新检测系统</button>
+    </div>`;
 }
 
 // ── Data ──
@@ -195,24 +256,34 @@ async function loadData() {
 }
 
 function renderData(rounds, decisions, chats) {
-  document.getElementById('tab-data').innerHTML = `
+  const el = document.getElementById('tab-data');
+  el.innerHTML = `
     <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">回合数据上报</div></div>
+      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">云端回合记录</div></div>
       <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">玩家决策记录</div></div>
       <div class="stat-box"><div class="sv">${chats.length}</div><div class="sl">研讨聊天记录</div></div>
+      <div class="stat-box"><div class="sv">${new Set(rounds.map(r=>r.room_id)).size}</div><div class="sl">历史活跃房间</div></div>
+    </div>
+    <div class="card"><h3>最近回合损失播报 (Top 50)</h3>
+      <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+        <table class="tbl"><thead><tr><th>房间代码</th><th>轮次</th><th>本轮损失额</th><th>上报时间</th></tr></thead><tbody>
+        ${rounds.slice(0,50).map(r=>`<tr><td style="font-family:monospace;color:var(--blue);font-weight:600">${r.room_id}</td><td>第 ${r.round_num} 轮</td><td style="color:var(--red);font-weight:700">-${r.round_loss?.toFixed(0)||'0'}万</td><td style="color:var(--muted)">${r.ts||''}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
     </div>`;
 }
 
 // ── Export ──
 function renderExport() {
-  document.getElementById('tab-export').innerHTML = `
+  const el = document.getElementById('tab-export');
+  el.innerHTML = `
     <div class="card"><h3>D1 云端数据导出</h3>
-      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">将云端数据库中的仿真数据导出为 JSON 格式，便于分析。</p>
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;line-height:1.7;">该功能会将 Cloudflare D1 数据库中的全量仿真数据导出为 JSON 格式。包含玩家所有决策明细、多轮演进数据及聊天文本，便于课后直接导入科研分析软件（如 Python/R）进行分析。</p>
       <div class="form-row two">
-        <div class="fg"><label>房间代码 (留空=全部)</label><input id="exp-room" placeholder="如 R1234"></div>
+        <div class="fg"><label>房间代码 (留空=导出全部)</label><input id="exp-room" placeholder="如 R1234"></div>
       </div>
-      <div style="margin-top:12px">
-        <button class="btn btn-primary" onclick="doExport()">下载 JSON 数据</button>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="doExport()">下载完整 JSON 数据包</button>
       </div>
     </div>`;
 }
@@ -221,15 +292,16 @@ async function doExport() {
   const room = document.getElementById('exp-room').value.trim();
   let url = API + '/api/export/' + (room || '_all');
   try {
+    toast('正在从云端打包数据，请稍候...', 'var(--blue)');
     const res = await fetch(url);
     const data = await res.json();
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `haihe_simulation_data_${room||'all'}_${Date.now()}.json`;
+    a.download = `haihe_D1_export_${room||'all'}_${Date.now()}.json`;
     a.click();
-    toast('文件已下载');
-  } catch(e) { toast('导出失败', 'var(--red)'); }
+    toast('JSON数据包已成功下载！', 'var(--green)');
+  } catch(e) { toast('导出失败，请检查网络。', 'var(--red)'); }
 }
 
 checkHealth();

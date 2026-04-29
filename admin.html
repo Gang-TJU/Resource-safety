@@ -7,135 +7,144 @@
 <style>
 :root{--bg:#f7f8fa;--card:#fff;--text:#2d3748;--muted:#718096;--border:#e2e8f0;--blue:#4472C4;--green:#55A868;--amber:#DD8452;--red:#C44E52;--gold:#D4A853;--radius:10px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.top-bar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-.top-bar h1{font-size:1.1rem;font-weight:700;color:var(--blue)}
-.top-bar a{font-size:.84rem;color:var(--blue);text-decoration:none}
-.container{max-width:1100px;margin:0 auto;padding:20px}
+body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
+.top-bar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:var(--radius);margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.top-bar h1{font-size:1.15rem;font-weight:700;color:var(--blue)}
 .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0}
-.tab{padding:10px 20px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab{padding:10px 20px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
 .tab:hover{color:var(--text)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)}
-.card h3{font-size:.95rem;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
-.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.form-row.two{grid-template-columns:1fr 1fr}
-.fg{display:flex;flex-direction:column;gap:4px}
-.fg label{font-size:.78rem;color:var(--muted);font-weight:600}
-.fg input,.fg select{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88rem;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
-.fg input:focus{border-color:var(--blue)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:7px;font-size:.86rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.card h3{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 20px;border-radius:7px;font-size:.86rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
 .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{opacity:.9}
 .btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.9}
+.btn-warning{background:var(--amber);color:#fff}.btn-warning:hover{opacity:.9}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
 .btn-sm{padding:5px 12px;font-size:.78rem}
 .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.room-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative}
+.room-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
 .room-card .code{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--blue);letter-spacing:2px}
 .room-card .meta{font-size:.78rem;color:var(--muted);margin:6px 0}
-.room-card .status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:600}
-.status-waiting{background:#e8f5e9;color:#2e7d32}
-.status-playing{background:#fff3e0;color:#e65100}
-.status-finished{background:#f3e5f5;color:#6a1b9a}
-.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
-.tbl th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600;font-size:.76rem}
-.tbl td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem;text-align:left}
+.tbl th{padding:10px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600}
+.tbl td{padding:10px;border-bottom:1px solid var(--border)}
 .tbl tr:hover td{background:rgba(68,114,196,.03)}
-.toast{position:fixed;top:16px;right:16px;z-index:999;padding:10px 20px;border-radius:8px;background:var(--green);color:#fff;font-size:.86rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.12);animation:fadeIn .3s}
+.toast{position:fixed;top:16px;right:16px;z-index:999;padding:12px 24px;border-radius:8px;background:var(--green);color:#fff;font-size:.9rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:fadeIn .3s}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .hidden{display:none!important}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
-.stat-box .sv{font-size:1.6rem;font-weight:700;color:var(--blue)}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+.stat-box .sv{font-size:1.5rem;font-weight:700;color:var(--blue)}
 .stat-box .sl{font-size:.76rem;color:var(--muted);margin-top:4px}
-@media(max-width:768px){.form-row{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}.room-grid{grid-template-columns:1fr}}
+.action-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600;background:#e2e8f0;color:#4a5568}
+.action-drain{background:#ebf8ff;color:#2b6cb0}
+.action-build{background:#f0fff4;color:#2f855a}
+.action-evac{background:#fff5f5;color:#c53030}
 </style>
 </head>
 <body>
 <div class="top-bar">
-  <h1>海河洪涝决策仿真平台 · 管理后台 (V2.0 云原生)</h1>
-  <div style="display:flex;align-items:center;gap:16px">
-    <a href="/">← 返回游戏大厅</a>
-    <button class="btn btn-outline btn-sm" onclick="showChangePw()" style="font-size:.78rem;padding:5px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)">修改密码</button>
-    <button onclick="doLogout()" style="font-size:.78rem;padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--red);background:transparent;color:var(--red);font-weight:600">退出登录</button>
-  </div>
+  <h1>海河洪涝决策仿真平台 · 教师控制台</h1>
+  <div style="font-size:.85rem;font-weight:600" id="server-status">连接中...</div>
 </div>
-<div class="container">
-  <div class="card" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
-    <span id="server-status" style="font-size:.85rem;font-weight:600;color:var(--muted)">正在连接云端 API...</span>
-  </div>
-  
-  <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
-  
+<div style="max-width:1200px;margin:0 auto">
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="rooms">房间管理</button>
-    <button class="tab" data-tab="config">参数配置</button>
-    <button class="tab" data-tab="data">数据看板</button>
-    <button class="tab" data-tab="export">数据导出</button>
+    <button class="tab active" data-tab="rooms">🎮 房间管理</button>
+    <button class="tab" data-tab="config">⚡ 教学干预 (上帝之手)</button>
+    <button class="tab" data-tab="data">📊 多维数据看板</button>
+    <button class="tab" data-tab="export">📥 双格式导出</button>
   </div>
   
-  <div id="tab-rooms"></div>
-  <div id="tab-config" class="hidden"></div>
-  <div id="tab-data" class="hidden"></div>
-  <div id="tab-export" class="hidden"></div>
+  <div id="tab-rooms">
+    <div class="card">
+      <h3>创建演练房间</h3>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input id="new-group" value="实验A组" placeholder="组名" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px">
+        <button class="btn btn-primary" onclick="createRoom()">新建房间</button>
+      </div>
+    </div>
+    <div id="room-list" class="room-grid">加载中...</div>
+  </div>
+
+  <div id="tab-config" class="hidden">
+    <div class="card">
+      <h3>⚡ 动态情景干预面板</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
+        使用“上帝之手”向全流域广播突发事件，强行改变系统演化轨迹，考察学生的应急响应能力与复杂系统认知。
+      </p>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px">
+        <input id="target-room" placeholder="输入目标房间码 (必填)" style="padding:9px;border:1px solid var(--border);border-radius:6px;width:200px;font-weight:600">
+        <span style="font-size:.8rem;color:var(--amber)">注：请先在此输入您要干预的房间码。</span>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px">
+        <div style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fff5f5">
+          <h4 style="color:var(--red);margin-bottom:8px">极端气候叠加</h4>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;min-height:36px">发布特大暴雨预警，引发全流域恐慌值上升，考验市长极限排洪规划。</p>
+          <button class="btn btn-danger" style="width:100%" onclick="triggerEvent('【中央气象台紧急预警】强对流天气叠加！未来12小时全流域将面临极端特大暴雨，请各市长/村长做好最坏打算！')">下达特大暴雨预警</button>
+        </div>
+        <div style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fffff0">
+          <h4 style="color:var(--gold);margin-bottom:8px">信息孤岛测试</h4>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;min-height:36px">模拟因洪水导致基站损毁，测试基层村庄在失去上级指挥时的自组织能力。</p>
+          <button class="btn btn-warning" style="width:100%" onclick="triggerEvent('⚡【系统突发】特大洪水导致多地通讯基站损毁，跨区通讯随时可能中断！请各村长依靠本地资源进行防洪自救！')">模拟通讯阻断危机</button>
+        </div>
+        <div style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#f0fff4">
+          <h4 style="color:var(--green);margin-bottom:8px">政策协同博弈</h4>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px;min-height:36px">出台生态补偿暗示，观察上下游是否能从“自保”转向“流域利益最大化”。</p>
+          <button class="btn btn-primary" style="background:var(--green);width:100%" onclick="triggerEvent('📜【国家发改委通报】将启动流域横向生态补偿机制。对主动蓄洪牺牲的地区，下游受益城市需给予对等资金补偿！')">发布横向补偿政策</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-data" class="hidden">
+    <div id="data-overview">加载中...</div>
+  </div>
+
+  <div id="tab-export" class="hidden">
+    <div class="card">
+      <h3>📥 教学全维度数据导出</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
+        一键提取完整的推演数据集。包含原生 <b>JSON 格式</b> (用于系统级分析) 以及 <b>CSV 表格格式</b> (可直接用 Excel/Python/R 打开，适用于课后复盘与学生成绩评估)。
+      </p>
+      <div style="display:flex;gap:15px;align-items:center">
+        <input id="exp-room" placeholder="房间代码 (留空导出全部)" style="padding:10px;border:1px solid var(--border);border-radius:6px;width:250px">
+        <button class="btn btn-primary" onclick="doExport()">打包下载 JSON + CSV</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="toast-area"></div>
 
 <script>
-// 【核心防断联设计】：强制锁死云端 API 子域名
 const API = 'https://api.resil-hub.cn'; 
 let currentTab = 'rooms';
-let config = {};
-let rooms = [];
-
-async function checkHealth() {
-  const statusEl = document.getElementById('server-status');
-  const errorEl = document.getElementById('health-error');
-  try {
-    const res = await fetch(API + '/api/health');
-    const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('json')) throw new Error('API 返回了非 JSON 格式数据');
-    
-    const data = await res.json();
-    if (data.ok) {
-      statusEl.textContent = '✅ 已连接云端: ' + API + ' (D1数据库)';
-      statusEl.style.color = 'var(--green)';
-      errorEl.classList.add('hidden');
-      loadRooms();
-    }
-  } catch(e) {
-    statusEl.textContent = '❌ 无法连接云端 API';
-    statusEl.style.color = 'var(--red)';
-    errorEl.classList.remove('hidden');
-    errorEl.innerHTML = `
-      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">连接失败诊断</h3>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API}/api/health</code></p>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px">请检查网络或刷新页面重试。</p>`;
-  }
-}
 
 async function safeFetch(url, opts) {
   try {
-    opts = opts || {};
     const res = await fetch(url, opts);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch(e) {
-    console.error('safeFetch error for ' + url + ':', e);
-    toast('请求失败', 'var(--red)');
+    console.error('Fetch error:', e);
     return null;
   }
 }
 
-async function doLogout() {
-  toast('云端模式下，请直接关闭页面即可。', 'var(--blue)');
+async function checkHealth() {
+  const st = document.getElementById('server-status');
+  const d = await safeFetch(API + '/api/health');
+  if(d && d.ok) {
+    st.textContent = '✅ 已连接云端 Serverless 引擎';
+    st.style.color = 'var(--green)';
+    loadRooms();
+  } else {
+    st.textContent = '❌ API 连接断开';
+    st.style.color = 'var(--red)';
+  }
 }
 
-function showChangePw() {
-  toast('云端模式下暂不支持在线修改密码，请通过代码配置更新。', 'var(--amber)');
-}
-
-// Tab 切换逻辑
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     currentTab = t.dataset.tab;
@@ -145,163 +154,138 @@ document.querySelectorAll('.tab').forEach(t => {
       document.getElementById('tab-'+id).classList.toggle('hidden', id !== currentTab);
     });
     if (currentTab === 'rooms') loadRooms();
-    if (currentTab === 'config') loadConfig();
     if (currentTab === 'data') loadData();
-    if (currentTab === 'export') renderExport();
   });
 });
 
 function toast(msg, color) {
   const d = document.createElement('div');
-  d.className = 'toast';
-  d.style.background = color || 'var(--green)';
-  d.textContent = msg;
+  d.className = 'toast'; d.style.background = color || 'var(--green)'; d.textContent = msg;
   document.getElementById('toast-area').appendChild(d);
-  setTimeout(() => { d.style.opacity='0'; d.style.transition='opacity .3s'; setTimeout(()=>d.remove(),300); }, 2500);
+  setTimeout(() => { d.style.opacity='0'; setTimeout(()=>d.remove(),300); }, 2500);
 }
 
-// ── Rooms ──
+// === 房间管理 ===
 async function loadRooms() {
-  document.getElementById('tab-rooms').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
+  const el = document.getElementById('room-list');
   const data = await safeFetch(API + '/api/rooms');
-  if (data === null) {
-    document.getElementById('tab-rooms').innerHTML = `<div class="card"><p style="color:var(--red);margin-bottom:10px">房间列表加载失败</p><button class="btn btn-primary btn-sm" onclick="loadRooms()">重新加载</button></div>`;
-    return;
-  }
-  rooms = data;
-  renderRooms();
-}
-
-function renderRooms() {
-  const el = document.getElementById('tab-rooms');
-  el.innerHTML = `
-    <div class="card">
-      <h3>创建新房间</h3>
-      <div style="display:flex;gap:10px;align-items:end">
-        <div class="fg" style="flex:1"><label>组名</label><input id="new-group" value="实验组" placeholder="如 A组、实验组"></div>
-        <button class="btn btn-primary" onclick="createRoom()">创建推演房间</button>
+  if (!data) return el.innerHTML = '加载失败';
+  el.innerHTML = data.map(r => `
+    <div class="room-card">
+      <div class="code">${r.code}</div>
+      <div class="meta">${r.group_name || '默认'} · 第 ${r.rounds_played||0} 轮</div>
+      <div style="margin-bottom:10px"><span style="font-size:.75rem;padding:3px 8px;border-radius:4px;background:${r.status==='WAITING'?'#e8f5e9':'#fff3e0'};color:${r.status==='WAITING'?'#2e7d32':'#e65100'}">${r.status==='WAITING'?'待命':'推演中'}</span></div>
+      <div style="display:flex;gap:6px">
+        ${r.status==='WAITING'?`<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 发令</button>`:''}
+        <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
       </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rooms.length}</div><div class="sl">房间总数</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='WAITING').length}</div><div class="sl">等待中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>r.status==='PLAYING').length}</div><div class="sl">推演进行中</div></div>
-    </div>
-    <div class="room-grid">${rooms.map(r => `
-      <div class="room-card">
-        <div class="code">${r.code}</div>
-        <div class="meta">${r.group_name || ''}</div>
-        <span class="status status-${r.status.toLowerCase()}">${r.status === 'WAITING' ? '等待学生加入' : '推演进行中'}</span>
-        <div style="margin-top:10px;display:flex;gap:6px">
-          ${r.status === 'WAITING' ? `<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 一键开启全班</button>` : ''}
-          <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制房间码</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
-        </div>
-      </div>`).join('')}
-    </div>`;
+    </div>`).join('') || '<p style="color:var(--muted)">暂无房间</p>';
 }
 
 async function createRoom() {
-  const name = document.getElementById('new-group').value || '默认组';
-  const data = await safeFetch(API + '/api/rooms', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({group_name: name}) });
-  if (data) { toast('房间已创建: ' + data.code); loadRooms(); }
+  const g = document.getElementById('new-group').value;
+  const d = await safeFetch(API + '/api/rooms', { method: 'POST', body: JSON.stringify({group_name: g}) });
+  if(d) { toast('创建成功: ' + d.code); loadRooms(); }
+}
+async function startRoom(c) {
+  if(!confirm('确定全班发令？')) return;
+  await safeFetch(`${API}/api/rooms/${c}/start`, { method: 'POST' });
+  toast('发令成功'); loadRooms();
+}
+async function deleteRoom(c) {
+  if(!confirm('删除数据不可逆？')) return;
+  await safeFetch(`${API}/api/rooms/${c}`, { method: 'DELETE' });
+  toast('删除成功'); loadRooms();
 }
 
-async function deleteRoom(code) {
-  if (!confirm('确定删除房间 ' + code + '？此操作不可逆！')) return;
-  await safeFetch(API + '/api/rooms/' + code, { method: 'DELETE' });
-  loadRooms();
+// === 上帝之手 (情景干预) ===
+async function triggerEvent(msg) {
+  const rm = document.getElementById('target-room').value.trim();
+  if(!rm) return toast('必须输入目标房间码！', 'var(--red)');
+  // 伪装成系统消息写入云端 chat_logs 表
+  const payload = {
+    room_id: rm, round_num: 99, player_id: 'SYSTEM', player_name: '国家防总/气象局', 
+    role: 'ADMIN', channel: 'ALL', village: '', content: msg, msg_type: 'sys'
+  };
+  const d = await safeFetch(API + '/api/data/chats', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  if(d && d.ok) toast('⚡ 干预指令已广播至大屏！', 'var(--amber)');
+  else toast('发送失败', 'var(--red)');
 }
 
-function copyCode(code) {
-  navigator.clipboard.writeText(code).then(() => toast('已复制房间码: ' + code));
-}
-
-async function startRoom(code) {
-  if(!confirm('确定开启游戏？开启后全班将同步进入第一轮！')) return;
-  await safeFetch(API + '/api/rooms/' + code + '/start', { method: 'POST' });
-  toast('推演指令已下发！');
-  loadRooms();
-}
-
-// ── Config ──
-async function loadConfig() {
-  document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
-  const data = await safeFetch(API + '/api/config');
-  if (data === null) return;
-  config = data;
-  renderConfig();
-}
-
-function renderConfig() {
-  const el = document.getElementById('tab-config');
-  el.innerHTML = `
-    <div class="card"><h3>全局参数配置说明</h3>
-      <p style="font-size:.84rem;color:var(--muted);line-height:1.7;">平台现已升级至 Cloudflare Serverless 云原生架构。您的水文模型参数（降雨量、衰减系数、资产损失等）现已由前端硬编码和 Worker API 共同维护，无需手动调整，平台即可支撑百人级高并发推演。</p>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="btn btn-outline" onclick="loadConfig()">重新检测系统</button>
-    </div>`;
-}
-
-// ── Data ──
+// === 多维看板 ===
 async function loadData() {
-  document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
-  const [rounds, decisions, chats] = await Promise.all([
-    safeFetch(API+'/api/data/rounds'),
-    safeFetch(API+'/api/data/decisions'),
-    safeFetch(API+'/api/data/chats'),
-  ]);
-  if (rounds && decisions && chats) renderData(rounds, decisions, chats);
-}
-
-function renderData(rounds, decisions, chats) {
-  const el = document.getElementById('tab-data');
-  el.innerHTML = `
+  const el = document.getElementById('data-overview'); el.innerHTML = '拉取云端记录...';
+  const [decisions, rounds] = await Promise.all([ safeFetch(API+'/api/data/decisions'), safeFetch(API+'/api/data/rounds') ]);
+  if(!decisions || !rounds) return el.innerHTML = '获取失败';
+  
+  let html = `
     <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">云端回合记录</div></div>
-      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">玩家决策记录</div></div>
-      <div class="stat-box"><div class="sv">${chats.length}</div><div class="sl">研讨聊天记录</div></div>
-      <div class="stat-box"><div class="sv">${new Set(rounds.map(r=>r.room_id)).size}</div><div class="sl">历史活跃房间</div></div>
+      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">系统轮次快照</div></div>
+      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">主体决策记录</div></div>
     </div>
-    <div class="card"><h3>最近回合损失播报 (Top 50)</h3>
-      <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
-        <table class="tbl"><thead><tr><th>房间代码</th><th>轮次</th><th>本轮损失额</th><th>上报时间</th></tr></thead><tbody>
-        ${rounds.slice(0,50).map(r=>`<tr><td style="font-family:monospace;color:var(--blue);font-weight:600">${r.room_id}</td><td>第 ${r.round_num} 轮</td><td style="color:var(--red);font-weight:700">-${r.round_loss?.toFixed(0)||'0'}万</td><td style="color:var(--muted)">${r.ts||''}</td></tr>`).join('')}
-        </tbody></table>
-      </div>
-    </div>`;
+    <div class="card">
+      <h3>⏱ 最新主体决策流追踪</h3>
+      <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+        <table class="tbl"><thead><tr><th>房间/轮次</th><th>角色身份</th><th>动作指令</th><th>数值/影响</th><th>时间戳</th></tr></thead><tbody>
+  `;
+  
+  // 行为解析与美化
+  const actMap = { 
+    'drain': {n:'市长排洪', c:'action-drain'}, 'sandbag': {n:'构筑防线(沙袋)', c:'action-build'},
+    'build_dam': {n:'修建大坝', c:'action-build'}, 'blast_dam': {n:'炸毁大坝', c:'action-evac'},
+    'evacuate': {n:'村民搬迁', c:'action-evac'}, 'stay': {n:'村民留守', c:'action-tag'},
+    'evacuate_order': {n:'下达撤离令', c:'action-evac'}, 'army_card': {n:'呼叫救援', c:'action-drain'}
+  };
+
+  decisions.slice(0, 50).forEach(d => {
+    const act = actMap[d.action_type] || {n: d.action_type, c:'action-tag'};
+    let eff = d.action_value || '无数值';
+    if(d.action_type === 'drain') eff = `向流向排入 ${d.action_value} 单位`;
+    if(d.action_type === 'sandbag') eff = `抵御 ${d.action_value} 单位水量`;
+    
+    html += `<tr>
+      <td style="font-weight:600;color:var(--blue)">[${d.room_id}] R${d.round_num}</td>
+      <td>${d.player_name} <span style="font-size:.7rem;color:var(--muted)">(${d.role.substring(0,8)})</span></td>
+      <td><span class="action-tag ${act.c}">${act.n}</span></td>
+      <td style="font-size:.8rem;font-family:monospace">${eff}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${d.ts}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody></table></div></div>';
 }
 
-// ── Export ──
-function renderExport() {
-  const el = document.getElementById('tab-export');
-  el.innerHTML = `
-    <div class="card"><h3>D1 云端数据导出</h3>
-      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;line-height:1.7;">该功能会将 Cloudflare D1 数据库中的全量仿真数据导出为 JSON 格式。包含玩家所有决策明细、多轮演进数据及聊天文本，便于课后直接导入科研分析软件（如 Python/R）进行分析。</p>
-      <div class="form-row two">
-        <div class="fg"><label>房间代码 (留空=导出全部)</label><input id="exp-room" placeholder="如 R1234"></div>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="doExport()">下载完整 JSON 数据包</button>
-      </div>
-    </div>`;
-}
-
+// === 双格式导出 ===
 async function doExport() {
   const room = document.getElementById('exp-room').value.trim();
-  let url = API + '/api/export/' + (room || '_all');
-  try {
-    toast('正在从云端打包数据，请稍候...', 'var(--blue)');
-    const res = await fetch(url);
-    const data = await res.json();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `haihe_D1_export_${room||'all'}_${Date.now()}.json`;
-    a.click();
-    toast('JSON数据包已成功下载！', 'var(--green)');
-  } catch(e) { toast('导出失败，请检查网络。', 'var(--red)'); }
+  toast('开始拉取全域数据，请稍候...', 'var(--blue)');
+  const data = await safeFetch(API + '/api/export/' + (room || '_all'));
+  if(!data) return toast('导出失败', 'var(--red)');
+  
+  // 1. 下载 JSON
+  downloadFile(JSON.stringify(data, null, 2), `haihe_raw_${room||'all'}.json`, 'application/json');
+  
+  // 2. 转换并下载 CSV (防乱码 BOM 头)
+  if (data.decisions && data.decisions.length) {
+    downloadFile(jsonToCSV(data.decisions), `haihe_decisions_${room||'all'}.csv`, 'text/csv;charset=utf-8;');
+  }
+  if (data.rounds && data.rounds.length) {
+    downloadFile(jsonToCSV(data.rounds), `haihe_rounds_${room||'all'}.csv`, 'text/csv;charset=utf-8;');
+  }
+  toast('✅ 下载完成 (包含 JSON 与 CSV 表格)！', 'var(--green)');
+}
+
+function jsonToCSV(arr) {
+  if (!arr || !arr.length) return '';
+  const cols = Object.keys(arr[0]);
+  const rows = arr.map(obj => cols.map(k => `"${(obj[k]||'').toString().replace(/"/g, '""')}"`).join(','));
+  return '\uFEFF' + cols.join(',') + '\n' + rows.join('\n');
+}
+
+function downloadFile(content, fileName, mimeType) {
+  const b = new Blob([content], { type: mimeType });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = fileName;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 checkHealth();

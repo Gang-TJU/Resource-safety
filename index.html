@@ -19,19 +19,29 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 6px rgba(196,78,82,.2)}50%{box-shadow:0 0 18px rgba(196,78,82,.35)}}
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes gaugeFlash{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+/* Water rising effect inside village nodes */
 .vn .water-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(68,114,196,.3),rgba(68,114,196,.05));transition:height 1.2s cubic-bezier(.4,0,.2,1);border-radius:0 0 9px 9px;z-index:0;pointer-events:none}
 .vn.flood .water-fill{background:linear-gradient(to top,rgba(196,78,82,.35),rgba(196,78,82,.1));background-size:200% 100%;animation:waveMotion 2s ease-in-out infinite}
 @keyframes waveMotion{0%,100%{opacity:.8;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.03)}}
 .vn.just-flooded{animation:floodShake .6s ease-in-out}
 @keyframes floodShake{0%,100%{transform:translateX(0)}10%,50%,90%{transform:translateX(-3px)}30%,70%{transform:translateX(3px)}}
+/* Tutorial overlay */
+.tut-overlay{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.55);transition:opacity .3s}
+.tut-highlight{position:relative;z-index:801!important;box-shadow:0 0 0 4px var(--cy),0 0 24px rgba(68,114,196,.35)!important;border-radius:10px!important;transition:box-shadow .3s}
+.tut-tip{position:fixed;z-index:802;max-width:340px;padding:16px 20px;background:#fff;border:2px solid var(--cy);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);font-size:.86rem;line-height:1.7;color:var(--t1)}
+.tut-tip .tut-step{font-size:.7rem;color:var(--t3);margin-bottom:6px}.tut-tip .tut-title{font-weight:700;color:var(--cy);margin-bottom:6px}
+.tut-tip .tut-btns{margin-top:10px;display:flex;gap:8px;justify-content:flex-end}
+/* Danger effects */
 @keyframes dangerShake{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-2px)}30%,60%,90%{transform:translateX(2px)}}
 @keyframes dangerGlow{0%,100%{box-shadow:0 0 8px rgba(196,78,82,.15)}50%{box-shadow:0 0 20px rgba(196,78,82,.4)}}
 @keyframes dangerBorder{0%,100%{border-color:rgba(196,78,82,.2)}50%{border-color:rgba(196,78,82,.5)}}
 .vn.danger-zone{animation:dangerShake .5s ease-in-out infinite,dangerGlow 1.5s ease-in-out infinite}
 #S-game.danger-border{border:2px solid rgba(196,78,82,.3);animation:dangerBorder 2s ease-in-out infinite;border-radius:12px}
+/* Blackout overlay */
 .blackout-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;flex-direction:column;animation:fadeIn .5s}
 .blackout-text{font-size:2.2rem;font-weight:900;color:var(--rd);text-shadow:0 0 30px rgba(196,78,82,.5);margin-bottom:12px}
 .blackout-sub{font-size:1rem;color:rgba(255,255,255,.6)}
+/* Threshold gauge on village nodes */
 .vn .threshold-gauge{height:4px;border-radius:2px;margin-top:3px;background:var(--p2);overflow:hidden;position:relative}
 .vn .threshold-gauge .tg-fill{height:100%;border-radius:2px;transition:width .6s,background .4s}
 .fade-in{animation:fadeIn .5s ease-out both}
@@ -49,7 +59,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 .bd-fz{background:rgba(196,78,82,.08);color:var(--rd);border:1px solid rgba(196,78,82,.2)}
 #S-intro.active{display:flex!important;align-items:center;justify-content:center;padding:40px 20px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(68,114,196,.06),transparent 70%),var(--bg)}
 .intro-w{max-width:740px;text-align:center}
-.intro-w h1{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;line-height:1.2;margin-bottom:8px;background:linear-gradient(135deg,#2d3748,var(--cy));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:fadeIn .7s both}
+.intro-w h1{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;line-height:1.2;margin-bottom:8px;background:linear-gradient(135deg,#2d3748,var(--cy));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:fadeIn .7s both}
 .intro-w .sub{font-family:'ZCOOL KuaiLe',cursive;font-size:1.2rem;color:var(--am);margin-bottom:22px;animation:fadeIn .7s .1s both}
 .intro-w .desc{font-size:.92rem;color:var(--t2);line-height:1.9;max-width:600px;margin:0 auto 30px;animation:fadeIn .7s .2s both}
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:30px;animation:fadeIn .7s .3s both}
@@ -133,7 +143,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 .ro-loss-tbl th{padding:7px 10px;border-bottom:1.5px solid var(--bd);color:var(--t3);font-weight:600;font-size:.74rem}
 .ro-loss-tbl td{padding:6px 10px;border-bottom:1px solid rgba(0,0,0,.04)}
 #S-result{padding:40px 20px}.res-w{max-width:820px;margin:0 auto}
-.res-w h2{font-size:1.8rem;font-weight:900;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,var(--am),#b8922e);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.res-w h2{font-size:1.8rem;font-weight:900;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,var(--am),#b8922e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .res-sub{text-align:center;color:var(--t2);font-size:.9rem;margin-bottom:26px}
 .res-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:26px}
 .res-c{background:var(--p1);border:1px solid var(--bd);border-radius:11px;padding:18px;text-align:center;animation:fadeIn .4s both;box-shadow:var(--shadow)}
@@ -152,15 +162,37 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 .mb h3{font-size:1.15rem;font-weight:700;margin-bottom:12px}.mb p{font-size:.86rem;color:var(--t2);line-height:1.8;margin-bottom:12px}
 .mb .mbtns{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
 #toast-c{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none;max-width:380px}
+/* Phase transition progress bar */
+.phase-bar{height:3px;background:var(--p2);border-radius:2px;overflow:hidden;margin:0 -10px 0 -10px;width:calc(100% + 20px)}
+.phase-bar-fill{height:100%;background:linear-gradient(90deg,var(--cy),var(--gn));border-radius:2px;transition:width 1s linear}
+/* Floating notification badge */
+.notif-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--rd);animation:pulseGlow 2s infinite}
+/* SunLink-style countdown ring */
+.countdown-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.countdown-ring svg{transform:rotate(-90deg)}
+.countdown-ring .ring-bg{stroke:var(--p2);fill:none}
+.countdown-ring .ring-fg{fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+/* Mobile bottom tab bar */
 .mob-tabs{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--p1);border-top:1px solid var(--bd);box-shadow:0 -2px 12px rgba(0,0,0,.06);padding:6px 0 env(safe-area-inset-bottom,4px)}
 .mob-tabs-inner{display:flex;justify-content:space-around;align-items:center}
 .mob-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 12px;border:none;background:none;color:var(--t3);font-size:.62rem;font-family:var(--fd);cursor:pointer;transition:color .2s;position:relative}
 .mob-tab.active{color:var(--cy)}
 .mob-tab .mt-icon{font-size:1.1rem}
+/* Decision cards (SunLink-style) */
+.dec-card{background:var(--p1);border:1.5px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.dec-card:hover{border-color:var(--cy);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.dec-card.selected{border-color:var(--cy);background:rgba(68,114,196,.04)}
+.dec-card .dc-icon{font-size:1.4rem;margin-bottom:6px}
+.dec-card .dc-title{font-weight:700;font-size:.88rem;margin-bottom:3px}
+.dec-card .dc-desc{font-size:.76rem;color:var(--t2);line-height:1.5}
+
+/* ========== MOBILE RESPONSIVE ========== */
 @media(max-width:768px){
   html{font-size:14px}
+  /* Show mobile bottom tabs on game screen */
   .mob-tabs{display:block}
   #S-game.active{padding-bottom:70px!important}
+  /* Intro */
   #S-intro.active{padding:20px 12px}
   .intro-w h1{font-size:1.7rem}
   .intro-w .sub{font-size:1rem}
@@ -169,8 +201,10 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   .intro-btns{flex-direction:column;gap:10px}
   .intro-btns .btn{width:100%}
   .river-art{display:none}
+  /* Lobby */
   #S-lobby{padding:20px 12px}
   .rg{grid-template-columns:1fr}
+  /* Game layout: single column vertical scroll */
   #S-game.active{display:flex!important;flex-direction:column;padding:8px;gap:7px;min-height:auto}
   .g-top{padding:8px 10px;gap:6px}
   .g-top .tl{gap:8px;flex-wrap:wrap}
@@ -181,11 +215,13 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   .rain-cards{gap:6px}
   .rain-card{min-width:80px;padding:8px}
   .rain-card .rc-val{font-size:1.2rem}
+  /* Main: stack vertically */
   .g-main{grid-template-columns:1fr!important;gap:7px}
   .g-left,.g-right{max-height:none;overflow-y:visible}
   .status-grid{grid-template-columns:1fr 1fr}
   .sv{padding:8px}
   .sv .sv-v{font-size:1rem}
+  /* Map panel */
   .map-pnl{min-height:320px}
   .map-hd{padding:8px 10px;flex-direction:column;align-items:flex-start;gap:6px}
   .vn{width:42%!important;padding:7px}
@@ -193,20 +229,24 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   .vn .vs{font-size:.62rem}
   .flow-lbl{font-size:.56rem;padding:2px 5px}
   .flow-arrow{font-size:1.2rem}
+  /* Action + chat panels */
   .abg .btn{font-size:.8rem;padding:9px 12px}
   .disc-pnl{min-height:160px}
   .disc-msgs{max-height:220px;min-height:80px}
   .dm{font-size:.74rem;padding:5px 8px}
   .di-row input{font-size:.8rem;padding:7px 10px}
+  /* Bottom bar */
   .g-bot{padding:8px 10px;gap:5px}
   .fi{font-size:.76rem}
   #btn-next{font-size:.72rem;padding:5px 10px}
+  /* Round overlay */
   .ro-inner{width:96%}
   .ro-inner .ro-round{font-size:1.8rem}
   .ro-rain-grid{grid-template-columns:1fr;gap:8px}
   .ro-rain-card .rrc-val{font-size:1.6rem}
   .ro-loss-tbl{font-size:.7rem}
   .ro-loss-tbl th,.ro-loss-tbl td{padding:5px 6px}
+  /* Result */
   #S-result{padding:20px 10px}
   .res-cards{grid-template-columns:1fr 1fr}
   .res-c{padding:12px}
@@ -215,9 +255,11 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   .vc{min-width:auto}
   .res-tbl{font-size:.7rem}
   .res-tbl th,.res-tbl td{padding:6px 5px}
+  /* Modal */
   .mb{padding:18px;max-width:95vw}
   .mb h3{font-size:1rem}
   .mb p{font-size:.82rem}
+  /* Toast */
   #toast-c{top:10px;right:10px;left:10px;max-width:none}
 }
 @media(max-width:420px){
@@ -229,7 +271,9 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   .res-cards{grid-template-columns:1fr}
   .ro-loss-tbl{font-size:.64rem}
 }
-.fx-overlay{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;background:rgba(255,255,255,0);transition:background .3s,opacity .4s;opacity:0}
+/* ========== DECISION ANIMATION EFFECTS ========== */
+.fx-overlay{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;
+  background:rgba(255,255,255,0);transition:background .3s,opacity .4s;opacity:0}
 .fx-overlay.fx-show{opacity:1;background:rgba(255,255,255,.7)}
 .fx-overlay.fx-danger.fx-show{background:rgba(196,78,82,.08)}
 .fx-overlay.fx-army.fx-show{background:rgba(85,168,104,.08)}
@@ -238,42 +282,31 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 .fx-danger .fx-text{color:var(--rd)}.fx-army .fx-text{color:var(--gn)}
 @keyframes fxBounce{0%{transform:scale(0) rotate(-15deg);opacity:0}50%{transform:scale(1.3) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0)}}
 @keyframes fxSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* Ripple effect on action buttons */
 .btn{position:relative;overflow:hidden}.btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,.4) 0%,transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
 .btn:active::after{opacity:1;transition:opacity 0s}
+/* Water ripple on flood */
 @keyframes waterRipple{0%{box-shadow:0 0 0 0 rgba(68,114,196,.3)}70%{box-shadow:0 0 0 12px rgba(68,114,196,0)}100%{box-shadow:0 0 0 0 rgba(68,114,196,0)}}
 .vn.flood{animation:pulseGlow 2s infinite,waterRipple 2.5s ease-out infinite}
+/* Status value change flash */
 @keyframes valFlash{0%{background:rgba(68,114,196,.15)}100%{background:transparent}}
 .sv.flash-change{animation:valFlash .8s ease-out}
-/* V2.0 增强视觉 CSS 保留 */
-.phase-bar{height:3px;background:var(--p2);border-radius:2px;overflow:hidden;margin:0 -10px 0 -10px;width:calc(100% + 20px)}
-.phase-bar-fill{height:100%;background:linear-gradient(90deg,var(--cy),var(--gn));border-radius:2px;transition:width 1s linear}
-.notif-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--rd);animation:pulseGlow 2s infinite}
-.countdown-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
-.countdown-ring svg{transform:rotate(-90deg)}
-.countdown-ring .ring-bg{stroke:var(--p2);fill:none}
-.countdown-ring .ring-fg{fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
-.dec-card{background:var(--p1);border:1.5px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
-.dec-card:hover{border-color:var(--cy);transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.dec-card.selected{border-color:var(--cy);background:rgba(68,114,196,.04)}
-.dec-card .dc-icon{font-size:1.4rem;margin-bottom:6px}
-.dec-card .dc-title{font-weight:700;font-size:.88rem;margin-bottom:3px}
-.dec-card .dc-desc{font-size:.76rem;color:var(--t2);line-height:1.5}
 </style>
 </head>
 <body>
 <canvas id="rain-canvas"></canvas>
 <div id="basin-bg"></div>
 
+<!-- INTRO -->
 <div id="S-intro" class="screen active">
   <div class="intro-w">
     <h1 style="margin-bottom:10px">流域性洪涝风险决策仿真平台</h1>
     <div class="sub" style="font-family:'ZCOOL KuaiLe',cursive;font-size:1rem;color:var(--cy);margin-bottom:28px;animation:fadeIn .7s .1s both">Flood Risk Decision-making Simulation Platform</div>
     <p class="desc">基于2023年海河"23·7"流域性特大洪水真实案例。台风"杜苏芮"残余环流北上，北京83小时降雨744.8mm（140年最大），84座水库联合调度，1963年以来首次启用8处蓄滞洪区，120万人紧急转移。你将在这一背景下体验多主体协同与博弈。</p>
-    
     <div class="feat-grid">
       <div class="f"><div style="font-size:1.4rem">🌊</div><h3>流域联动机制</h3><p>上游排水推高下游水位，修坝拦水、启用蓄滞洪区影响全流域命运</p></div>
       <div class="f"><div style="font-size:1.4rem">🤖</div><h3>AI协同推演</h3><p>单人即可体验完整游戏，每村5+名AI村民自主研讨发言做决策</p></div>
-      <div class="f"><div style="font-size:1.4rem">☁️</div><h3>云端汇聚计算</h3><p>数据通过Cloudflare Serverless架构无缝上报，后台实时分析</p></div>
+      <div class="f"><div style="font-size:1.4rem">🎯</div><h3>有限理性博弈</h3><p>每人只掌握局部信息，需在不确定性下快速决策，体验集体困境</p></div>
     </div>
     <div class="intro-btns">
       <button class="btn btn-p" onclick="showScreen('S-lobby')">进入游戏大厅</button>
@@ -284,12 +317,13 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
     <div style="margin-top:36px;padding-top:20px;border-top:1px solid var(--bd);animation:fadeIn .7s .6s both;line-height:2;text-align:center">
       <div style="font-size:.82rem;font-weight:600;color:var(--cy)">天津大学资源安全与公共治理中心</div>
       <div style="font-size:.74rem;color:var(--t2)">Center for Resource Security and Public Governance, Tianjin University</div>
-      <div style="font-size:.74rem;color:var(--t3)">联系人：刘老师，<a href="mailto:lglhm@tju.edu.cn" style="color:var(--cy);text-decoration:none">lglhm@tju.edu.cn</a></div>
+      <div style="font-size:.74rem;color:var(--t3)">联系人：刘老师，<a href="/cdn-cgi/l/email-protection#a7cbc0cbcfcae7d3cdd289c2c3d289c4c9" style="color:var(--cy);text-decoration:none"><span class="__cf_email__" data-cfemail="08646f646065487c627d266d6c7d266b66">[email&#160;protected]</span></a></div>
       <div style="font-size:.7rem;color:var(--t3);margin-top:4px">© 2026 Tianjin University GIPC. All Rights Reserved.</div>
     </div>
   </div>
 </div>
 
+<!-- LOBBY -->
 <div id="S-lobby" class="screen">
   <div class="lob-w fade-in">
     <h2>加入演练</h2>
@@ -304,29 +338,31 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
           <div class="rc" data-r="VLF" onclick="selRole(this,'VLF')"><h4>🏠 蓄滞洪区村长</h4><p>购置沙袋防洪屏障 + 动员村民撤离 + 灾后补偿核算</p></div>
           <div class="rc" data-r="VLN" onclick="selRole(this,'VLN')"><h4>🏘 普通村庄村长</h4><p>可花10~50购置沙袋防洪屏障，抵挡水量</p></div>
           <div class="rc" data-r="VIL" onclick="selRole(this,'VIL')"><h4>🧑 普通村民</h4><p>决策搬迁or留守，搬+未淹损30，不搬+淹损50</p></div>
-          <div class="rc" data-r="OBSERVER" onclick="selRole(this,'OBSERVER')" style="grid-column:1/-1;border-color:var(--gd);background:rgba(212,168,83,.04)"><h4>👁 教师/观察者 (上帝视角)</h4><p>可看到所有玩家决策、所有村庄水位、所有聊天频道。不参与投票或决策。</p></div>
+          <div class="rc" data-r="OBSERVER" onclick="selRole(this,'OBSERVER')" style="grid-column:1/-1;border-color:var(--gd);background:rgba(212,168,83,.04)"><h4>👁 教师/观察者 (上帝视角)</h4><p>可看到所有玩家决策、所有村庄水位、所有聊天频道。不参与投票或决策。拥有"开始游戏"按钮(联机模式)。</p></div>
         </div>
-        <div class="fg"><label>演练房间码（相同号码的数据将汇总至后台，留空单机自动生成）</label><input id="inp-room" placeholder="如 CLASS-A"></div>
-        <button class="btn btn-p" style="width:100%;margin-top:12px" onclick="startGame()">开始推演实验</button>
+        <div class="fg"><label>房间码（留空=单机模式，输入=联机模式）</label><input id="inp-room" placeholder="如 ABC123，教师创建后分享给学生"></div>
+        <details style="margin-top:4px;font-size:.76rem;color:var(--t3)"><summary style="cursor:pointer">高级设置</summary><div class="fg" style="margin-top:6px"><label>Worker API 地址（可选，留空使用默认）</label><input id="inp-worker-api" placeholder="https://your-worker.workers.dev" onchange="WORKER_API=this.value.replace(/\/$/,'')"></div></details>
+        <button class="btn btn-p" style="width:100%;margin-top:12px" onclick="startGame()">开始游戏 · 角色盲盒分配</button>
         <button class="btn btn-o" style="width:100%" onclick="showScreen('S-intro')">返回首页</button>
-        <button class="btn btn-o" style="width:100%" onclick="window.open('/admin.html', '_blank')">教师管理后台</button>
+        <button class="btn btn-o" style="width:100%" onclick="window.location='/admin'">教师管理后台</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- WAITING ROOM (multiplayer) -->
 <div id="S-waiting" class="screen">
   <div style="max-width:600px;margin:60px auto;text-align:center;padding:20px">
     <div class="pnl fade-in" style="padding:30px">
       <div style="font-size:2.5rem;margin-bottom:16px">⏳</div>
       <h2 style="font-size:1.4rem;margin-bottom:8px" id="wait-title">等待教师开始游戏...</h2>
-      <p style="color:var(--t2);font-size:.88rem;margin-bottom:20px" id="wait-subtitle">你已加入房间，请等待教师点击"一键开启全班游戏"</p>
+      <p style="color:var(--t2);font-size:.88rem;margin-bottom:20px" id="wait-subtitle">你已加入房间，请等待教师点击"开始游戏"</p>
       <div style="margin-bottom:16px;padding:14px;background:var(--p2);border-radius:9px;border:1px solid var(--bd)">
         <div style="font-size:.78rem;color:var(--t3);margin-bottom:4px">房间码</div>
         <div style="font-family:var(--fm);font-size:1.6rem;font-weight:700;color:var(--cy);letter-spacing:3px" id="wait-room-code">------</div>
       </div>
       <div style="margin-bottom:16px;padding:14px;background:rgba(68,114,196,.04);border-radius:9px;border:1px solid rgba(68,114,196,.15)">
-        <div style="font-size:.78rem;color:var(--t3);margin-bottom:4px">你的分配角色</div>
+        <div style="font-size:.78rem;color:var(--t3);margin-bottom:4px">你的角色</div>
         <div style="font-size:1.1rem;font-weight:700;color:var(--cy)" id="wait-role">分配中...</div>
         <div style="font-size:.82rem;color:var(--t2);margin-top:4px" id="wait-village"></div>
       </div>
@@ -335,11 +371,12 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
         <div id="wait-player-list" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
       </div>
       <div id="wait-start-area"></div>
-      <button class="btn btn-o" style="margin-top:12px" onclick="stopRoomPolling();showScreen('S-lobby')">退出房间</button>
+      <button class="btn btn-o" style="margin-top:12px" onclick="stopRoomPolling();mpDisconnect();showScreen('S-lobby')">退出房间</button>
     </div>
   </div>
 </div>
 
+<!-- GAME -->
 <div id="S-game" class="screen">
   <div class="g-top">
     <div class="tl"><span class="rb" id="g-round">第 1/6 轮</span><span class="pl" id="g-phase">天气预报</span><span id="g-phase-dots" style="display:inline-flex;gap:3px;margin-left:4px"></span><span class="bd bd-up" id="g-role">市长</span><span style="font-size:.82rem;color:var(--t2)" id="g-name">张同学</span></div>
@@ -373,28 +410,38 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
       <div class="map-hd"><div><div style="font-size:.92rem;font-weight:700">海河流域洪涝风险控制沙盘</div><div style="font-size:.7rem;color:var(--t3)">北京(上游) → 河北(中游) → 天津(下游) → 入海 | 点击村庄查看详情</div></div><div style="display:flex;gap:6px"><span class="bd bd-up">上游</span><span class="bd bd-mid">中游</span><span class="bd bd-dn">下游</span></div></div>
       <div class="map-bd" id="map-bd">
         <div class="map-bg-img"><svg viewBox="0 0 800 500" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bohai Sea -->
           <ellipse cx="740" cy="300" rx="120" ry="200" fill="#1a3a5c" opacity=".4"/>
           <text x="720" y="310" font-size="16" fill="#4dabf7" opacity=".5" font-family="sans-serif">渤海</text>
+          <!-- Basin boundary -->
           <path d="M60,80 C120,40 250,20 350,50 C450,80 550,60 650,100 C720,130 760,200 750,320 C740,420 680,470 580,480 C450,490 300,470 180,440 C100,420 50,350 40,260 C30,180 40,110 60,80Z" fill="none" stroke="#4dabf7" stroke-width="1.5" stroke-dasharray="6,4" opacity=".3"/>
           <text x="320" y="35" font-size="11" fill="#4dabf7" opacity=".35" font-family="sans-serif">海河流域</text>
+          <!-- Mountains (Taihang, Yanshan) -->
           <path d="M50,100 L70,60 L90,95 L110,55 L130,90 L150,50 L170,85 L190,60 L200,100" fill="none" stroke="#667" stroke-width="1.5" opacity=".3"/>
           <text x="90" y="50" font-size="9" fill="#889" opacity=".4" font-family="sans-serif">燕山</text>
           <path d="M40,150 L55,120 L70,148 L85,115 L100,145 L115,110 L130,140" fill="none" stroke="#667" stroke-width="1.5" opacity=".3"/>
           <text x="35" y="170" font-size="9" fill="#889" opacity=".4" font-family="sans-serif" transform="rotate(-70,35,170)">太行山</text>
+          <!-- Yongding River (永定河) -->
           <path d="M120,100 C150,130 170,160 200,190 C230,220 270,240 320,260" fill="none" stroke="#4dabf7" stroke-width="2" opacity=".25" stroke-linecap="round"/>
           <text x="140" y="150" font-size="8" fill="#4dabf7" opacity=".35" font-family="sans-serif" transform="rotate(40,140,150)">永定河</text>
+          <!-- Daqing River (大清河) -->
           <path d="M160,200 C200,220 260,250 340,280 C400,300 450,310 520,330" fill="none" stroke="#4dabf7" stroke-width="2.5" opacity=".25" stroke-linecap="round"/>
           <text x="280" y="248" font-size="8" fill="#4dabf7" opacity=".35" font-family="sans-serif" transform="rotate(15,280,248)">大清河</text>
+          <!-- Ziya River (子牙河) -->
           <path d="M100,280 C160,290 250,310 380,340 C460,355 530,350 580,340" fill="none" stroke="#4dabf7" stroke-width="2" opacity=".25" stroke-linecap="round"/>
           <text x="250" y="318" font-size="8" fill="#4dabf7" opacity=".35" font-family="sans-serif" transform="rotate(8,250,318)">子牙河</text>
+          <!-- South Canal (南运河) -->
           <path d="M300,400 C350,380 420,360 500,350 C560,345 610,340 650,330" fill="none" stroke="#4dabf7" stroke-width="1.5" opacity=".2" stroke-linecap="round"/>
           <text x="400" y="378" font-size="8" fill="#4dabf7" opacity=".3" font-family="sans-serif">南运河</text>
+          <!-- Hai River main (海河干流) -->
           <path d="M520,330 C570,325 620,310 670,300 C700,290 730,285 750,280" fill="none" stroke="#00e5ff" stroke-width="3" opacity=".3" stroke-linecap="round"/>
           <text x="620" y="298" font-size="9" fill="#00e5ff" opacity=".4" font-family="sans-serif">海河干流</text>
+          <!-- City markers -->
           <circle cx="180" cy="130" r="5" fill="#ff6b6b" opacity=".35"/><text x="190" y="134" font-size="10" fill="#ff6b6b" opacity=".4" font-family="sans-serif">北京</text>
           <circle cx="350" cy="300" r="4" fill="#51cf66" opacity=".35"/><text x="360" y="304" font-size="9" fill="#51cf66" opacity=".4" font-family="sans-serif">涿州</text>
           <circle cx="460" cy="340" r="4" fill="#51cf66" opacity=".35"/><text x="470" y="344" font-size="9" fill="#51cf66" opacity=".4" font-family="sans-serif">霸州</text>
           <circle cx="600" cy="320" r="5" fill="#ffd43b" opacity=".35"/><text x="580" y="340" font-size="10" fill="#ffd43b" opacity=".4" font-family="sans-serif">天津</text>
+          <!-- Flood detention areas -->
           <rect x="155" y="188" width="30" height="16" rx="3" fill="#ff922b" opacity=".15" stroke="#ff922b" stroke-width=".5" stroke-opacity=".3"/><text x="158" y="200" font-size="6" fill="#ff922b" opacity=".4" font-family="sans-serif">房山</text>
           <rect x="310" y="270" width="40" height="14" rx="3" fill="#ff922b" opacity=".15" stroke="#ff922b" stroke-width=".5" stroke-opacity=".3"/><text x="313" y="280" font-size="6" fill="#ff922b" opacity=".4" font-family="sans-serif">兰沟洼</text>
           <rect x="550" y="318" width="30" height="14" rx="3" fill="#ff922b" opacity=".15" stroke="#ff922b" stroke-width=".5" stroke-opacity=".3"/><text x="553" y="328" font-size="6" fill="#ff922b" opacity=".4" font-family="sans-serif">东淀</text>
@@ -419,7 +466,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
       </div>
       <div class="pnl disc-pnl">
         <div style="font-size:.88rem;font-weight:700;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between">
-          <span>💬 研讨频道</span>
+          <span>💬 村内研讨 / 全体频道</span>
           <div style="display:flex;gap:4px">
             <button class="btn btn-o" style="padding:3px 10px;font-size:.7rem" onclick="G.ch='ALL';renderChat()" id="btn-ch-a">全体</button>
             <button class="btn btn-o" style="padding:3px 10px;font-size:.7rem" onclick="G.ch='VIL';renderChat()" id="btn-ch-v">本村</button>
@@ -433,11 +480,14 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   <div class="g-bot"><div class="fin-row" id="fin-row"></div><div style="display:flex;gap:7px;align-items:center"><button class="btn btn-o" style="padding:6px 12px;font-size:.76rem" id="btn-next" onclick="advancePhase()">下一阶段 ▶</button></div></div>
 </div>
 
+<!-- ROUND TRANSITION -->
 <div class="round-overlay" id="round-ov"><div class="ro-inner" id="ro-inner"></div></div>
 
+<!-- RESULT -->
 <div id="S-result" class="screen">
   <div class="res-w fade-in">
     <h2>🏆 决策演练总结</h2>
+    <p class="res-sub">决策演练结束，以下为综合评分排名</p>
     <div class="res-cards" id="res-cards"></div>
     <div><h3 style="font-size:1rem;margin-bottom:12px">🎙 新闻发布会 · 市长述职</h3><div id="speech-area" style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:16px"></div></div>
     <div class="vote-panel"><h3 style="font-size:1rem;margin-bottom:6px">🗳 声誉投票</h3><p style="font-size:.8rem;color:var(--t3);margin-bottom:12px">请认真阅读以上市长述职，选出你最满意的一位市长。除市长外，每位村民、村长均有1票（仅可投一次）。AI参与人同步投票。</p><div id="vote-info" style="font-size:.8rem;color:var(--t3);margin-bottom:8px"></div><div class="vote-row" id="vote-row"></div><div id="vote-result" style="margin-top:12px;font-size:.82rem;color:var(--t2)"></div></div>
@@ -447,7 +497,9 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
   </div>
 </div>
 
+<!-- MODAL -->
 <div class="mo" id="mo"><div class="mb" id="mb"><h3 id="mo-t"></h3><div id="mo-b"></div><div class="mbtns" id="mo-btns"></div></div></div>
+<!-- MOBILE BOTTOM TABS -->
 <div class="mob-tabs" id="mob-tabs">
   <div class="mob-tabs-inner">
     <button class="mob-tab active" data-panel="status" onclick="mobTab('status')"><span class="mt-icon">📋</span><span>状态</span></button>
@@ -457,63 +509,214 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
     <button class="mob-tab" data-panel="next" onclick="advancePhase()"><span class="mt-icon">▶</span><span>下一步</span></button>
   </div>
 </div>
+
 <div id="toast-c"></div>
 
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-// ===================== CLOUDFLARE API & POLLING LOBBY =====================
-const WORKER_API = 'https://api.resil-hub.cn'; // 【强制绑定 API 专属域名，绕开 404】
-let SERVER_CFG = null;
-let _roomPollTimer = null;
-
+// ===================== MULTIPLAYER / CONFIG LAYER =====================
+let MP={enabled:false,socket:null,roomCode:null,isHost:false};
+let SERVER_CFG=null;
 async function loadServerConfig(){
-  try{const r=await fetch(WORKER_API + '/api/config');if(r.ok){SERVER_CFG=await r.json();applyConfig(SERVER_CFG);return true}}catch(e){}
+  try{const r=await fetch('/api/config');if(r.ok){SERVER_CFG=await r.json();applyConfig(SERVER_CFG);return true}}catch(e){}
   return false;
 }
+function applyConfig(cfg){
+  if(!cfg)return;
+  if(cfg.flood_thresholds)Object.assign(FT,cfg.flood_thresholds);
+  if(cfg.is_flood_zone)Object.keys(cfg.is_flood_zone).forEach(k=>IFZ[k]=cfg.is_flood_zone[k]?1:0);
+  if(cfg.game){if(cfg.game.max_rounds)window._MR=cfg.game.max_rounds;if(cfg.game.phase_timers)Object.assign(PHT,cfg.game.phase_timers)}
+  if(cfg.economy)window._ECO=cfg.economy;
+  if(cfg.hydrology)window._HYD=cfg.hydrology;
+  if(cfg.villages)Object.assign(VN,cfg.villages);
+  if(cfg.cities)Object.assign(CN,cfg.cities);
+}
+function getMR(){return window._MR||MR}
+function getEco(k,def){return window._ECO?window._ECO[k]||def:def}
+function getHyd(k,def){return window._HYD?window._HYD[k]||def:def}
+function mpConnect(code,name,sid,pref){
+  if(MP.socket)MP.socket.disconnect();
+  const s=io({transports:['websocket','polling']});
+  MP.socket=s;MP.roomCode=code;MP.enabled=true;
+  s.on('connect',()=>{s.emit('join_room',{code,name,student_id:sid,pref});toast('已连接服务器','gn')});
+  s.on('role_assigned',d=>{
+    G.role=d.role;G.vil=d.village;MP.roomCode=d.room_code;
+    if(d.config)applyConfig(d.config);
+    // Update waiting room UI
+    const rl=RL[d.role]||d.role;
+    const waitRole=document.getElementById('wait-role');if(waitRole)waitRole.textContent=rl;
+    const waitVil=document.getElementById('wait-village');if(waitVil)waitVil.textContent=d.village==='ALL'?'全局视角':VN[d.village]||d.village;
+    const waitCode=document.getElementById('wait-room-code');if(waitCode)waitCode.textContent=d.room_code;
+    // If OBSERVER, show start button
+    if(d.role==='OBSERVER'){
+      MP.isHost=true;
+      const sa=document.getElementById('wait-start-area');
+      if(sa)sa.innerHTML='<button class="btn btn-p" style="width:100%;font-size:1.1rem;padding:14px 30px;margin-top:8px" onclick="mpStartGame()">开始游戏</button>';
+      const wt=document.getElementById('wait-title');if(wt)wt.textContent='等待玩家加入...';
+      const ws=document.getElementById('wait-subtitle');if(ws)ws.textContent='你是教师/观察者。当所有玩家就绪后，点击下方按钮开始游戏。';
+    }
+    // Update player list
+    if(d.players)updateWaitingPlayerList(d.players);
+    toast('角色分配: '+rl,'bl');
+  });
+  s.on('player_joined',d=>{
+    sysMsg(`${d.name} 加入了房间 (${RL[d.role]||d.role})`);toast(d.name+' 加入','gn');
+    // Add to waiting room player list
+    const pl=document.getElementById('wait-player-list');
+    if(pl){const tag=document.createElement('span');tag.style.cssText='padding:4px 10px;background:rgba(68,114,196,.08);border:1px solid rgba(68,114,196,.15);border-radius:99px;font-size:.78rem;color:var(--cy)';tag.textContent=d.name+' ('+( RL[d.role]||d.role)+')';pl.appendChild(tag)}
+  });
+  s.on('player_left',d=>{sysMsg(`${d.name} 离开了房间`)});
+  s.on('game_started',d=>{
+    toast('游戏开始！','gn');
+    if(d.config)applyConfig(d.config);
+    if(d.players){
+      // Store multiplayer player info
+      MP.mpPlayers=d.players;
+    }
+    // Start the game -- for OBSERVER, use observer mode; for others, normal game
+    if(G.role==='OBSERVER'){
+      initObserverGame(d);
+    }else{
+      initGame();
+    }
+  });
+  s.on('action_broadcast',d=>{
+    sysMsg(`[${d.name}] ${d.action}: ${JSON.stringify(d.value)}`);
+    // For observer: track all actions
+    if(G.role==='OBSERVER'&&G._observerActions){
+      G._observerActions.push({...d,ts:now()});
+      renderObserverDashboard();
+    }
+    renderAll();
+  });
+  s.on('chat_broadcast',d=>{G.msgs.push({tp:'ai',nm:d.name,ct:d.content,ch:d.channel||'ALL',vil:d.village,rl:RL[d.role]||'',tm:now()});renderChat();
+    // Observer sees all chats
+    if(G.role==='OBSERVER'&&G._observerChats){G._observerChats.push({...d,ts:now()});renderObserverDashboard()}
+  });
+  s.on('phase_changed',d=>{G.pi=d.phase_index;renderAll();startTimer()});
+  s.on('game_finished',()=>{toast('游戏结束','am');showResult()});
+  s.on('error',d=>{toast(d.msg||'连接错误','rd')});
+  s.on('disconnect',()=>{toast('断开连接','rd')});
+}
+function mpDisconnect(){if(MP.socket){MP.socket.disconnect();MP.socket=null}MP.enabled=false;MP.roomCode=null;MP.isHost=false}
+function mpStartGame(){if(MP.socket&&MP.roomCode){MP.socket.emit('start_game',{code:MP.roomCode});toast('正在开始游戏...','bl')}}
+function updateWaitingPlayerList(players){
+  const pl=document.getElementById('wait-player-list');if(!pl)return;
+  pl.innerHTML=players.map(p=>`<span style="padding:4px 10px;background:${p.is_bot?'rgba(85,168,104,.08)':'rgba(68,114,196,.08)'};border:1px solid ${p.is_bot?'rgba(85,168,104,.15)':'rgba(68,114,196,.15)'};border-radius:99px;font-size:.78rem;color:${p.is_bot?'var(--gn)':'var(--cy)'}">${p.name} (${RL[p.role]||p.role})${p.is_bot?' AI':''}</span>`).join('');
+}
+// Observer mode: teacher/observer "god view"
+function initObserverGame(d){
+  G._observerActions=[];G._observerChats=[];
+  G.round=1;G.pi=0;G.msgs=[];G.news=[];G.votes={};G.voted=false;G.hist=[];G.roundEnded=false;G.totalLoss=0;G.vilHist={};
+  VIL.forEach(v=>{G.ws[v]=0;G.va[v]=500;G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.vilHist[v]=[];G.sandbags[v]=0});
+  G.ca={A:500,B:500,C:500};G.cd={A:0,B:0,C:0};G.dams.A=false;G.dams.B=false;G.dams.C=false;
+  G.armyCard={A:true,B:true,C:true};G.blasted={A:false,B:false,C:false};
+  G._upflow={};VIL.forEach(v=>G._upflow[v]=0);G._justFlooded={};G._seaDischarge=0;
+  G.players=[];genRain();
+  showScreen('S-game');renderAll();startTimer();
+  // Override action panel for observer
+  renderObserverDashboard();
+  sysMsg('你以教师/观察者身份加入，可看到所有玩家的决策和聊天。');
+}
+function renderObserverDashboard(){
+  const btns=document.getElementById('act-btns');const ex=document.getElementById('act-extra');const tt=document.getElementById('act-title');
+  if(!btns)return;
+  tt.textContent='👁 教师视角 · 全局监控';
+  let html='<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:8px">你正在以<b style="color:var(--gd)">上帝视角</b>观察所有玩家。你不参与决策或投票。</div>';
+  // Recent actions
+  const acts=G._observerActions||[];
+  if(acts.length){
+    html+='<div style="font-size:.8rem;font-weight:700;color:var(--cy);margin:8px 0 4px">最近玩家行动 ('+acts.length+')</div>';
+    html+='<div style="max-height:180px;overflow-y:auto;background:var(--p2);border-radius:7px;padding:6px;border:1px solid var(--bd)">';
+    acts.slice(-15).reverse().forEach(a=>{html+=`<div style="font-size:.74rem;padding:3px 6px;border-bottom:1px solid rgba(0,0,0,.04)"><span style="color:var(--cy);font-weight:600">${a.name}</span> <span style="color:var(--t3)">(${RL[a.role]||a.role})</span> ${a.action}: ${JSON.stringify(a.value)} <span style="color:var(--t3);font-size:.66rem">${a.ts||''}</span></div>`});
+    html+='</div>';
+  }else{
+    html+='<div style="font-size:.78rem;color:var(--t3);padding:10px;text-align:center">暂无玩家行动</div>';
+  }
+  // Recent chats across all channels
+  const chats=G._observerChats||[];
+  if(chats.length){
+    html+='<div style="font-size:.8rem;font-weight:700;color:var(--gn);margin:8px 0 4px">全频道聊天 ('+chats.length+')</div>';
+    html+='<div style="max-height:160px;overflow-y:auto;background:var(--p2);border-radius:7px;padding:6px;border:1px solid var(--bd)">';
+    chats.slice(-15).reverse().forEach(c=>{html+=`<div style="font-size:.74rem;padding:3px 6px;border-bottom:1px solid rgba(0,0,0,.04)"><span style="color:var(--gn);font-weight:600">${c.name}</span> <span style="color:var(--t3)">[${c.channel||'ALL'}${c.village?' '+c.village:''}]</span> ${c.content}</div>`});
+    html+='</div>';
+  }
+  btns.innerHTML=html;
+  // Advance phase button for teacher
+  if(ex)ex.innerHTML='<button class="btn btn-p" style="width:100%;margin-top:8px" onclick="mpEmit(\'advance_phase\',{})">推进下一阶段</button>';
+}
+function mpEmit(evt,data){if(MP.enabled&&MP.socket){data.code=MP.roomCode;MP.socket.emit(evt,data)}}
+function mpSendAction(action,value){mpEmit('player_action',{action,value})}
+function mpSendChat(content,channel,village){mpEmit('chat_message',{content,channel,village})}
+function mpSaveRound(){mpEmit('save_round_data',{round_num:G.round,rainfall:G.rain,water_levels:G.ws,village_assets:G.va,city_assets:G.ca,round_loss:G.hist.length?G.hist[G.hist.length-1].loss:0,total_loss:G.totalLoss})}
+
+// ===================== D1 同步大厅 =====================
+// Worker API 基地址（可配置，默认同源或 Cloudflare Worker URL）
+let WORKER_API='';
+let _roomPollTimer=null;
 
 async function joinRoomHTTP(code){
-  const url = WORKER_API + '/api/rooms/' + code + '/join';
+  const url=WORKER_API+'/api/rooms/'+code+'/join';
   try{
-    const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref})});
-    const d = await res.json();
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref})});
+    const d=await res.json();
     if(!res.ok){toast(d.detail||'加入失败','rd');showScreen('S-lobby');return}
-    G.role = d.role; G.vil = d.village;
-    document.getElementById('wait-role').textContent = RL[d.role]||d.role;
-    document.getElementById('wait-village').textContent = d.village==='ALL'?'全局视角':VN[d.village]||d.village;
+    G.role=d.role;G.vil=d.village;
+    const rl=RL[d.role]||d.role;
+    const waitRole=document.getElementById('wait-role');if(waitRole)waitRole.textContent=rl;
+    const waitVil=document.getElementById('wait-village');if(waitVil)waitVil.textContent=d.village==='ALL'?'全局视角':VN[d.village]||d.village;
+    // 如果是 OBSERVER，显示开始按钮
     if(d.role==='OBSERVER'){
-      const sa = document.getElementById('wait-start-area');
-      if(sa) sa.innerHTML = '<button class="btn btn-p" style="width:100%;font-size:1.1rem;padding:14px 30px;margin-top:8px" onclick="startRoomHTTP()">一键开启全班游戏</button>';
-      document.getElementById('wait-title').textContent = '等待学生加入...';
-      document.getElementById('wait-subtitle').textContent = '你是教师/观察者。当所有玩家就绪后，点击下方按钮统一开始游戏。';
+      const sa=document.getElementById('wait-start-area');
+      if(sa)sa.innerHTML='<button class="btn btn-p" style="width:100%;font-size:1.1rem;padding:14px 30px;margin-top:8px" onclick="startRoomHTTP()">开始游戏</button>';
+      const wt=document.getElementById('wait-title');if(wt)wt.textContent='等待玩家加入...';
+      const ws=document.getElementById('wait-subtitle');if(ws)ws.textContent='你是教师/观察者。当所有玩家就绪后，点击下方按钮开始游戏。';
     }
-    if(d.players) renderWaitingPlayers(d.players);
-    toast('角色已分配','gn');
+    if(d.players)renderWaitingPlayers(d.players);
+    toast('角色分配: '+rl,'gn');
     startRoomPolling(code);
-  }catch(e){toast('网络错误','rd');showScreen('S-lobby')}
+  }catch(e){toast('网络错误: '+e.message,'rd');showScreen('S-lobby')}
 }
 
 function renderWaitingPlayers(players){
   const pl=document.getElementById('wait-player-list');if(!pl)return;
-  pl.innerHTML=players.map(p=>`<span style="padding:4px 10px;background:rgba(68,114,196,.08);border:1px solid rgba(68,114,196,.15);border-radius:99px;font-size:.78rem;color:var(--cy)">${p.name} (${RL[p.role]||p.role})</span>`).join('');
+  pl.innerHTML=players.map(p=>{
+    const isObs=p.role==='OBSERVER';
+    return `<span style="padding:4px 10px;background:${isObs?'rgba(212,168,83,.08)':'rgba(68,114,196,.08)'};border:1px solid ${isObs?'rgba(212,168,83,.15)':'rgba(68,114,196,.15)'};border-radius:99px;font-size:.78rem;color:${isObs?'var(--gd)':'var(--cy)'}">${p.name} (${RL[p.role]||p.role})</span>`;
+  }).join('');
+  // 更新计数
+  const cnt=document.getElementById('wait-player-count');
+  if(cnt)cnt.textContent=players.length+'人已加入';
 }
 
 function startRoomPolling(code){
   stopRoomPolling();
-  _roomPollTimer = setInterval(async()=>{
+  _roomPollTimer=setInterval(async()=>{
     try{
-      const res = await fetch(WORKER_API + '/api/rooms/' + code);
-      if(!res.ok) return;
-      const d = await res.json();
-      if(d.players) renderWaitingPlayers(d.players);
-      if(d.status === 'PLAYING'){
+      const res=await fetch(WORKER_API+'/api/rooms/'+code);
+      if(!res.ok)return;
+      const d=await res.json();
+      if(d.players)renderWaitingPlayers(d.players);
+      if(d.status==='PLAYING'){
         stopRoomPolling();
-        if(d.config) applyConfig(d.config);
+        if(d.config&&Object.keys(d.config).length)applyConfig(d.config);
         showCountdown(()=>{
-           if(G.role === 'OBSERVER') initObserverGame();
-           else initGame();
+          // 连接 Socket.IO 用于实时游戏事件（如果可用）
+          if(typeof io!=='undefined'){
+            mpConnect(code,G.nm,G.sid,G.pref);
+            // 不等待 Socket.IO 的 game_started，直接初始化
+            setTimeout(()=>{
+              if(G.role==='OBSERVER')initObserverGame({});
+              else initGame();
+            },500);
+          }else{
+            if(G.role==='OBSERVER')initObserverGame({});
+            else initGame();
+          }
         });
       }
     }catch(e){}
-  }, 2000);
+  },3000);
 }
 
 function stopRoomPolling(){if(_roomPollTimer){clearInterval(_roomPollTimer);_roomPollTimer=null}}
@@ -522,22 +725,27 @@ async function startRoomHTTP(){
   const code=document.getElementById('wait-room-code')?.textContent;
   if(!code)return;
   try{
-    const res = await fetch(WORKER_API + '/api/rooms/' + code + '/start',{method:'POST',headers:{'Content-Type':'application/json'}});
-    if(!res.ok) {toast('启动失败','rd');return}
-    toast('全班启动指令已下发！','gn');
+    const res=await fetch(WORKER_API+'/api/rooms/'+code+'/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+    const d=await res.json();
+    if(!res.ok){toast(d.detail||'启动失败','rd');return}
+    toast('游戏启动中...','gn');
   }catch(e){toast('网络错误','rd')}
 }
 
-function getRoomId() { return G.localSessionId || 'DEFAULT'; }
-
-async function mpSendAction(action, value){
-  try { await fetch(WORKER_API + '/api/data/decisions', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ room_id: getRoomId(), round_num: G.round, player_id: 'human', player_name: G.nm, role: G.role, village: G.vil||'', action_type: action, action_value: value }) }); } catch(e){}
-}
-async function mpSendChat(content, channel, village){
-  try { await fetch(WORKER_API + '/api/data/chats', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ room_id: getRoomId(), round_num: G.round, player_id: 'human', player_name: G.nm, role: G.role, channel: channel||'ALL', village: village||'', content: content, msg_type: 'player' }) }); } catch(e){}
-}
-async function mpSaveRound(){
-  try { await fetch(WORKER_API + '/api/data/rounds', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ room_id: getRoomId(), round_num: G.round, rainfall_A: G.rain.A||0, rainfall_B: G.rain.B||0, rainfall_C: G.rain.C||0, water_A1: G.ws.A1||0, water_A2: G.ws.A2||0, water_A3: G.ws.A3||0, water_B1: G.ws.B1||0, water_B2: G.ws.B2||0, water_B3: G.ws.B3||0, water_C1: G.ws.C1||0, water_C2: G.ws.C2||0, water_C3: G.ws.C3||0, asset_A1: G.va.A1||0, asset_A2: G.va.A2||0, asset_A3: G.va.A3||0, asset_B1: G.va.B1||0, asset_B2: G.va.B2||0, asset_B3: G.va.B3||0, asset_C1: G.va.C1||0, asset_C2: G.va.C2||0, asset_C3: G.va.C3||0, city_asset_A: G.ca.A||0, city_asset_B: G.ca.B||0, city_asset_C: G.ca.C||0, round_loss: G.hist.length?G.hist[G.hist.length-1].loss:0, total_loss: G.totalLoss||0 }) }); } catch(e){}
+function showCountdown(callback){
+  const ov=document.createElement('div');
+  ov.id='countdown-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;flex-direction:column';
+  ov.innerHTML='<div style="font-size:1.2rem;color:#fff;margin-bottom:20px;font-weight:600">游戏即将开始</div><div id="cd-num" style="font-size:6rem;font-weight:900;color:var(--cy);text-shadow:0 0 40px rgba(68,114,196,.5);transition:all .3s">3</div>';
+  document.body.appendChild(ov);
+  let n=3;
+  const cdEl=document.getElementById('cd-num');
+  const tick=setInterval(()=>{
+    n--;
+    if(n>0){cdEl.textContent=n;cdEl.style.transform='scale(1.2)';setTimeout(()=>cdEl.style.transform='scale(1)',200)}
+    else if(n===0){cdEl.textContent='开始!';cdEl.style.color='var(--gd)';cdEl.style.fontSize='4rem'}
+    else{clearInterval(tick);ov.remove();callback()}
+  },1000);
 }
 
 // ===================== CONSTANTS =====================
@@ -555,24 +763,14 @@ const RL={MAYOR_A:'北京市长',MAYOR_B:'河北省长',MAYOR_C:'天津市长',L
 const NAMES_M=['李明辉','王建国','赵德铭'];
 const NAMES_L=['钱家富','孙保民','周安平','吴治水','郑大河','冯守正','蒋防汛','韩安澜','曹明德'];
 const NAMES_V=['陈大爷','林阿姨','黄大叔','何大妈','刘老师','杨大哥','胡大姐','马老伯','曹大婶','卢师傅','韩大嫂','魏大爷','朱阿姨','沈老师','许大叔','高大妈','谢大哥','丁大姐','彭老伯','董大婶','范大爷','蒋阿姨','袁老师','邹大叔','潘大妈','邓大哥','唐大姐','于师傅','萧大婶','姚大嫂'];
+// Flood scenario descriptions for each village
 const FLOOD_SCENES={A1:'房山琉璃河镇低洼地带大面积进水，养殖场牲畜被困。',A2:'门头沟落坡岭一带山洪暴发，多处道路中断，K396列车被困。',A3:'昌平南口一带山洪暴发，多处桥梁冲毁，通往延庆公路中断。',B1:'涿州码头镇水深超3米，图书仓库数百万册泡水，居民爬上屋顶等待救援。',B2:'霸州胜芳镇低洼区积水入户，数万亩农田被淹。',B3:'保定白洋淀水位超汛限，周边村庄大面积进水，群众向高地转移。',C1:'静海东淀蓄洪区启用，大量农田和鱼塘被淹没，群众紧急转移。',C2:'武清区排水压力极大，北运河水位持续超警。',C3:'滨海新区海河入海口满负荷运行，潮汐顶托导致排水受阻，低洼地区严重内涝。'};
 
-function applyConfig(cfg){
-  if(!cfg)return;
-  if(cfg.flood_thresholds)Object.assign(FT,cfg.flood_thresholds);
-  if(cfg.is_flood_zone)Object.keys(cfg.is_flood_zone).forEach(k=>IFZ[k]=cfg.is_flood_zone[k]?1:0);
-  if(cfg.game){if(cfg.game.max_rounds)window._MR=cfg.game.max_rounds;if(cfg.game.phase_timers)Object.assign(PHT,cfg.game.phase_timers)}
-  if(cfg.economy)window._ECO=cfg.economy;
-  if(cfg.hydrology)window._HYD=cfg.hydrology;
-}
-function getMR(){return window._MR||MR}
-function getEco(k,def){return window._ECO?window._ECO[k]||def:def}
-function getHyd(k,def){return window._HYD?window._HYD[k]||def:def}
 function calcDmg(w){if(w<=10)return 0;let d=0,x=10,inc=5;while(x<w&&x<300){d+=inc;inc+=5;x+=10}return d}
 function calcVLoss(moved,flooded){if(moved&&flooded)return 0;if(!moved&&!flooded)return 0;if(moved&&!flooded)return 30;return 50}
 
 // ===================== GAME STATE =====================
-let G={nm:'张同学',sid:'2024001',pref:'MAYOR',role:null,vil:null,localSessionId:null,
+let G={nm:'张同学',sid:'2024001',pref:'MAYOR',role:null,vil:null,
   round:1,pi:0,timer:null,ts:0,ch:'ALL',msgs:[],news:[],votes:{},hist:[],
   rain:{A:0,B:0,C:0},ws:{},va:{},pa:{},ca:{A:500,B:500,C:500},
   cd:{A:0,B:0,C:0},dams:{},dike:{},vm:{},players:[],roundEnded:false,
@@ -587,28 +785,27 @@ function initGame(){
   G.armyCard={A:true,B:true,C:true};G.blasted={A:false,B:false,C:false};
   G._upflow={};VIL.forEach(v=>G._upflow[v]=0);G._justFlooded={};G._seaDischarge=0;
   createPlayers();genRain();showScreen('S-game');renderAll();
-  startTimer();
+  if(!G._tutorialDone){startTutorial()}else{startTimer()}
   sysMsg('游戏开始！模拟2023年7月29日—8月2日海河"23·7"流域性特大洪水，共6轮。');
   sysMsg('💡 提示：每人只掌握局部信息，需在不确定性下快速决策。你的选择会影响他人，他人的选择也会影响你。');
   addNews('2023年7月29日，台风"杜苏芮"残余环流抵达华北，海河流域迎来60年一遇极端暴雨。');
   setTimeout(()=>showRoleReveal(),500);
 }
-
 function createPlayers(){
   G.players=[];let ar;
-  if(G.pref==='MAYOR')ar='MAYOR_A';else if(G.pref==='VLF')ar='LEADER_B1';else if(G.pref==='VLN')ar='LEADER_B2';else if(G.pref==='OBSERVER')ar='OBSERVER';else ar=null;
+  if(G.pref==='MAYOR')ar='MAYOR_A';else if(G.pref==='VLF')ar='LEADER_B1';else if(G.pref==='VLN')ar='LEADER_B2';else if(G.pref==='OBSERVER')ar='MAYOR_A';else ar=null;
   let pv=null;
   if(ar&&ar.startsWith('LEADER_'))pv=ar.replace('LEADER_','');
   else if(ar&&ar.startsWith('MAYOR_'))pv=ar.replace('MAYOR_','')+'1';
   else{pv='B1';ar='VIL_B1_0'}
   G.role=ar;G.vil=pv;
-  G.players.push({id:'human',nm:G.nm,role:ar,vil:pv,bot:0,spec:null,panic:0,conformity:0});G.pa.human=100;
+  G.players.push({id:'human',nm:G.nm,role:ar,vil:pv,bot:0,spec:null,panic:0,conformity:0,memory:[]});G.pa.human=100;
   const struct=['MAYOR_A','MAYOR_B','MAYOR_C','LEADER_A1','LEADER_A2','LEADER_A3','LEADER_B1','LEADER_B2','LEADER_B3','LEADER_C1','LEADER_C2','LEADER_C3'];
   let mi=0,li=0;
   struct.forEach(r=>{if(r===ar)return;let v=null;
     if(r.startsWith('LEADER_'))v=r.replace('LEADER_','');else if(r.startsWith('MAYOR_'))v=r.replace('MAYOR_','')+'1';
     const nm=r.startsWith('MAYOR_')?NAMES_M[mi++%3]:NAMES_L[li++%9];
-    G.players.push({id:'ai_'+r,nm,role:r,vil:v,bot:1,spec:null,panic:10+Math.random()*15,conformity:30+Math.random()*30});G.pa['ai_'+r]=100;
+    G.players.push({id:'ai_'+r,nm,role:r,vil:v,bot:1,spec:null,panic:10+Math.random()*15,conformity:30+Math.random()*30,memory:[]});G.pa['ai_'+r]=100;
   });
   const VCNT={A1:8,A2:9,A3:9,B1:9,B2:8,B3:9,C1:9,C2:8,C3:9};
   const RUMOR_V=['A2','B2','C2'],STAY_V=['A1','B1','C3'];
@@ -619,18 +816,21 @@ function createPlayers(){
     for(let i=0;i<count;i++){const pid='v_'+v+'_'+i;let spec=null;
       if(RUMOR_V.includes(v)&&i===0)spec='RUMOR';
       if(STAY_V.includes(v)&&i===0)spec='STAY';
+      // 理性水文员：每城1名（第2个无特殊身份的村民）
       const city=v[0];
       if(!spec&&!rationalAssigned[city]&&i>=2){spec='RATIONAL';rationalAssigned[city]=true}
+      // 恐慌/从众初始值
       let panic=10+Math.random()*20,conformity=30+Math.random()*40;
       if(spec==='STAY'){panic=5;conformity=10}
       else if(spec==='RUMOR'){panic=55;conformity=50+Math.random()*20}
       else if(spec==='RATIONAL'){panic=5;conformity=5}
       const nm=spec==='RATIONAL'?['张水文','李水文','王水文']['ABC'.indexOf(city)]:NAMES_V[vi%NAMES_V.length];
-      G.players.push({id:pid,nm,role:'VIL_'+v+'_'+i,vil:v,bot:1,spec,panic,conformity});G.pa[pid]=100;vi++;
+      G.players.push({id:pid,nm,role:'VIL_'+v+'_'+i,vil:v,bot:1,spec,panic,conformity,memory:[]});G.pa[pid]=100;vi++;
     }
   });
 }
 function genRain(){
+  // Tuned: moderate rainfall so some villages survive with good decisions (req #5)
   const base=getHyd('rainfall_base',18),inc=getHyd('rainfall_round_increment',8),sp=getHyd('rainfall_spread',12),spinc=getHyd('rainfall_spread_round_increment',5);
   const b=base+G.round*inc,s=sp+G.round*spinc;
   const rm=window._HYD?.rainfall_multiplier||{A:1.1,B:0.9,C:0.6};
@@ -640,42 +840,12 @@ function genRain(){
   G.rain.C=Math.round(b*rm.C+Math.random()*s*sm.C);
 }
 
-// ===================== OBSERVER MODE =====================
-function initObserverGame(){
-  G._observerActions=[]; G._observerChats=[];
-  G.round=1; G.pi=0; G.msgs=[]; G.news=[]; G.votes={}; G.hist=[]; G.totalLoss=0; G.vilHist={}; G._chatMuted=false;
-  VIL.forEach(v=>{G.ws[v]=0; G.va[v]=500; G.dams[v]=false; G.dike[v]=false; G.vm[v]={}; G.vilHist[v]=[]; G.sandbags[v]=0});
-  G.ca={A:500,B:500,C:500}; G.cd={A:0,B:0,C:0}; G.dams.A=false; G.dams.B=false; G.dams.C=false;
-  G.armyCard={A:true,B:true,C:true}; G.blasted={A:false,B:false,C:false};
-  G._upflow={}; VIL.forEach(v=>G._upflow[v]=0); G._seaDischarge=0;
-  
-  createPlayers(); 
-  genRain();
-  showScreen('S-game');
-  renderAll();
-  startTimer();
-  renderObserverDashboard();
-  
-  sysMsg('你以教师/观察者身份加入！你可通过右上角【教师管理后台】实时查看全班学生的上报数据。当前大屏将展示本机的模拟基准数据。');
-}
-
-function renderObserverDashboard(){
-  const btns = document.getElementById('act-btns');
-  const tt = document.getElementById('act-title');
-  if(!btns) return;
-  tt.textContent = '👁 教师视角 · 全局监控';
-  btns.innerHTML = `
-    <div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:8px">
-      你正在以<b style="color:var(--gd)">上帝视角</b>观察当前基准演算。<br>
-      注：本沙盘展示 AI 并行推演情况。如需查看学生真实决策历史，请前往 <b>教师管理后台</b>。
-    </div>
-    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="window.open('/admin.html', '_blank')">打开云端数据后台监控</button>
-  `;
-}
-
 // ===================== PHASE ENGINE =====================
 function startTimer(){clearInterval(G.timer);G.ts=PHT[PH[G.pi]]||20;G._tsMax=G.ts;updTimer();G.timer=setInterval(()=>{G.ts--;updTimer();if(G.ts<=0){clearInterval(G.timer);autoPhase()}},1000)}
-function updTimer(){const el=document.getElementById('g-timer');if(!el)return;el.textContent=`${String(Math.floor(G.ts/60)).padStart(2,'0')}:${String(G.ts%60).padStart(2,'0')}`;el.style.color=G.ts<=10?'var(--rd)':G.ts<=20?'var(--am)':'var(--cy)';el.style.opacity=G.ts<=5?.6+Math.abs(Math.sin(Date.now()/300))*.4:1;
+function updTimer(){const el=document.getElementById('g-timer');if(!el)return;el.textContent=`${String(Math.floor(G.ts/60)).padStart(2,'0')}:${String(G.ts%60).padStart(2,'0')}`;const pct=G._tsMax?G.ts/G._tsMax:1;el.style.color=G.ts<=10?'var(--rd)':G.ts<=20?'var(--am)':'var(--cy)';el.style.opacity=G.ts<=5?.6+Math.abs(Math.sin(Date.now()/300))*.4:1;
+  // 感官压力：最后10秒tick音效（440→880Hz递增）
+  if(G.ts<=10&&G.ts>0)playTick(440+((10-G.ts)/10)*440);
+  // 危险边框：任意村庄水位>80%阈值
   const sg=document.getElementById('S-game');
   if(sg)sg.classList.toggle('danger-border',VIL.some(v=>G.ws[v]>FT[v]*0.8&&G.ws[v]<FT[v]));
 }
@@ -683,6 +853,7 @@ function advancePhase(){clearInterval(G.timer);closeMo();execPhase(PH[G.pi]);G.p
 function autoPhase(){const p=PH[G.pi];if(p==='VIL_DISCUSS'&&G.role&&G.role.startsWith('VIL_')&&!G.vm[G.vil]?.human){G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=false;sysMsg('时间到！系统默认你选择"暂不搬迁"。')}advancePhase()}
 function execPhase(p){
   if(p==='WEATHER'){sysMsg(`【天气预报】北京降水${G.rain.A}mm | 河北降水${G.rain.B}mm | 天津降水${G.rain.C}mm`);
+    // 黑天鹅通讯中断事件（第3-5轮，30%概率）
     if(G.round>=3&&G.round<=5&&Math.random()<0.3)setTimeout(()=>triggerBlackout(),2000)}
   else if(p==='VIL_DISCUSS'){aiVilDiscuss();let mc=0,sc=0;VIL.forEach(v=>{Object.values(G.vm[v]||{}).forEach(m=>{if(m)mc++;else sc++})});sysMsg(`【村民表决完成】搬迁${mc}人，留守${sc}人。`)}
   else if(p==='LEADER_BUILD'){aiLeaderBuild()}
@@ -690,18 +861,192 @@ function execPhase(p){
   else if(p==='COMPUTE'){computeFlood()}
 }
 
-// ===================== AI DISCUSSION & PANIC =====================
+// ===================== AI DISCUSSION =====================
+// 动态模板插值函数
+function fillTpl(tpl,ctx){return tpl.replace(/\{(\w+)\}/g,(_,k)=>ctx[k]!=null?ctx[k]:'')}
+
 const DISCUSS_TEMPLATES={
-  worried:['水涨得太快了，拒马河已经漫堤了，必须搬！','看这雨势比63年还猛，不搬怕来不及。','上游来水量太大，涿州那边已经淹成一片。','院子已经进水了，再不走来不及！','预警都红色了，赶紧往高处转移！'],
-  calm:['先别慌，大坝还撑得住，看看再说。','年年都说洪水，别自己吓自己。','搬了要是没淹，白损失30万。','水库在拦水呢，84座水库都在调度。','63年那次都挺过来了。'],
-  leader_warn:['各位注意！水位持续上涨，建议做好转移准备。','已向镇里申请救援，大家先把贵重物品搬到高处。','蓄滞洪区可能启用，赶紧准备。'],
-  leader_calm:['目前水位可控，不必恐慌。','上级已在协调水库调度，暂不需全村搬迁。'],
-  rumor:['听说上游水库已关闭泄洪，水马上就退！','政府不会启用咱们蓄滞洪区，放心！','这次洪水顶多到膝盖。','别信预警，每年都发，哪年真淹了？'],
-  stay_elder:['我在这住了一辈子了，死也要死在家里！','63年那场大水我都挺过来了！','搬什么搬？鸡鸭牛羊怎么办？','年轻人不懂，水过两天就退。'],
-  agree:['说得有道理。','我同意。','对，我也这么想。'],
-  question:['上游泄洪量到底多少？','蓄滞洪区启用了没？','市长排洪方案定了吗？','村长，救援船到了吗？'],
-  panic_high:['完了完了，水要漫上来了！快跑！','来不及了！赶紧撤！什么都别带了！','隔壁村都淹了！我们这也撑不住！','天啊这水势太猛了，跑啊！！','听说上游又在泄洪，我们肯定完了！'],
-  rational:['根据当前水位数据，暂不需恐慌，阈值还有余量。','水文监测显示流量在可控范围内，建议冷静分析。','大家别被情绪带节奏，看实际水位数据再做决定。','从水文角度看，排洪调度正在发挥作用，不必过度恐慌。'],
+  worried:[
+    '水涨得太快了，拒马河已经漫堤了，必须搬！',
+    '看这雨势比63年还猛，不搬怕来不及。',
+    '上游来水量太大，涿州那边已经淹成一片。',
+    '院子已经进水了，再不走来不及！',
+    '预警都红色了，赶紧往高处转移！',
+    '水位已经{water}了，阈值才{thresh}，还差{margin}就淹了！',
+    '这轮降雨{rain}毫米，比上轮还猛，不走就晚了！',
+    '刚才看到{neighbor}那边水都漫上来了，咱们迟早也得淹。',
+    '我家一楼已经泡了，再不走二楼也保不住。',
+    '上游排了{drain}单位过来，加上降雨，肯定超阈值了！',
+    '隔壁{neighbor}已经过阈值了，咱们还能撑多久？',
+    '我看村资产都快归零了，再损失下去全完。',
+  ],
+  calm:[
+    '先别慌，大坝还撑得住，看看再说。',
+    '年年都说洪水，别自己吓自己。',
+    '搬了要是没淹，白损失30万。',
+    '水库在拦水呢，84座水库都在调度。',
+    '63年那次都挺过来了。',
+    '当前水位才{water}，阈值是{thresh}，还有{margin}的余量呢。',
+    '上轮也是这么喊，结果没淹，白搬白亏。',
+    '降雨{rain}毫米不算特别大，别被情绪带节奏。',
+    '沙袋已经挡了{sb}单位水量，压力没那么大。',
+    '大坝都修了，能拦30单位，别慌。',
+    '水位才到阈值的{pct}%，还早呢。',
+    '先等等村长消息，别乱决策。',
+  ],
+  leader_warn:[
+    '各位注意！水位持续上涨，建议做好转移准备。',
+    '已向镇里申请救援，大家先把贵重物品搬到高处。',
+    '蓄滞洪区可能启用，赶紧准备。',
+    '水位{water}已达阈值{pct}%，全村注意防范！',
+    '上游来水{drain}单位，沙袋只能挡{sb}，缺口很大，建议撤离。',
+  ],
+  leader_calm:[
+    '目前水位可控，不必恐慌。',
+    '上级已在协调水库调度，暂不需全村搬迁。',
+    '目前水位{water}，阈值{thresh}，余量{margin}，暂时安全。',
+    '已部署{sb}单位沙袋屏障，防线稳固，大家安心。',
+  ],
+  leader_data:[
+    '各位，当前水情通报：水位{water}/{thresh}({pct}%)，沙袋{sb}单位就位，村资产余额{va}。',
+    '本轮降雨{rain}mm，上游排洪{drain}单位，沙袋抵挡{sb}，剩余压力约{pressure}。',
+    '向上级报告：{village}水位{pct}%，请求增派物资支援。',
+  ],
+  rumor:[
+    '听说上游水库已关闭泄洪，水马上就退！',
+    '政府不会启用咱们蓄滞洪区，放心！',
+    '这次洪水顶多到膝盖。',
+    '别信预警，每年都发，哪年真淹了？',
+    '我有内部消息，市长说了不让咱们这片淹。',
+    '上面领导说了，咱们村是重点保护对象。',
+    '我听说解放军马上就到了，水位很快就能控制住。',
+  ],
+  stay_elder:[
+    '我在这住了一辈子了，死也要死在家里！',
+    '63年那场大水我都挺过来了！',
+    '搬什么搬？鸡鸭牛羊怎么办？',
+    '年轻人不懂，水过两天就退。',
+    '我种了一辈子地，地要是泡了我活着还有啥意思。',
+    '上回也说要淹，结果呢？白忙活一场。',
+    '我腿脚不好，走不了路，就待家里了。',
+  ],
+  agree:['说得有道理。','我同意。','对，我也这么想。','没错，我也有同感。','赞同，就这么办。'],
+  question:[
+    '上游泄洪量到底多少？',
+    '蓄滞洪区启用了没？',
+    '市长排洪方案定了吗？',
+    '村长，救援船到了吗？',
+    '现在水位到底多少了？谁有确切数据？',
+    '安置点在哪里？生活物资够不够？',
+    '有没有人联系上镇里的人？',
+    '大坝修了没有？能挡多少？',
+  ],
+  panic_high:[
+    '完了完了，水要漫上来了！快跑！',
+    '来不及了！赶紧撤！什么都别带了！',
+    '隔壁村都淹了！我们这也撑不住！',
+    '天啊这水势太猛了，跑啊！！',
+    '听说上游又在泄洪，我们肯定完了！',
+    '水位{water}都快到{thresh}了！还等什么！',
+    '我看到河水已经漫堤了！所有人快上二楼！',
+    '村资产都亏成{va}了，整个村都要破产了！',
+  ],
+  rational:[
+    '根据当前水位数据，暂不需恐慌，阈值还有余量。',
+    '水文监测显示流量在可控范围内，建议冷静分析。',
+    '大家别被情绪带节奏，看实际水位数据再做决定。',
+    '从水文角度看，排洪调度正在发挥作用，不必过度恐慌。',
+    '当前水位{water}，阈值{thresh}，占比{pct}%。按这个趋势，{forecast}。',
+    '上游排洪{drain}单位，经沙袋削减{sb}后，实际入村约{net}。数据上看{assessment}。',
+    '从历史数据看，前{prevRounds}轮水位变化趋势是{trend}，本轮新增降雨{rain}mm。',
+    '综合分析：降雨{rain}+上游{drain}-沙袋{sb}=净增约{net}，距阈值{margin}，{conclusion}。',
+  ],
+  // ========== 新增：群体决策学习模板 ==========
+  experience_loss:[
+    '上轮我留守结果亏了{lastLoss}万，这次说什么我也要搬！',
+    '大家别忘了第{lastRound}轮，水位一下子涨上去，留守的全亏了{lastLoss}万。',
+    '有了上回的教训，我不敢再赌了。损失{lastLoss}万太心疼了。',
+    '我已经亏了{totalLoss}万了，再亏下去就真破产了，必须搬！',
+    '上轮{village}就是因为大意才被淹的，这次可不能再犯同样的错。',
+  ],
+  experience_safe:[
+    '上轮水位才{lastWater}，最后也没淹，别太紧张。',
+    '前几轮都安全过来了，这轮降雨差不多，应该没事。',
+    '第{lastRound}轮那些搬的白亏了30万，留守的反而赚了。',
+    '别听风就是雨，上轮也是喊淹喊淹，结果水位只到{lastWater}。',
+  ],
+  cross_village:[
+    '听说{neighbor}水位已经{nwater}了，超过阈值{nthresh}了！他们那边全淹了。',
+    '{neighbor}的人说水都到腰了，咱们这迟早也要涨上来。',
+    '刚从{neighbor}传来的消息，他们村长下了撤离令！',
+    '上游{neighbor}已经决堤了，洪水正往咱们这边冲。',
+    '{neighbor}那边有人没来得及撤，被困二楼了！',
+  ],
+  persuade:[
+    '你想想上轮的教训，{lastLoss}万就这么没了，还不长记性？',
+    '老{target}，别犟了，水位都{pct}%了，再等就来不及了！',
+    '大家冷静想想，搬最多损30，不搬被淹损50，怎么算都该搬。',
+    '带上身份证和值钱的东西，先走为安，保命要紧。',
+    '你看看大家都在走了，别当最后一个被困在村里的人。',
+  ],
+  disagree:[
+    '@{target}：你说63年挺过来了，但这次降雨是那时候的{mult}倍啊！',
+    '@{target}：别光凭经验，数据说水位已经到{pct}%了。',
+    '@{target}：你说没事，但上轮也有人说没事，结果亏了{lastLoss}万。',
+    '@{target}：情况跟你说的不一样，上游排洪{drain}单位呢！',
+    '我不同意，{target}你太乐观了，看看实际水位再说。',
+  ],
+  opinion_change:[
+    '本来我想留的，但看这水位涨速…还是搬吧，安全第一。',
+    '我改主意了。刚才看到{neighbor}已经淹了，不走不行。',
+    '算了，大家都搬我也搬吧，落单更危险。',
+    '原本觉得没事的，但村长说的有道理，撤吧。',
+    '我一开始不想搬，但上轮亏了{lastLoss}万让我学聪明了。',
+    '听了水文员的分析，我决定还是搬了。数据不会骗人。',
+  ],
+  regret:[
+    '早知道上轮就该搬了…白白损失{lastLoss}万。',
+    '后悔啊，当时要是听了那个要搬的人的话就好了。',
+    '都怪我太大意，损失了{totalLoss}万，个人资产就剩{pa}了。',
+  ],
+  weather_react:[
+    '降雨{rain}毫米！比上轮的{prevRain}毫米还大，情况不妙。',
+    '北京降{rainA}、河北降{rainB}、天津降{rainC}…上游雨越大，咱们越危险。',
+    '这雨量一轮比一轮大，第{round}轮已经到{rain}毫米了，趋势不好。',
+    '上游{rain}毫米的降雨量，排洪压力肯定很大，咱们准备好了吗？',
+    '又下雨了…第{round}轮了，什么时候才是个头啊。',
+    '这轮降雨量不算特别大，才{rain}毫米，别紧张。',
+  ],
+  mayor_react_down:[
+    '上游又往下排洪了！市长光顾自己，咱们下游遭殃。',
+    '上游排了{drain}单位过来，这不是要把咱们淹了吗！',
+    '凭什么上游一排洪就排到我们这边？太不公平了。',
+    '市长排洪{drain}单位，加上本地降雨，压力太大了。',
+  ],
+  leader_react:[
+    '村长沙袋够不够啊？只有{sb}单位，水量那么大。',
+    '有沙袋挡着我就放心了，{sb}单位应该够用。',
+    '村长投了{sb}万买沙袋，这钱花得值。',
+    '村长辛苦了，沙袋防线能撑住吗？',
+  ],
+  compute_flood:[
+    '完了…{village}水位{water}超过阈值{thresh}了，被淹了！',
+    '我就说要搬吧！现在淹了，损失更大！',
+    '唉…{village}真的被淹了，损失了{dmg}万。',
+    '又淹了…第{count}次了，到底什么时候是个头。',
+  ],
+  compute_safe:[
+    '还好还好，这轮挺过来了。水位{water}，没到{thresh}。',
+    '虚惊一场，差{margin}就淹了，太悬了。',
+    '安全！但下轮降雨可能更大，不能掉以轻心。',
+    '活着真好…不过隔壁{neighbor}没那么幸运。',
+  ],
+  minority_defend:[
+    '你们都走了，但我不信会淹！',
+    '随便你们怎么说，我不走，我的判断不会错。',
+    '跟风搬迁的才是傻子，白亏30万！',
+    '大家冷静点行不行？别一窝蜂全跑了。',
+  ],
 };
 const PANIC_KEYWORDS=['淹','跑','决堤','完了','快逃','不行了','救命','冲毁','漫堤','溃坝'];
 
@@ -710,16 +1055,28 @@ function updatePanic(){
     const w=G.ws[v],th=FT[v],ratio=w/th;
     const cityVils=VFLOW[v[0]]||[];
     const neighborFlooded=cityVils.some(nv=>nv!==v&&G.ws[nv]>=FT[nv]);
+
+    // 扫描本村频道+全体频道最近消息中的恐慌关键词
     const vilMsgs=G.msgs.filter(m=>(m.ch==='ALL'||(m.ch==='VIL'&&m.vil===v))).slice(-20).map(m=>m.ct||'').join('');
     const keywordHits=PANIC_KEYWORDS.filter(k=>vilMsgs.includes(k)).length;
-    const vils=G.players.filter(p=>p.vil===v&&p.bot&&!(p.role||'').startsWith('LEADER_')&&!(p.role||'').startsWith('MAYOR_'));
+
+    const vils=G.players.filter(p=>p.vil===v&&p.bot&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_'));
     vils.forEach(p=>{
-      if(p.spec==='RATIONAL'){p.panic=Math.round(ratio*50);return;}
+      if(p.spec==='RATIONAL'){
+        // 理性水文员：纯数据驱动
+        p.panic=Math.round(ratio*50);
+        return;
+      }
+      // 关键词影响（仅本村相关消息）
       if(keywordHits>0)p.panic+=(keywordHits*8);
+      // 水位影响
       if(ratio>0.7)p.panic+=10;
       if(ratio>1.0)p.panic+=15;
+      // 邻村被淹
       if(neighborFlooded)p.panic+=20;
+      // 自然衰减
       p.panic-=5;
+      // 特殊NPC上限
       if(p.spec==='STAY')p.panic=Math.min(p.panic,30);
       p.panic=clamp(p.panic,0,100);
     });
@@ -728,47 +1085,251 @@ function updatePanic(){
 
 function aiVilDiscuss(){
   updatePanic();
+  // 经验学习：根据memory调整panic
+  G.players.filter(p=>p.bot).forEach(p=>{
+    if(!p.memory||!p.memory.length)return;
+    const lastM=p.memory[p.memory.length-1];
+    if(lastM.flooded&&!lastM.moved)p.panic=Math.min(100,(p.panic||20)+15); // 上轮被淹没搬→更恐慌
+    if(lastM.flooded&&lastM.moved)p.panic=Math.min(100,(p.panic||20)+5);   // 上轮被淹但搬了→略恐慌
+    if(!lastM.flooded&&lastM.moved)p.panic=Math.max(0,(p.panic||20)-8);    // 上轮没淹但搬了→降恐慌(白搬)
+    if(!lastM.flooded&&!lastM.moved)p.panic=Math.max(0,(p.panic||20)-5);   // 上轮没淹没搬→降恐慌
+    if(p.spec==='STAY')p.panic=Math.min(p.panic,30);
+  });
+
   VIL.forEach(v=>{G.vm[v]=G.vm[v]||{};const w=G.ws[v],th=FT[v],ratio=w/th;
-  const vils=G.players.filter(p=>p.vil===v&&p.bot&&!(p.role||'').startsWith('LEADER_')&&!(p.role||'').startsWith('MAYOR_'));
+  const cityVils=VFLOW[v[0]]||[];
+  const neighborV=cityVils.filter(nv=>nv!==v);
+  const neighborInfo=neighborV.map(nv=>({v:nv,w:G.ws[nv],th:FT[nv],fl:G.ws[nv]>=FT[nv]}));
+  const anyNeighborFlooded=neighborInfo.some(n=>n.fl);
+  const c=v[0];
+
+  // 构建上下文对象，供模板插值
+  const ctx={
+    water:w.toFixed(0), thresh:th, margin:(th-w).toFixed(0), pct:(ratio*100).toFixed(0),
+    rain:G.rain[c], rainA:G.rain.A, rainB:G.rain.B, rainC:G.rain.C,
+    drain:G.cd[c]||0, sb:G.sandbags[v]||0, va:Math.round(G.va[v]),
+    village:VN[v], round:G.round, net:Math.max(0,Math.round(G.rain[c]*0.35+(G._upflow?.[v]||0)-(G.sandbags[v]||0))),
+    pressure:Math.max(0,Math.round(G.rain[c]*0.35+(G._upflow?.[v]||0)-(G.sandbags[v]||0))),
+    neighbor:neighborV.length?VN[neighborV[0]]:'',
+    nwater:neighborV.length?G.ws[neighborV[0]].toFixed(0):'',
+    nthresh:neighborV.length?FT[neighborV[0]]:'',
+    forecast:ratio>0.8?'可能超阈值':ratio>0.5?'需密切关注':'暂时安全',
+    assessment:ratio>0.7?'压力较大':'尚在可控范围',
+    conclusion:ratio>0.8?'建议撤离':ratio>0.5?'建议做好准备':'暂可观望',
+    trend:G.round>1?'逐轮上升':'首轮', prevRounds:Math.max(1,G.round-1),
+    mult:(G.round>=2?(G.rain[c]/Math.max(1,G.rain[c]-8)).toFixed(1):'1.5'),
+  };
+
+  const vils=G.players.filter(p=>p.vil===v&&p.bot&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_'));
   const ld=G.players.find(p=>p.role==='LEADER_'+v);
-  if(ld&&ld.bot){const ms=ratio>0.5?DISCUSS_TEMPLATES.leader_warn:DISCUSS_TEMPLATES.leader_calm;setTimeout(()=>aiChat(ld.nm,v,pick(ms),'村长'),300+Math.random()*800)}
+
+  // ---- 村长发言：引用实际数据 ----
+  if(ld&&ld.bot){
+    let ldMsg;
+    if(ratio>0.7){
+      ldMsg=fillTpl(pick(DISCUSS_TEMPLATES.leader_warn),ctx);
+    }else if(ratio>0.4){
+      ldMsg=fillTpl(pick(DISCUSS_TEMPLATES.leader_data),ctx);
+    }else{
+      ldMsg=fillTpl(pick(DISCUSS_TEMPLATES.leader_calm),ctx);
+    }
+    setTimeout(()=>aiChat(ld.nm,v,ldMsg,'村长'),300+Math.random()*800);
+  }
+
+  // ---- 三波讨论模拟 ----
+  const shuffled=shuffle(vils);
+  const n=shuffled.length;
+  const wave1=shuffled.slice(0,Math.max(1,Math.ceil(n*0.2)));  // 先驱 20%
+  const wave2=shuffled.slice(wave1.length,wave1.length+Math.max(1,Math.ceil(n*0.5)));  // 跟随 50%
+  const wave3=shuffled.slice(wave1.length+wave2.length);  // 犹豫者 30%
+
   const decided={};
-  const spk=shuffle(vils).slice(0,Math.min(vils.length,2+Math.floor(Math.random()*3)));
-  vils.forEach((p,i)=>{
+  const chatLog=[]; // 本轮讨论记录，用于@引用
+
+  function getMemCtx(p){
+    const mem=p.memory||[];
+    const last=mem.length?mem[mem.length-1]:null;
+    const totalLoss=mem.reduce((s,m)=>s+m.personalLoss,0);
+    const floodCount=mem.filter(m=>m.flooded).length;
+    return{
+      lastLoss:last?last.personalLoss:0, lastRound:last?last.round:0,
+      lastWater:last?last.water:0, totalLoss, floodCount,
+      pa:G.pa[p.id]||100, target:'', prevRain:G.round>1?Math.max(10,G.rain[c]-8):0,
+      count:floodCount,
+    };
+  }
+
+  function decideAndSpeak(p,waveIdx,speakDelay){
+    const mCtx={...ctx,...getMemCtx(p)};
+    // ---- 决策 ----
     let pm;
-    if(p.spec==='RATIONAL'){ pm=ratio>0.8?0.85:ratio>0.5?0.3:0.05; }
-    else if(p.spec==='STAY'){ pm=p.panic>25?0.15:0.03; }
-    else{
+    if(p.spec==='RATIONAL'){
+      pm=ratio>0.8?0.85:ratio>0.5?0.3:0.05;
+    }else if(p.spec==='STAY'){
+      pm=p.panic>25?0.15:0.03;
+      // 经验修正：上轮被淹过→STAY也会有更高概率搬
+      const mem=p.memory||[];
+      if(mem.some(m=>m.flooded&&!m.moved))pm=Math.min(0.35,pm+0.12);
+    }else{
       const panicBase=(p.panic||20)/100;
+      // 从众效应
       const movedCount=Object.values(decided).filter(x=>x).length;
       const totalDecided=Math.max(1,Object.keys(decided).length);
-      const herdEffect=(movedCount/totalDecided)*(p.conformity||40)/100*0.3;
-      pm=clamp(panicBase+herdEffect,0.05,0.95);
+      const herdRatio=movedCount/totalDecided;
+      const herdEffect=herdRatio*(p.conformity||40)/100*(waveIdx===0?0.1:waveIdx===1?0.25:0.4);
+      // 经验修正
+      let expMod=0;
+      const mem=p.memory||[];
+      if(mem.some(m=>m.flooded&&!m.moved))expMod+=0.15;
+      if(mem.some(m=>!m.flooded&&m.moved))expMod-=0.08;
+      pm=clamp(panicBase+herdEffect+expMod,0.05,0.95);
     }
-    const mv=Math.random()<pm;G.vm[v][p.id]=mv;decided[p.id]=mv;
-    if(Object.values(decided).filter(x=>x).length>=3){
-      vils.filter(pp=>!decided[pp.id]&&pp.spec!=='STAY'&&pp.spec!=='RATIONAL').forEach(pp=>{pp.conformity=Math.min(100,(pp.conformity||40)+25)});
-    }
-    if(spk.includes(p)){let msg;
-      if(p.spec==='RUMOR')msg=pick(DISCUSS_TEMPLATES.rumor);
-      else if(p.spec==='STAY')msg=pick(DISCUSS_TEMPLATES.stay_elder);
-      else if(p.spec==='RATIONAL'){ msg=pick(DISCUSS_TEMPLATES.rational).replace('阈值还有余量',`当前水位${w.toFixed(0)}/阈值${th}(${(ratio*100).toFixed(0)}%)`);}
-      else if(p.panic>70)msg=pick(DISCUSS_TEMPLATES.panic_high);
-      else if(mv)msg=pick(DISCUSS_TEMPLATES.worried);
-      else msg=Math.random()<.3?pick(DISCUSS_TEMPLATES.question):pick(DISCUSS_TEMPLATES.calm);
-      const label=p.spec==='STAY'?'村民(老人)':p.spec==='RATIONAL'?'水文员':'村民';
-      setTimeout(()=>aiChat(p.nm,v,msg,label),800+i*600+Math.random()*1000)}});
-  if(spk.length>=2)setTimeout(()=>aiChat(spk[spk.length-1].nm,v,pick(DISCUSS_TEMPLATES.agree),'村民'),spk.length*600+2000+Math.random()*800)})}
+    const mv=Math.random()<pm;
+    G.vm[v][p.id]=mv;decided[p.id]=mv;
 
+    // 从众级联：如果3+人撤离，提升其余人的从众值
+    if(Object.values(decided).filter(x=>x).length>=3){
+      vils.filter(pp=>!decided[pp.id]&&pp.spec!=='STAY'&&pp.spec!=='RATIONAL').forEach(pp=>{pp.conformity=Math.min(100,(pp.conformity||40)+20)});
+    }
+
+    // ---- 发言选择 ----
+    // 判断是否为多数/少数派
+    const movedSoFar=Object.values(decided).filter(x=>x).length;
+    const totalSoFar=Object.keys(decided).length;
+    const majorityMoves=movedSoFar/totalSoFar>0.6;
+    const majorityStays=(totalSoFar-movedSoFar)/totalSoFar>0.6;
+    const isMinority=(mv&&majorityStays)||(!mv&&majorityMoves);
+
+    let msg=null;
+    const mem=p.memory||[];
+    const hadFloodLoss=mem.some(m=>m.flooded&&!m.moved);
+    const hadSafeStay=mem.some(m=>!m.flooded&&!m.moved);
+
+    if(p.spec==='RUMOR'){
+      msg=fillTpl(pick(DISCUSS_TEMPLATES.rumor),mCtx);
+    }else if(p.spec==='STAY'){
+      if(hadFloodLoss&&Math.random()<0.4){
+        msg=fillTpl(pick(DISCUSS_TEMPLATES.opinion_change),mCtx);
+      }else{
+        msg=fillTpl(pick(DISCUSS_TEMPLATES.stay_elder),mCtx);
+      }
+    }else if(p.spec==='RATIONAL'){
+      msg=fillTpl(pick(DISCUSS_TEMPLATES.rational),mCtx);
+    }else{
+      // 根据波次和上下文选择发言类型
+      const msgPool=[];
+
+      // 经验发言（有历史记忆时优先）
+      if(hadFloodLoss&&Math.random()<0.6)msgPool.push(...DISCUSS_TEMPLATES.experience_loss);
+      if(hadSafeStay&&!mv&&Math.random()<0.5)msgPool.push(...DISCUSS_TEMPLATES.experience_safe);
+
+      // 跨村情报
+      if(anyNeighborFlooded&&Math.random()<0.5)msgPool.push(...DISCUSS_TEMPLATES.cross_village);
+
+      // 意见转变（第2、3波且方向与个人初始倾向相反）
+      if(waveIdx>=1&&mv&&(p.panic||20)<40&&Math.random()<0.4)msgPool.push(...DISCUSS_TEMPLATES.opinion_change);
+
+      // 少数派防御
+      if(isMinority&&Math.random()<0.5)msgPool.push(...DISCUSS_TEMPLATES.minority_defend);
+
+      // @引用反驳（与最近发言者panic差距>25）
+      if(chatLog.length>0&&Math.random()<0.35){
+        const recent=chatLog[chatLog.length-1];
+        const recentP=vils.find(pp=>pp.nm===recent.nm);
+        if(recentP&&Math.abs((p.panic||20)-(recentP.panic||20))>25){
+          mCtx.target=recent.nm;
+          msgPool.push(...DISCUSS_TEMPLATES.disagree);
+        }
+      }
+
+      // 说服他人
+      if(mv&&p.panic>50&&chatLog.some(cl=>!cl.moved)&&Math.random()<0.3){
+        const stayer=chatLog.find(cl=>!cl.moved);
+        if(stayer)mCtx.target=stayer.nm;
+        msgPool.push(...DISCUSS_TEMPLATES.persuade);
+      }
+
+      // 基础发言
+      if(p.panic>70)msgPool.push(...DISCUSS_TEMPLATES.panic_high);
+      else if(mv)msgPool.push(...DISCUSS_TEMPLATES.worried);
+      else msgPool.push(...(Math.random()<0.3?DISCUSS_TEMPLATES.question:DISCUSS_TEMPLATES.calm));
+
+      msg=fillTpl(pick(msgPool.length?msgPool:DISCUSS_TEMPLATES.calm),mCtx);
+    }
+
+    chatLog.push({nm:p.nm,moved:mv,panic:p.panic||20});
+
+    const label=p.spec==='STAY'?'村民(老人)':p.spec==='RATIONAL'?'水文员':p.spec==='RUMOR'?'村民(消息灵通)':'村民';
+    setTimeout(()=>aiChat(p.nm,v,msg,label),speakDelay);
+  }
+
+  // 控制每波只有部分人发言，其余只做决策不说话
+  let delay=800;
+  // 第1波：先驱者（全部发言）
+  wave1.forEach((p,i)=>{
+    decideAndSpeak(p,0,delay+i*700+Math.random()*600);
+  });
+  delay+=wave1.length*700+800;
+
+  // 第2波：跟随者（60%发言）
+  wave2.forEach((p,i)=>{
+    const speaks=Math.random()<0.6;
+    if(speaks){
+      decideAndSpeak(p,1,delay+i*600+Math.random()*500);
+    }else{
+      // 只做决策不发言
+      let pm;
+      if(p.spec==='RATIONAL')pm=ratio>0.8?0.85:ratio>0.5?0.3:0.05;
+      else if(p.spec==='STAY')pm=p.panic>25?0.15:0.03;
+      else{
+        const panicBase=(p.panic||20)/100;
+        const movedCount=Object.values(decided).filter(x=>x).length;
+        const totalDecided=Math.max(1,Object.keys(decided).length);
+        const herdEffect=(movedCount/totalDecided)*(p.conformity||40)/100*0.25;
+        let expMod=0;const mem=p.memory||[];
+        if(mem.some(m=>m.flooded&&!m.moved))expMod+=0.15;
+        if(mem.some(m=>!m.flooded&&m.moved))expMod-=0.08;
+        pm=clamp(panicBase+herdEffect+expMod,0.05,0.95);
+      }
+      G.vm[v][p.id]=Math.random()<pm;decided[p.id]=G.vm[v][p.id];
+    }
+  });
+  delay+=wave2.length*600+600;
+
+  // 第3波：犹豫者（40%发言，从众最大化）
+  wave3.forEach((p,i)=>{
+    const speaks=Math.random()<0.4;
+    if(speaks){
+      decideAndSpeak(p,2,delay+i*600+Math.random()*500);
+    }else{
+      let pm;
+      if(p.spec==='RATIONAL')pm=ratio>0.8?0.85:ratio>0.5?0.3:0.05;
+      else if(p.spec==='STAY')pm=p.panic>25?0.15:0.03;
+      else{
+        const panicBase=(p.panic||20)/100;
+        const movedCount=Object.values(decided).filter(x=>x).length;
+        const totalDecided=Math.max(1,Object.keys(decided).length);
+        const herdEffect=(movedCount/totalDecided)*(p.conformity||40)/100*0.4;
+        let expMod=0;const mem=p.memory||[];
+        if(mem.some(m=>m.flooded&&!m.moved))expMod+=0.15;
+        if(mem.some(m=>!m.flooded&&m.moved))expMod-=0.08;
+        pm=clamp(panicBase+herdEffect+expMod,0.05,0.95);
+      }
+      G.vm[v][p.id]=Math.random()<pm;decided[p.id]=G.vm[v][p.id];
+    }
+  });
+  });
+}
 function aiLeaderBuild(){VIL.forEach(v=>{const ld=G.players.find(p=>p.role==='LEADER_'+v&&p.bot);if(!ld)return;const w=G.ws[v]+G.rain[v[0]]*.5;
   const ratio=w/FT[v];if(ratio>0.4&&G.va[v]>=10){const amt=Math.min(Math.round(10+ratio*40),50,G.va[v]);G.sandbags[v]=amt;G.va[v]-=amt;sysMsg(`${ld.nm}(${VN[v]}村长)投入${amt}万购置沙袋防洪屏障，可抵挡${amt}单位水量。`)}})}
-
 function aiMayorDrain(){['A','B','C'].forEach(c=>{const m=G.players.find(p=>p.role==='MAYOR_'+c&&p.bot);if(!m)return;
   const vf=VFLOW[c],tw=vf.reduce((s,v)=>s+G.ws[v],0)+G.rain[c];let d;
   if(c==='A')d=Math.min(tw,tw*(.3+Math.random()*.25));else if(c==='B')d=Math.min(tw*.65,tw*(.25+Math.random()*.3));else d=Math.min(getHyd('max_drain_C',85),tw*(.35+Math.random()*.3));
   G.cd[c]=Math.round(d);
   if(tw>50&&G.ca[c]>=30&&Math.random()<.4){G.dams[c]=true;sysMsg(`${m.nm}(${CN[c]}市长)修建大坝拦水30。`)}
+  // AI may blast an existing dam to release water downstream
   if(G.dams[c]&&tw<30&&G.ca[c]>=20&&Math.random()<.2){G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 ${m.nm}(${CN[c]}市长)炸坝释放拦截水量至下游！花费20。`)}
+  // Army card: one-time use, clears ALL water to zero, resets defense
   if(G.armyCard[c]&&tw>65&&Math.random()<.25){G.armyCard[c]=false;vf.forEach(v=>{G.ws[v]=0;G.sandbags[v]=0;G.dams[v]=false;G.dike[v]=false});G.dams[c]=false;sysMsg(`🚁 ${m.nm}(${CN[c]}市长)动用解放军救援牌！所有村庄水位清零，防御重置！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！全面清零水位！`)}
   sysMsg(`${m.nm}(${CN[c]}市长)排洪${G.cd[c]}单位${c!=='C'?'至下游':'入海'}。`)})}
 
@@ -780,10 +1341,12 @@ function computeFlood(){
   const iflow=window._HYD?.inter_city_flow||[0.5,0.3,0.2];
   const prevWs={};VIL.forEach(v=>prevWs[v]=G.ws[v]);
   const wi={};VIL.forEach(v=>wi[v]=0);
+  // Distribute rain within each city
   ['A','B','C'].forEach(c=>{
     const vf=VFLOW[c];
     vf.forEach((v,i)=>{wi[v]+=G.rain[c]*(rdist[i]||0.33)});
   });
+  // Intra-city cascade: within each city, water flows top->bottom per VFLOW
   ['A','B','C'].forEach(c=>{
     const vf=VFLOW[c];
     for(let i=0;i<vf.length-1;i++){
@@ -792,19 +1355,21 @@ function computeFlood(){
       if(excess>0){wi[dst]+=excess;wi[src]-=excess}
     }
   });
+  // Inter-city drain: A->B, B->C
   const ad=Math.min(G.cd.A,(G.ws[VFLOW.A[2]]+wi[VFLOW.A[2]])*0.8);
   if(G.dams.A)wi[VFLOW.A[2]]-=Math.min(30,wi[VFLOW.A[2]]);
   VFLOW.B.forEach((v,i)=>{wi[v]+=ad*(iflow[i]||0.33)});
   const bd=Math.min(G.cd.B,(G.ws[VFLOW.B[2]]+wi[VFLOW.B[2]])*0.7);
   if(G.dams.B)wi[VFLOW.B[2]]-=Math.min(30,wi[VFLOW.B[2]]);
   VFLOW.C.forEach((v,i)=>{wi[v]+=bd*(iflow[i]||0.33)});
-  
+  // Apply sandbag barriers per village (blocks water, excess flows downstream)
   ['A','B','C'].forEach(c=>{
     const vf=VFLOW[c];
     vf.forEach((v,i)=>{
       if(G.sandbags[v]>0){const bl=Math.min(G.sandbags[v],wi[v]);wi[v]-=bl;if(i<vf.length-1)wi[vf[i+1]]+=Math.max(0,bl*0.3)}
     });
   });
+  // Apply dikes (flood detention zones drain to next downstream village)
   ['A','B','C'].forEach(c=>{
     const vf=VFLOW[c];
     vf.forEach((v,i)=>{
@@ -814,14 +1379,18 @@ function computeFlood(){
       }
     });
   });
+  // Dam blast: if a city dam was blasted, its blocked water releases downstream
   ['A','B','C'].forEach(c=>{
     if(G.blasted[c]){const vf=VFLOW[c];const last=vf[vf.length-1];wi[last]+=30}
   });
-  const c3v=VFLOW.C[2]; 
+  // Sea discharge cap on C3
+  const c3v=VFLOW.C[2]; // C3
   let cdr=Math.min(G.cd.C,getHyd('max_drain_C',85));
+  // Update water levels with natural decay
   VIL.forEach(v=>{
     let newW=G.ws[v]+wi[v];
     if(v===c3v){
+      // Sea cap: only seaCap can exit per round
       const seaOut=Math.min(seaCap,newW*0.4+cdr*0.3);
       newW=Math.max(0,(newW-seaOut)*decay);
       G._seaDischarge=seaOut;
@@ -834,6 +1403,7 @@ function computeFlood(){
   VFLOW.B.forEach((v,i)=>{G._upflow[v]=ad*(iflow[i]||0.33)});
   VFLOW.C.forEach((v,i)=>{G._upflow[v]=bd*(iflow[i]||0.33)});
   VFLOW.A.forEach(v=>{G._upflow[v]=0});
+  // Detect newly flooded villages for shake animation
   G._justFlooded=G._justFlooded||{};
   VIL.forEach(v=>{
     if(prevWs[v]<FT[v]&&G.ws[v]>=FT[v]){
@@ -841,11 +1411,12 @@ function computeFlood(){
       setTimeout(()=>{delete G._justFlooded[v];renderMap()},1500);
     }
   });
+  // Calculate losses
   let summary='【本轮水情结算】\n',roundLoss=0;
   VIL.forEach(v=>{const w=G.ws[v],fl=w>=FT[v],dmg=calcDmg(w);G.va[v]=Math.max(-300,G.va[v]-dmg);roundLoss+=dmg;
     summary+=`${VN[v]}：水${w.toFixed(0)}/${FT[v]} ${fl?'⚠淹没':'✓安全'} 损${dmg}\n`;
     G.vilHist[v].push({r:G.round,w:Math.round(w),fl,dmg,va:Math.round(G.va[v]),mc:Object.values(G.vm[v]||{}).filter(x=>x).length,sc:Object.values(G.vm[v]||{}).filter(x=>!x).length});
-    G.players.filter(p=>p.vil===v&&!(p.role||'').startsWith('LEADER_')&&!(p.role||'').startsWith('MAYOR_')).forEach(p=>{
+    G.players.filter(p=>p.vil===v&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_')).forEach(p=>{
       const moved=G.vm[v]?.[p.id]||false;G.pa[p.id]=(G.pa[p.id]||100)-calcVLoss(moved,fl)})});
   ['A','B','C'].forEach(c=>{if(G.dams[c]){G.ca[c]-=30;roundLoss+=30;summary+=`${CN[c]}修坝-30\n`}if(G.blasted[c]){summary+=`${CN[c]}炸坝释放水量\n`}});
   VIL.forEach(v=>{if(G.dike[v]&&IFZ[v]){G.va[v]-=50;roundLoss+=50}});
@@ -853,12 +1424,11 @@ function computeFlood(){
   showDecisionFeedback();
   G.hist.push({r:G.round,rain:{...G.rain},ws:{...G.ws},va:{...G.va},ca:{...G.ca},loss:roundLoss,totalLoss:G.totalLoss});
 }
-
 function showDecisionFeedback(){
-  if(G.role==='OBSERVER') return;
   const fb=document.getElementById('decision-feedback');if(!fb)return;
   const v=G.vil,c=v?v[0]:'A';let html='<div style="padding:10px;background:rgba(68,114,196,.05);border:1px solid rgba(68,114,196,.15);border-radius:8px;font-size:.78rem;color:var(--t2);line-height:1.7">';
   html+='<div style="font-weight:700;color:var(--cy);margin-bottom:6px">📊 水量因果归因分析</div>';
+  // 因果链公式
   const rainV=(G.rain[c]||0)*0.35;
   const upflow=G._upflow[v]||0;
   const sbk=G.sandbags[v]||0;
@@ -871,7 +1441,9 @@ function showDecisionFeedback(){
   if(damBlk>0)html+=`<span style="color:var(--t3)">−</span><span style="padding:2px 8px;background:rgba(85,168,104,.1);border-radius:4px;color:var(--gn)">大坝 −${damBlk}</span>`;
   html+=`<span style="color:var(--t3)">=</span><span style="padding:2px 8px;background:${finalW>=FT[v]?'rgba(196,78,82,.1)':'rgba(85,168,104,.1)'};border-radius:4px;color:${finalW>=FT[v]?'var(--rd)':'var(--gn)'}">水位 ${finalW.toFixed(0)}</span>`;
   html+='</div>';
+  // Upstream impact narrative
   if(SP[v]==='mid'||SP[v]==='dn'){const up=SP[v]==='mid'?'A':'B';html+=`<div>↓ ${CN[up]}市长排洪${G.cd[up]}单位流向你所在区域</div>`}
+  // Village vote result
   const mc=Object.values(G.vm[v]||{}).filter(x=>x).length,sc=Object.values(G.vm[v]||{}).filter(x=>!x).length;
   html+=`<div>🏘 ${VN[v]}：${mc}人搬迁 / ${sc}人留守</div>`;
   const fl=G.ws[v]>=FT[v];
@@ -882,7 +1454,6 @@ function showDecisionFeedback(){
   html+='<div style="font-size:.72rem;color:var(--t3);margin-top:4px">💡 你只掌握局部信息——上下游的决策正在实时影响你的处境。</div>';
   html+='</div>';fb.innerHTML=html;
 }
-
 function genNews(){const fv=VIL.filter(v=>G.ws[v]>=FT[v]);
   const rn=[[1,'台风"杜苏芮"残余环流北上，海河流域普降大到暴雨，水利部启动防汛Ⅲ级响应。'],[1,'北京房山、门头沟累计降雨超300mm，永定河卢沟桥站超警戒。'],
     [2,'河北涿州告急！北拒马河洪峰过境，城区水深超3米。京港澳高速断行。'],[2,'K396次列车因暴雨滞留门头沟落坡岭站，900余名旅客被困。'],
@@ -896,21 +1467,33 @@ function genNews(){const fv=VIL.filter(v=>G.ws[v]>=FT[v]);
 
 // ===================== ROUND MANAGEMENT =====================
 function endRound(){
+  // Modification 6: 记录本轮经历到每个AI的memory，供下轮经验学习
+  G.players.filter(p=>p.bot).forEach(p=>{
+    const v=p.vil;if(!v)return;
+    const fl=G.ws[v]>=FT[v];
+    const moved=G.vm[v]?.[p.id]||false;
+    const personalLoss=calcVLoss(moved,fl);
+    p.memory=p.memory||[];
+    p.memory.push({round:G.round,village:v,flooded:fl,moved,personalLoss,water:Math.round(G.ws[v]),thresh:FT[v]});
+  });
   VIL.forEach(v=>{G.dams[v]=false;G.dike[v]=false;G.vm[v]={};G.sandbags[v]=0});
   G.dams.A=false;G.dams.B=false;G.dams.C=false;G.cd={A:0,B:0,C:0};G.blasted={A:false,B:false,C:false};G._evacOrdered={};
-  mpSaveRound(); 
+  mpSaveRound();
   if(G.round>=getMR()){sysMsg('六轮结束！进入最终评分。');setTimeout(showResult,1200);return}
   G.round++;G.pi=0;genRain();showRoundTransition();
 }
 function showRoundTransition(){
   const ov=document.getElementById('round-ov');
+  // Build loss summary table (req #9)
   let lossTbl='<table class="ro-loss-tbl"><thead><tr><th>村庄</th><th>水位</th><th>阈值</th><th>状态</th><th>村余额</th><th>本轮搬/留</th></tr></thead><tbody>';
   VIL.forEach(v=>{const w=G.ws[v],fl=w>=FT[v],h=G.vilHist[v],last=h[h.length-1];
     lossTbl+=`<tr><td>${VN[v]}</td><td style="font-family:var(--fm);color:${fl?'var(--rd)':'var(--gn)'}">${w.toFixed(0)}</td><td style="font-family:var(--fm)">${FT[v]}</td><td style="color:${fl?'var(--rd)':'var(--gn)'}">${fl?'⚠淹没':'✓安全'}</td><td style="font-family:var(--fm);color:${G.va[v]>=0?'var(--gn)':'var(--rd)'}">${G.va[v].toFixed(0)}</td><td>${last?last.mc+'/'+last.sc:'—'}</td></tr>`});
   lossTbl+='</tbody></table>';
+  // City + total loss
   let cityRow='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0">';
   ['A','B','C'].forEach(c=>{cityRow+=`<div style="text-align:center;padding:10px;background:var(--p1);border-radius:8px;border:1px solid var(--bd);box-shadow:var(--shadow)"><div style="font-size:.76rem;color:var(--t3)">${CN[c]}市资产</div><div style="font-size:1.2rem;font-weight:700;font-family:var(--fm);color:${G.ca[c]>=0?'var(--gn)':'var(--rd)'}">${G.ca[c].toFixed(0)}</div></div>`});
   cityRow+=`<div style="text-align:center;padding:10px;background:rgba(196,78,82,.04);border-radius:8px;border:1px solid rgba(196,78,82,.15)"><div style="font-size:.76rem;color:var(--t3)">累计总损失</div><div style="font-size:1.2rem;font-weight:700;font-family:var(--fm);color:var(--rd)">${G.totalLoss.toFixed(0)}</div></div></div>`;
+  // Bankruptcy warnings
   let bankWarn='';const bkVil=VIL.filter(v=>G.va[v]<0);const bkCity=['A','B','C'].filter(c=>G.ca[c]<0);
   if(bkVil.length||bkCity.length){bankWarn='<div style="margin:10px 0;padding:10px;background:rgba(196,78,82,.06);border:1px solid rgba(196,78,82,.2);border-radius:8px;color:var(--rd);font-size:.82rem">⚠ 破产警告：';
     if(bkVil.length)bankWarn+=bkVil.map(v=>VN[v]).join('、')+'已资不抵债！';
@@ -929,10 +1512,90 @@ function showRoundTransition(){
 function closeRoundOv(){document.getElementById('round-ov').classList.remove('show');closeMo();renderAll();startTimer();
   sysMsg(`第${G.round}轮开始！降雨：北京${G.rain.A}mm 河北${G.rain.B}mm 天津${G.rain.C}mm`);triggerEvent();runAIPhase(PH[G.pi])}
 function runAIPhase(p){
-  if(p==='VIL_DISCUSS'){const ru=G.players.find(q=>q.spec==='RUMOR');if(ru&&Math.random()<.55)setTimeout(()=>aiChat(ru.nm,ru.vil,pick(DISCUSS_TEMPLATES.rumor),'村民'),1500+Math.random()*1500);
-    const st=G.players.find(q=>q.spec==='STAY');if(st&&Math.random()<.6)setTimeout(()=>aiChat(st.nm,st.vil,pick(DISCUSS_TEMPLATES.stay_elder),'村民(老人)'),2500+Math.random()*1500)}
-  if(p==='WEATHER'){const r=G.players.filter(q=>q.bot);const s=r[Math.floor(Math.random()*r.length)];
-    if(s)setTimeout(()=>aiChat(s.nm,s.vil,pick(['这降雨强度比往年大多了。','上游雨这么猛，拒马河水位涨得吓人。','希望水库调度能顶住。','听说门头沟那边已经有泥石流了。']),'村民'),1000+Math.random()*1500)}
+  if(p==='VIL_DISCUSS'){
+    const ru=G.players.find(q=>q.spec==='RUMOR');
+    if(ru&&Math.random()<.55)setTimeout(()=>aiChat(ru.nm,ru.vil,fillTpl(pick(DISCUSS_TEMPLATES.rumor),{rain:G.rain[ru.vil[0]],water:G.ws[ru.vil].toFixed(0)}),'村民(消息灵通)'),1500+Math.random()*1500);
+    const st=G.players.find(q=>q.spec==='STAY');
+    if(st&&Math.random()<.6)setTimeout(()=>aiChat(st.nm,st.vil,fillTpl(pick(DISCUSS_TEMPLATES.stay_elder),{}),'村民(老人)'),2500+Math.random()*1500);
+  }
+  if(p==='WEATHER'){
+    // 2-4名AI对降雨做出反应，引用实际数据+跨村情报
+    const bots=shuffle(G.players.filter(q=>q.bot&&q.vil));
+    const speakers=bots.slice(0,2+Math.floor(Math.random()*3));
+    speakers.forEach((s,i)=>{
+      const c=s.vil[0];
+      const ctx={
+        rain:G.rain[c],rainA:G.rain.A,rainB:G.rain.B,rainC:G.rain.C,
+        round:G.round, prevRain:G.round>1?Math.max(10,G.rain[c]-8):0,
+        water:G.ws[s.vil].toFixed(0), thresh:FT[s.vil],
+        neighbor:VFLOW[c].filter(nv=>nv!==s.vil).map(nv=>VN[nv])[0]||'',
+      };
+      let msg;
+      // 经验引用：上轮被淹的人会感叹
+      const mem=s.memory||[];
+      const lastM=mem.length?mem[mem.length-1]:null;
+      if(lastM&&lastM.flooded&&Math.random()<0.5){
+        ctx.lastLoss=lastM.personalLoss;ctx.lastRound=lastM.round;
+        msg=fillTpl(pick(DISCUSS_TEMPLATES.regret),{...ctx,totalLoss:mem.reduce((a,m)=>a+m.personalLoss,0),pa:G.pa[s.id]||100});
+      }else{
+        msg=fillTpl(pick(DISCUSS_TEMPLATES.weather_react),ctx);
+      }
+      const label=s.role.startsWith('LEADER_')?'村长':s.role.startsWith('MAYOR_')?'市长':s.spec==='RATIONAL'?'水文员':'村民';
+      setTimeout(()=>aiChat(s.nm,s.vil,msg,label),800+i*900+Math.random()*1000);
+    });
+  }
+  if(p==='LEADER_BUILD'){
+    // 村长沙袋决策后，1-2名村民反应
+    setTimeout(()=>{
+      VIL.forEach(v=>{
+        if(G.sandbags[v]>0&&Math.random()<0.5){
+          const reactor=G.players.find(q=>q.bot&&q.vil===v&&!q.role.startsWith('LEADER_')&&!q.role.startsWith('MAYOR_'));
+          if(reactor){
+            const ctx={sb:G.sandbags[v],village:VN[v],water:G.ws[v].toFixed(0),thresh:FT[v]};
+            const msg=fillTpl(pick(DISCUSS_TEMPLATES.leader_react),ctx);
+            aiChat(reactor.nm,v,msg,'村民');
+          }
+        }
+      });
+    },2000+Math.random()*1500);
+  }
+  if(p==='MAYOR_DRAIN'){
+    // 下游村民对排洪方案反应
+    setTimeout(()=>{
+      ['B','C'].forEach(c=>{
+        const upC=c==='B'?'A':'B';
+        if(G.cd[upC]>10){
+          const downVils=G.players.filter(q=>q.bot&&q.vil&&q.vil[0]===c&&!q.role.startsWith('MAYOR_'));
+          if(downVils.length){
+            const reactor=pick(downVils);
+            const ctx={drain:G.cd[upC],village:VN[reactor.vil],water:G.ws[reactor.vil].toFixed(0),thresh:FT[reactor.vil]};
+            const msg=fillTpl(pick(DISCUSS_TEMPLATES.mayor_react_down),ctx);
+            aiChat(reactor.nm,reactor.vil,msg,reactor.role.startsWith('LEADER_')?'村长':'村民');
+          }
+        }
+      });
+    },1500+Math.random()*1500);
+  }
+  if(p==='COMPUTE'){
+    // 结算后：受灾村民感叹+安全村民庆幸
+    setTimeout(()=>{
+      VIL.forEach(v=>{
+        const w=G.ws[v],fl=w>=FT[v];
+        const reactor=G.players.find(q=>q.bot&&q.vil===v&&!q.role.startsWith('LEADER_')&&!q.role.startsWith('MAYOR_'));
+        if(!reactor)return;
+        if(Math.random()<0.45){
+          const neighborV=VFLOW[v[0]].filter(nv=>nv!==v);
+          const ctx={
+            village:VN[v], water:w.toFixed(0), thresh:FT[v], margin:(FT[v]-w).toFixed(0),
+            dmg:calcDmg(w), count:G.vilHist[v]?G.vilHist[v].filter(h=>h.fl).length:0,
+            neighbor:neighborV.length?VN[neighborV[0]]:'',
+          };
+          const msg=fillTpl(pick(fl?DISCUSS_TEMPLATES.compute_flood:DISCUSS_TEMPLATES.compute_safe),ctx);
+          aiChat(reactor.nm,v,msg,'村民');
+        }
+      });
+    },1500+Math.random()*1000);
+  }
 }
 function triggerEvent(){
   const evts=[
@@ -950,24 +1613,12 @@ function triggerEvent(){
   hit.forEach(e=>addNews(e.ic+' '+e.b.split('\n')[0]));
 }
 
-function triggerBlackout(){
-  if(G._chatMuted)return;
-  G._chatMuted=true;
-  const ov=document.createElement('div');ov.className='blackout-overlay';ov.id='blackout-ov';
-  ov.innerHTML='<div class="blackout-text">⚡ 通讯中断！</div><div class="blackout-sub">紧急突发事件导致通讯暂时中断，15秒后恢复...</div><div id="blackout-timer" style="font-size:2rem;color:#fff;margin-top:16px;font-family:var(--fm)">15</div>';
-  document.body.appendChild(ov);
-  let sec=15;
-  const tmr=setInterval(()=>{sec--;const el=document.getElementById('blackout-timer');if(el)el.textContent=sec;
-    if(sec<=0){clearInterval(tmr);G._chatMuted=false;const bo=document.getElementById('blackout-ov');if(bo)bo.remove();sysMsg('📡 通讯已恢复！');toast('通讯恢复','gn')}
-  },1000);
-  sysMsg('⚡ 紧急通讯中断！15秒内无法发送消息。');addNews('⚡ 突发通讯故障，各地通讯暂时中断！');
-}
-
 // ===================== RENDERING =====================
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function renderAll(){renderTop();renderRain();renderMyStatus();renderWarn();renderMap();renderAct();renderFin();renderBasin();renderChat();renderNews();renderBankruptAlerts();renderArmyCard()}
 function renderTop(){document.getElementById('g-round').textContent=`第 ${G.round}/${getMR()} 轮`;
   const ph=PH[G.pi]||'WEATHER',el=document.getElementById('g-phase');el.innerHTML=PHL[ph]||ph;
+  // Phase progress dots
   const pDots=PH.map((_,i)=>`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${i<G.pi?'var(--gn)':i===G.pi?'var(--cy)':'var(--p2)'};border:1px solid ${i<=G.pi?'transparent':'var(--bd)'};transition:all .3s"></span>`).join('');
   const pBar=document.getElementById('g-phase-dots');if(pBar)pBar.innerHTML=pDots;
   const needsAct=(ph==='VIL_DISCUSS'&&G.role&&G.role.startsWith('VIL_'))||(ph==='MAYOR_DRAIN'&&G.role&&G.role.startsWith('MAYOR_'))||(ph==='LEADER_BUILD'&&G.role&&G.role.startsWith('LEADER_'));
@@ -977,7 +1628,6 @@ function renderTop(){document.getElementById('g-round').textContent=`第 ${G.rou
   if(G.role&&G.role.includes('_A'))b.classList.add('bd-up');else if(G.role&&G.role.includes('_B'))b.classList.add('bd-mid');else if(G.role&&G.role.includes('_C'))b.classList.add('bd-dn');else b.classList.add('bd-up')}
 function renderRain(){document.getElementById('rain-cards').innerHTML=['A','B','C'].map(c=>`<div class="rain-card"><div class="rc-city">${CN[c]}</div><div class="rc-val">${G.rain[c]}</div><div class="rc-unit">mm</div></div>`).join('')}
 function renderMyStatus(){
-  if(G.role==='OBSERVER') return;
   const v=G.vil,c=v?v[0]:'A',lr=G.rain[c]||0,uf=(G._upflow&&G._upflow[v])||0,w=G.ws[v]||0,th=FT[v]||30,dmg=calcDmg(w),va=G.va[v]||0,pa=G.pa.human||0,fl=w>=th;
   document.getElementById('my-identity').textContent=(RL[G.role]||'村民')+' · '+VN[v];
   let strat='';
@@ -997,21 +1647,21 @@ function renderMyStatus(){
     <div class="sv"><div class="sv-l">🏛 ${CN[c]}市资产</div><div class="sv-v info">${(G.ca[c]||0).toFixed(0)}</div><div class="sv-bar" style="width:${clamp((G.ca[c]+300)/800*100,0,100)}%;background:var(--bl)"></div></div>`}
 function renderBankruptAlerts(){
   const el=document.getElementById('bankrupt-alerts');if(!el)return;let h='';
-  const bkVil=VIL.filter(v=>G.va[v]<0);
-  ['A','B','C'].forEach(c=>{if(G.ca[c]<0)h+=`<div class="bankrupt-alert" style="color:var(--rd);font-size:.8rem;margin-top:4px">🚨 ${CN[c]}市财政已破产！</div>`});
-  bkVil.forEach(v=>{h+=`<div class="bankrupt-alert" style="color:var(--rd);font-size:.8rem;margin-top:4px">🚨 ${VN[v]}已资不抵债(${G.va[v].toFixed(0)})！</div>`});
-  if(G.pa.human<0)h+=`<div class="bankrupt-alert" style="color:var(--rd);font-size:.8rem;margin-top:4px">🚨 你的个人资产已破产(${G.pa.human.toFixed(0)})！</div>`;
+  const bkVil=VIL.filter(v=>G.va[v]<0),bkPpl=G.players.filter(p=>G.pa[p.id]<0);
+  ['A','B','C'].forEach(c=>{if(G.ca[c]<0)h+=`<div class="bankrupt-alert">🚨 ${CN[c]}市财政已破产！</div>`});
+  bkVil.forEach(v=>{h+=`<div class="bankrupt-alert">🚨 ${VN[v]}已资不抵债(${G.va[v].toFixed(0)})！</div>`});
+  if(G.pa.human<0)h+=`<div class="bankrupt-alert">🚨 你的个人资产已破产(${G.pa.human.toFixed(0)})！</div>`;
   el.innerHTML=h}
 function renderArmyCard(){
   const el=document.getElementById('army-card-area');if(!el)return;
+  // Show army card status to everyone (req #7)
   let h='<div style="margin-top:8px;padding:9px 12px;border-radius:8px;background:rgba(212,168,83,.05);border:1px solid rgba(212,168,83,.15);font-size:.76rem;color:var(--t2)"><div style="font-weight:700;color:var(--am);margin-bottom:3px">🚁 解放军救援牌状态</div>';
   ['A','B','C'].forEach(c=>{h+=`<div>${CN[c]}市长：${G.armyCard[c]?'<span style="color:var(--gn)">✓ 未使用</span>':'<span style="color:var(--rd)">✗ 已使用</span>'}</div>`});
-  h+='<div style="font-size:.7rem;color:var(--t3);margin-top:3px">使用后所辖区域水位清零、防御重置</div></div>';
+  h+='<div style="font-size:.7rem;color:var(--t3);margin-top:3px">每位市长拥有唯一一次机会，使用后所辖村庄水位清零、防御重置</div></div>';
   el.innerHTML=h}
 function renderWarn(){const mx=Math.max(...VIL.map(v=>G.ws[v])),mt=Math.max(...VIL.map(v=>FT[v])),r=clamp(mx/(mt*1.2),0,1);
   let lv,cl;if(r<.25){lv='蓝色预警';cl='linear-gradient(90deg,#4472C4,#6a9ad8)'}else if(r<.5){lv='黄色预警';cl='linear-gradient(90deg,#D4A853,#e6c36a)'}else if(r<.75){lv='橙色预警';cl='linear-gradient(90deg,#DD8452,#c97a42)'}else{lv='红色预警';cl='linear-gradient(90deg,#C44E52,#d9636b)'}
   document.getElementById('warn-text').textContent=lv;const bar=document.getElementById('warn-bar');bar.style.width=(r*100)+'%';bar.style.background=cl}
-
 function renderMap(){
   const ct=document.getElementById('vn-container');
   const pos={
@@ -1022,11 +1672,13 @@ function renderMap(){
   ct.innerHTML=VIL.map(v=>{const p=pos[v],w=G.ws[v],th=FT[v],fl=w>=th,wp=clamp(w/(th*1.3)*100,0,100);
     let bc;if(wp<40)bc='linear-gradient(90deg,var(--cy),#6a9ad8)';else if(wp<70)bc='linear-gradient(90deg,var(--am),#c97a42)';else bc='linear-gradient(90deg,var(--rd),#d9636b)';
     const st=SP[v]==='up'?'bd-up':SP[v]==='mid'?'bd-mid':'bd-dn';const isPV=G.vil===v;
-    const vc=G.players.filter(q=>q.vil===v&&!(q.role||'').startsWith('LEADER_')&&!(q.role||'').startsWith('MAYOR_')).length;
+    const vc=G.players.filter(q=>q.vil===v&&!q.role.startsWith('LEADER_')&&!q.role.startsWith('MAYOR_')).length;
     const bk=G.va[v]<0?' style="color:var(--rd)"':'';
     const jf=G._justFlooded&&G._justFlooded[v]?' just-flooded':'';
     const waterH=clamp(wp,0,100);
+    // 危险判定：水位>80%阈值但未超阈值
     const isDanger=w>th*0.8&&!fl;
+    // 阈值色条：绿<50% 黄50-80% 红>80%
     const tgPct=clamp(w/th*100,0,100);
     const tgColor=tgPct<50?'var(--gn)':tgPct<80?'var(--am)':'var(--rd)';
     return `<div class="vn ${fl?'flood':''}${isDanger?' danger-zone':''}${jf}" onclick="showVilDetail('${v}')" style="left:${p.l};top:${p.t};${isPV?'border-color:var(--cy);box-shadow:0 2px 12px rgba(68,114,196,.15)':''}">
@@ -1039,34 +1691,45 @@ function renderMap(){
       </div>
       <div class="wb"><div class="wf" style="width:${wp}%;background:${bc}"></div></div>
       <div class="threshold-gauge"><div class="tg-fill" style="width:${tgPct}%;background:${tgColor}"></div></div>
-      <div class="vs"><span>水:${w.toFixed(0)}</span><span>阈:${th}</span><span style="color:${fl?'var(--rd)':'var(--gn)'}">${fl?'淹没':'安全'}</span></div>
-      <div class="vs"><span${bk}>村资产:${G.va[v].toFixed(0)}</span><span>${vc}人</span></div>
+      ${canSeeDetail(v)?`<div class="vs"><span>水:${w.toFixed(0)}</span><span>阈:${th}</span><span style="color:${fl?'var(--rd)':'var(--gn)'}">${fl?'淹没':'安全'}</span></div>
+      <div class="vs"><span${bk}>村资产:${G.va[v].toFixed(0)}</span><span>${vc}人</span></div>`
+      :`<div class="vs"><span>水情:${fogLabel(w,th)}</span><span style="color:${fl?'var(--rd)':'var(--gn)'}">${fl?'淹没':'安全'}</span></div>
+      <div class="vs" style="color:var(--t3);font-size:.66rem">信息受限</div>`}
       </div>
     </div>`}).join('');
+  // Add animated SVG flow paths
   let flowSvg='<svg class="flow-svg" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none" viewBox="0 0 100 100" preserveAspectRatio="none">';
+  // 定义渐变和动画
   flowSvg+='<defs><linearGradient id="fgN"><stop offset="0%" stop-color="#4472C4" stop-opacity=".5"/><stop offset="100%" stop-color="#6a9ad8" stop-opacity=".3"/></linearGradient>';
   flowSvg+='<linearGradient id="fgF"><stop offset="0%" stop-color="#C44E52" stop-opacity=".6"/><stop offset="100%" stop-color="#d9636b" stop-opacity=".3"/></linearGradient></defs>';
+  // 纵向流水（城内上→下）
   const colX=[15,49,81];const rowY=[15,48,81];
   colX.forEach((x,ci)=>{
     const city='ABC'[ci];const tw=VFLOW[city].reduce((s,v)=>s+G.ws[v],0);const isFlood=tw>100;const grad=isFlood?'url(#fgF)':'url(#fgN)';const sw=clamp(1+tw/60,1,4);
+    // 上→中
     flowSvg+=`<line x1="${x}" y1="${rowY[0]+8}" x2="${x}" y2="${rowY[1]-5}" stroke="${grad}" stroke-width="${sw}" stroke-dasharray="4,3"><animate attributeName="stroke-dashoffset" from="14" to="0" dur="1.5s" repeatCount="indefinite"/></line>`;
+    // 中→下
     flowSvg+=`<line x1="${x}" y1="${rowY[1]+8}" x2="${x}" y2="${rowY[2]-5}" stroke="${grad}" stroke-width="${sw}" stroke-dasharray="4,3"><animate attributeName="stroke-dashoffset" from="14" to="0" dur="1.5s" repeatCount="indefinite"/></line>`;
   });
+  // 横向流水（A→B→C）
   const drainAB=G.cd.A||0,drainBC=G.cd.B||0;
   const swAB=clamp(1+drainAB/30,1,4),swBC=clamp(1+drainBC/30,1,4);
   flowSvg+=`<line x1="28" y1="48" x2="36" y2="48" stroke="${drainAB>40?'url(#fgF)':'url(#fgN)'}" stroke-width="${swAB}" stroke-dasharray="3,2"><animate attributeName="stroke-dashoffset" from="10" to="0" dur="1s" repeatCount="indefinite"/></line>`;
   flowSvg+=`<line x1="62" y1="48" x2="68" y2="48" stroke="${drainBC>40?'url(#fgF)':'url(#fgN)'}" stroke-width="${swBC}" stroke-dasharray="3,2"><animate attributeName="stroke-dashoffset" from="10" to="0" dur="1s" repeatCount="indefinite"/></line>`;
+  // 入海箭头
   const seaDrain=G._seaDischarge||0;const swSea=clamp(1+seaDrain/20,1,4);
   flowSvg+=`<line x1="94" y1="81" x2="99" y2="86" stroke="url(#fgN)" stroke-width="${swSea}" stroke-dasharray="3,2"><animate attributeName="stroke-dashoffset" from="10" to="0" dur="1.2s" repeatCount="indefinite"/></line>`;
   flowSvg+='</svg>';
   ct.innerHTML+=flowSvg;
+  // Sea outlet label
   const seaCap=getHyd('sea_discharge_cap',60);
   ct.innerHTML+=`<div class="flow-lbl" style="right:0%;top:82%;color:var(--cy);font-size:.64rem">🌊 入渤海<br>上限${seaCap}/轮${G._seaDischarge?'<br>已排:'+G._seaDischarge.toFixed(0):''}</div>`;
+  // Column labels
   ct.innerHTML+=`<div class="flow-lbl" style="left:2%;top:-4%;color:var(--cy);font-weight:700">北京(上游)</div>`;
   ct.innerHTML+=`<div class="flow-lbl" style="left:36%;top:-4%;color:var(--gn);font-weight:700">河北(中游)</div>`;
   ct.innerHTML+=`<div class="flow-lbl" style="left:68%;top:-4%;color:var(--am);font-weight:700">天津(下游)</div>`;
 }
-
+// Village detail modal (req #6)
 function showVilDetail(v){
   const w=G.ws[v],th=FT[v],fl=w>=th,hist=G.vilHist[v]||[];
   let stats=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
@@ -1074,14 +1737,17 @@ function showVilDetail(v){
     <div style="background:var(--p2);padding:10px;border-radius:7px;text-align:center"><div style="font-size:.72rem;color:var(--t3)">淹没阈值</div><div style="font-family:var(--fm);font-size:1.2rem;font-weight:700">${th}</div></div>
     <div style="background:var(--p2);padding:10px;border-radius:7px;text-align:center"><div style="font-size:.72rem;color:var(--t3)">村资产</div><div style="font-family:var(--fm);font-size:1.2rem;font-weight:700;color:${G.va[v]>=0?'var(--gn)':'var(--rd)'}">${G.va[v].toFixed(0)}</div></div>
     <div style="background:var(--p2);padding:10px;border-radius:7px;text-align:center"><div style="font-size:.72rem;color:var(--t3)">类型</div><div style="font-size:.9rem;font-weight:700;color:${IFZ[v]?'var(--am)':'var(--cy)'}">${IFZ[v]?'蓄滞洪区':'普通村庄'}</div></div></div>`;
+  // History table
   let htbl='';if(hist.length){htbl='<div style="font-size:.82rem;font-weight:700;margin:8px 0 4px">📈 历史决策记录</div><div style="max-height:150px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:.76rem"><thead><tr style="border-bottom:1.5px solid var(--bd)"><th style="padding:4px 6px;text-align:left;color:var(--t3)">轮</th><th style="padding:4px 6px;color:var(--t3)">水位</th><th style="padding:4px 6px;color:var(--t3)">状态</th><th style="padding:4px 6px;color:var(--t3)">损失</th><th style="padding:4px 6px;color:var(--t3)">搬/留</th><th style="padding:4px 6px;color:var(--t3)">余额</th></tr></thead><tbody>';
     hist.forEach(h=>{htbl+=`<tr style="border-bottom:1px solid rgba(0,0,0,.04)"><td style="padding:3px 6px">R${h.r}</td><td style="padding:3px 6px;font-family:var(--fm);color:${h.fl?'var(--rd)':'var(--gn)'}">${h.w}</td><td style="padding:3px 6px;color:${h.fl?'var(--rd)':'var(--gn)'}">${h.fl?'淹没':'安全'}</td><td style="padding:3px 6px;color:var(--rd)">-${h.dmg}</td><td style="padding:3px 6px">${h.mc}/${h.sc}</td><td style="padding:3px 6px;font-family:var(--fm)">${h.va}</td></tr>`});
     htbl+='</tbody></table></div>'}
+  // Flood scenario description
   let scene='';if(fl){scene=`<div style="margin:10px 0;padding:10px;background:rgba(196,78,82,.05);border:1px solid rgba(196,78,82,.15);border-radius:7px;font-size:.8rem;color:var(--t2);line-height:1.7"><span style="color:var(--rd);font-weight:700">⚠ 淹没场景：</span>${FLOOD_SCENES[v]||'该村已被洪水淹没，居民生命财产受到严重威胁。'}</div>`}
   else if(w>th*.6){scene=`<div style="margin:10px 0;padding:10px;background:rgba(212,168,83,.06);border:1px solid rgba(212,168,83,.12);border-radius:7px;font-size:.8rem;color:var(--t2);line-height:1.7"><span style="color:var(--am);font-weight:700">⚠ 预警：</span>水位接近警戒线。${IFZ[v]?'作为蓄滞洪区，该村可能被要求为下游分洪。':'如上游继续排洪，本村压力将持续增大。'}</div>`}
   showModal(`📍 ${VN[v]} 详情`,stats+scene+htbl,'<button class="btn btn-p" onclick="closeMo()">关闭</button>')}
 
 function renderAct(){
+  // Observer mode: show dashboard instead of normal actions
   if(G.role==='OBSERVER'){renderObserverDashboard();return}
   const p=PH[G.pi]||'WEATHER',btns=document.getElementById('act-btns'),ex=document.getElementById('act-extra'),tt=document.getElementById('act-title');
   btns.innerHTML='';ex.innerHTML='';
@@ -1089,14 +1755,14 @@ function renderAct(){
     btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7">本轮降雨量已公布。注意：<b style="color:var(--am)">你只能看到全局降雨</b>，但不知道其他市长/村长会如何应对。</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">${['A','B','C'].map(c=>`<div style="text-align:center;padding:10px;background:var(--p2);border-radius:7px;border:1px solid var(--bd)"><div style="font-size:.74rem;color:var(--t3)">${CN[c]}</div><div style="font-size:1.2rem;font-weight:700;color:var(--cy);font-family:var(--fm)">${G.rain[c]}</div><div style="font-size:.66rem;color:var(--t3)">mm</div></div>`).join('')}</div>`}
   else if(p==='VIL_DISCUSS'){
-    if(G.role&&(G.role||'').startsWith('VIL_')){tt.textContent='💬 村民搬迁决策';const done=G.vm[G.vil]?.human!==undefined;
+    if(G.role&&G.role.startsWith('VIL_')){tt.textContent='💬 村民搬迁决策';const done=G.vm[G.vil]?.human!==undefined;
       btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:7px">水位:${G.ws[G.vil].toFixed(0)} 阈值:${FT[G.vil]} | 搬+未淹损30 | 不搬+淹损50<br><b style="color:var(--am)">注意：你不知道水位还会涨多少，其他人的决定也会影响全局。</b></div>
       <button class="btn btn-g" ${done?'disabled':''} onclick="hVilDec(true)">🚶 搬迁至安置点</button>
       <button class="btn btn-d" ${done?'disabled':''} onclick="hVilDec(false)">🏠 暂不搬迁</button>
       ${done?'<div style="font-size:.76rem;color:var(--gn);margin-top:5px">✓ 已选择，等待其他村民…</div>':''}`}
     else{tt.textContent='💬 村民研讨中';btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2)">村民正在研讨搬迁。你可在聊天中发言影响他们的决策。</div><button class="btn btn-o" style="margin-top:7px" onclick="hBroadcast()">向村民发防汛提醒</button>`}}
   else if(p==='LEADER_BUILD'){
-    if(G.role&&(G.role||'').startsWith('LEADER_')){const v=G.role.replace('LEADER_','');const isF=IFZ[v];tt.textContent=`🏗 ${VN[v]}防洪决策`;
+    if(G.role&&G.role.startsWith('LEADER_')){const v=G.role.replace('LEADER_','');const isF=IFZ[v];tt.textContent=`🏗 ${VN[v]}防洪决策`;
       const maxSB=Math.min(50,G.va[v]);const done=G.sandbags[v]>0;
       let fzExtra='';
       if(isF){fzExtra=`<div style="margin-top:10px;padding:10px;background:rgba(196,78,82,.04);border:1px solid rgba(196,78,82,.12);border-radius:8px">
@@ -1111,7 +1777,7 @@ function renderAct(){
         <button class="btn btn-o" onclick="sysMsg('${v}村长暂不操作。')">暂不操作</button>${fzExtra}`}
     else{tt.textContent='🏗 等待村长决策';btns.innerHTML='<div style="font-size:.82rem;color:var(--t2)">各村村长正在决策防洪方案。你不知道他们会做什么选择。</div>'}}
   else if(p==='MAYOR_DRAIN'){
-    if(G.role&&(G.role||'').startsWith('MAYOR_')){const c=G.role.replace('MAYOR_','');
+    if(G.role&&G.role.startsWith('MAYOR_')){const c=G.role.replace('MAYOR_','');
       const vf=VFLOW[c],tw=vf.reduce((s,v)=>s+G.ws[v],0)+G.rain[c],mx=c==='C'?Math.min(getHyd('max_drain_C',85),tw):c==='B'?tw*.65:tw;
       tt.textContent=`🌊 ${CN[c]}排洪决策`;
       btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7;margin-bottom:7px">${CN[c]}蓄水约${tw.toFixed(0)}，最大可排${mx.toFixed(0)}。${c!=='C'?'<b style="color:var(--am)">排出水量将流向下游！你的决定直接影响下游命运。</b>':'排入海。'}</div>
@@ -1133,30 +1799,157 @@ function renderAct(){
   else if(p==='COMPUTE'){tt.textContent='📝 结算中';btns.innerHTML='<div style="font-size:.82rem;color:var(--t2)">系统正在计算洪水传导、淹没和损失…</div>'}
   else{tt.textContent='✅ 回合结算';
     btns.innerHTML=`<div style="font-size:.82rem;color:var(--t2);line-height:1.7">第${G.round}轮结算完成。查看左侧状态和流域沙盘。</div>
-    <div style="font-size:.88rem;font-weight:700;color:var(--gn);margin-top:7px">点击"下一阶段"进入下一轮。</div>`}
-}
+    <div style="font-size:.88rem;font-weight:700;color:var(--gn);margin-top:7px">点击"下一阶段"进入下一轮。</div>`}}
+function renderFin(){const v=G.vil,c=v?v[0]:'A';
+  document.getElementById('fin-row').innerHTML=`
+    <div class="fi"><span class="fl">👤 个人:</span><span class="fv" style="color:${(G.pa.human||0)>=0?'var(--gn)':'var(--rd)'}">${(G.pa.human||0).toFixed(0)}</span></div>
+    ${v?`<div class="fi"><span class="fl">🏘 ${VN[v]}:</span><span class="fv" style="color:${G.va[v]>=0?'var(--cy)':'var(--rd)'}">${G.va[v].toFixed(0)}</span></div>`:''}
+    <div class="fi"><span class="fl">🏛 ${CN[c]}:</span><span class="fv" style="color:var(--gd)">${G.ca[c].toFixed(0)}</span></div>
+    <div class="fi"><span class="fl">📊 累计损失:</span><span class="fv" style="color:var(--rd)">${G.totalLoss.toFixed(0)}</span></div>
+    <div class="fi"><span class="fl">🌊 最高水位:</span><span class="fv" style="color:var(--am)">${Math.max(...VIL.map(v=>G.ws[v])).toFixed(0)}</span></div>`}
+function renderBasin(){document.getElementById('basin-bars').innerHTML=VIL.map(v=>{const w=G.ws[v],t=FT[v],p=clamp(w/t*100,0,100),cl=w>=t?'var(--rd)':w>t*.6?'var(--am)':'var(--gn)';
+  return `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:.74rem"><span style="min-width:36px">${v}</span><div style="flex:1;margin:0 7px;height:4px;background:rgba(0,0,0,.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:${p}%;background:${cl};border-radius:2px;transition:width .5s"></div></div><span style="font-family:var(--fm);color:${cl};min-width:32px;text-align:right">${w.toFixed(0)}</span></div>`}).join('')}
+function renderNews(){document.getElementById('news-list').innerHTML=G.news.map(n=>`<div style="margin-bottom:5px;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--am);font-size:.68rem;font-weight:600">R${n.r}</span> ${termify(n.t)}</div>`).join('')}
+
+// ===================== CHAT =====================
+function renderChat(){const ct=document.getElementById('chat-msgs');
+  // Observer sees ALL messages regardless of channel filter
+  const f=G.role==='OBSERVER'?G.msgs:G.msgs.filter(m=>{if(G.ch==='ALL')return m.ch==='ALL';return m.ch==='VIL'&&m.vil===G.vil});
+  ct.innerHTML=f.slice(-60).map(m=>{const cls=m.tp==='sys'?'sys':m.tp==='ai'?'ai':'';
+    return `<div class="dm ${cls}"><div class="dn">${m.nm}<span class="d-role">${m.rl||''}</span> <span style="font-size:.6rem;color:var(--t3)">${m.tm}</span></div><div>${m.ct}</div></div>`}).join('');
+  ct.scrollTop=ct.scrollHeight;
+  const ba=document.getElementById('btn-ch-a'),bv=document.getElementById('btn-ch-v');
+  if(ba)ba.style.background=G.ch==='ALL'?'rgba(68,114,196,.08)':'';if(bv)bv.style.background=G.ch==='VIL'?'rgba(85,168,104,.08)':''}
+function sysMsg(c){G.msgs.push({tp:'sys',nm:'系统',ct:c,ch:'ALL',vil:null,rl:'',tm:now()});renderChat()}
+function aiChat(nm,vil,ct,rl){G.msgs.push({tp:'ai',nm,ct,ch:vil?'VIL':'ALL',vil,rl:rl||'',tm:now()});renderChat()}
+function addNews(t){G.news.push({t,r:G.round});renderNews()}
+function sendChat(){const inp=document.getElementById('chat-in'),t=inp.value.trim();if(!t)return;
+  // 黑天鹅通讯中断检查
+  if(G._chatMuted){toast('通讯中断中，无法发送消息！','rd');return}
+  G.msgs.push({tp:'player',nm:G.nm,ct:t,ch:G.ch,vil:G.ch==='VIL'?G.vil:null,rl:RL[G.role]||'村民',tm:now()});inp.value='';renderChat();
+  mpSendChat(t,G.ch,G.ch==='VIL'?G.vil:null);
+  // 恐慌关键词检测 — 触发同村AI panic上升
+  if(PANIC_KEYWORDS.some(k=>t.includes(k))){
+    const targetVil=G.ch==='VIL'?G.vil:null;
+    G.players.filter(p=>p.bot&&p.spec!=='RATIONAL'&&(!targetVil||p.vil===targetVil))
+      .forEach(p=>{p.panic=Math.min(100,(p.panic||20)+15)});
+  }
+  // ---- 分类玩家消息内容 ----
+  const isQuestion=t.includes('？')||t.includes('?')||t.includes('吗')||t.includes('多少')||t.includes('怎么');
+  const isPanic=PANIC_KEYWORDS.some(k=>t.includes(k))||t.includes('快')||t.includes('赶紧')||t.includes('完蛋');
+  const isCalm=t.includes('别急')||t.includes('没事')||t.includes('冷静')||t.includes('别慌')||t.includes('不必');
+  const isCommand=t.includes('快')||t.includes('赶紧')||t.includes('必须')||t.includes('立刻')||t.includes('马上');
+  const hasData=/\d+/.test(t);
+
+  const pool=G.players.filter(p=>p.bot&&(G.ch==='ALL'||p.vil===G.vil));const resps=shuffle(pool).slice(0,2+Math.floor(Math.random()*2));
+  resps.forEach((r,i)=>{
+    const v=r.vil||G.vil;const c=v?v[0]:'A';
+    const w=G.ws[v]||0,th=FT[v]||30,ratio=w/th;
+    const mem=r.memory||[];const lastM=mem.length?mem[mem.length-1]:null;
+    const ctx={
+      water:w.toFixed(0),thresh:th,margin:(th-w).toFixed(0),pct:(ratio*100).toFixed(0),
+      rain:G.rain[c]||0,drain:G.cd[c]||0,sb:G.sandbags[v]||0,va:Math.round(G.va[v]||0),
+      village:VN[v]||'',target:G.nm,
+      lastLoss:lastM?lastM.personalLoss:0,lastRound:lastM?lastM.round:0,
+      lastWater:lastM?lastM.water:0,totalLoss:mem.reduce((s,m)=>s+m.personalLoss,0),
+      pa:G.pa[r.id]||100,forecast:ratio>0.8?'形势严峻':ratio>0.5?'需要关注':'暂时安全',
+      assessment:ratio>0.7?'压力较大':'可控范围',conclusion:ratio>0.8?'建议撤离':'暂可观望',
+      prevRounds:Math.max(1,G.round-1),trend:'逐轮上升',mult:'1.5',net:0,
+      neighbor:'',nwater:'',nthresh:'',prevRain:0,count:0,round:G.round,
+      rainA:G.rain.A||0,rainB:G.rain.B||0,rainC:G.rain.C||0,pressure:0,dmg:0,
+    };
+    let msgs;
+    if(r.spec==='RATIONAL'){
+      // 水文员：回答问题用数据，否则给分析
+      if(isQuestion){
+        msgs=[fillTpl('当前水位{water}，阈值{thresh}，占比{pct}%。{forecast}。',ctx),
+              fillTpl('降雨{rain}mm，上游排洪{drain}单位，沙袋挡{sb}。综合来看{assessment}。',ctx)];
+      }else{
+        msgs=DISCUSS_TEMPLATES.rational.map(m=>fillTpl(m,ctx));
+      }
+    }else if(r.spec==='STAY'){
+      if(isPanic){
+        // 恐慌消息→老人反驳
+        msgs=DISCUSS_TEMPLATES.stay_elder.map(m=>fillTpl(m,ctx));
+      }else if(isCalm){
+        msgs=[fillTpl('就是嘛，别瞎跑，听老人家的准没错。',ctx),'对，沉住气。'];
+      }else{
+        msgs=DISCUSS_TEMPLATES.stay_elder.map(m=>fillTpl(m,ctx));
+      }
+    }else{
+      // 普通村民：根据消息类型+恐慌等级交叉选择
+      const p_panic=(r.panic||20);
+      if(isQuestion){
+        // 高panic者回答带恐慌，低panic者冷静回答
+        if(p_panic>50){
+          msgs=[fillTpl('还问什么啊！水都{water}了，阈值才{thresh}，快跑！',ctx),
+                fillTpl('别问了，赶紧走！上游排了{drain}单位过来！',ctx)];
+        }else{
+          msgs=[fillTpl('水位{water}，阈值{thresh}，目前{forecast}。',ctx),
+                fillTpl('沙袋挡了{sb}单位，村资产还有{va}，暂时还行。',ctx)];
+        }
+      }else if(isPanic){
+        if(p_panic>50){
+          // 高panic附和
+          msgs=DISCUSS_TEMPLATES.panic_high.map(m=>fillTpl(m,ctx));
+          msgs.push(fillTpl('你说得对！水位{water}了，不能再等了！',ctx));
+        }else{
+          // 低panic质疑
+          msgs=[fillTpl('别这么慌，水位才到阈值的{pct}%，还有余量。',ctx),
+                fillTpl('你太紧张了吧，上轮也有人喊淹，结果没事。',ctx)];
+        }
+      }else if(isCalm){
+        if(p_panic>50){
+          // 高panic反驳安慰
+          msgs=[fillTpl('你说没事？水位都{water}了！上轮就是这么大意亏了{lastLoss}万！',ctx),
+                fillTpl('别站着说话不腰疼，上游排洪{drain}单位，你以为挡得住？',ctx)];
+        }else{
+          msgs=[fillTpl('同意，{forecast}，不必太紧张。',ctx),
+                fillTpl('对，先看看村长怎么安排，别乱跑。',ctx)];
+        }
+      }else if(isCommand){
+        // 祈使语气
+        if(G.role&&(G.role.startsWith('LEADER_')||G.role.startsWith('MAYOR_'))){
+          msgs=[fillTpl('收到！听{target}指挥。',ctx),'好的，马上行动。','明白了，跟着走。'];
+        }else{
+          if(p_panic>40)msgs=['好，听你的，走！','走吧走吧，别磨蹭了。'];
+          else msgs=[fillTpl('别这么着急，情况还不明朗呢。水位{water}，离{thresh}还有距离。',ctx),'你谁啊凭什么指挥我？再等等看。'];
+        }
+      }else{
+        // 一般发言：引用实际数据回应
+        if(p_panic>60)msgs=DISCUSS_TEMPLATES.worried.map(m=>fillTpl(m,ctx));
+        else if(lastM&&lastM.flooded)msgs=DISCUSS_TEMPLATES.experience_loss.map(m=>fillTpl(m,ctx));
+        else msgs=DISCUSS_TEMPLATES.calm.map(m=>fillTpl(m,ctx));
+      }
+    }
+    const label=r.spec==='RATIONAL'?'水文员':r.spec==='STAY'?'村民(老人)':r.role.startsWith('LEADER_')?'村长':'村民';
+    setTimeout(()=>aiChat(r.nm,G.ch==='VIL'?G.vil:null,pick(msgs),label),800+i*700+Math.random()*1000)})}
 
 // ===================== PLAYER ACTIONS =====================
 function hVilDec(m){closeMo();G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=m;sysMsg(`你选择了${m?'搬迁':'暂不搬迁'}。`);mpSendAction(m?'evacuate':'stay',{village:G.vil});renderAct();toast(m?'已选搬迁':'已选留守',m?'gn':'am');showFx(m?'move':'stay')}
 function hSandbag(v){const amt=parseInt(document.getElementById('sb-sl').value);if(G.sandbags[v]>0||G.va[v]<amt)return;G.sandbags[v]=amt;G.va[v]-=amt;sysMsg(`你投入${amt}万购置沙袋防洪屏障，可抵挡${amt}单位水量。`);mpSendAction('sandbag',{village:v,amount:amt});toast(`沙袋已就位(${amt})`,'gn');renderAll();showFx('sandbag')}
 function hMayorDrain(){const c=G.role.replace('MAYOR_',''),v=parseInt(document.getElementById('drain-sl').value);G.cd[c]=v;sysMsg(`你决定${CN[c]}排洪${v}单位${c!=='C'?'至下游':'入海'}。`);mpSendAction('drain',{city:c,value:v});toast('排洪方案确认','bl');renderAct();showFx('drain')}
 function hCDam(c){if(G.dams[c])return;G.dams[c]=true;G.ca[c]-=30;sysMsg(`📋 国家防总已批准！${CN[c]}修建大坝，花费30拦水30。`);mpSendAction('build_dam',{city:c});toast('大坝修建成功','gn');renderAll();showFx('dam')}
-function hBlastDam(c){if(!G.dams[c]||G.blasted[c])return;if(G.ca[c]<20){toast('市资产不足，炸坝需要20','rd');return}G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 你下令炸坝！${CN[c]}大坝被炸毁，拦截水量释放至下游。花费20。`);mpSendAction('blast_dam',{city:c});toast('大坝已炸毁！','am');renderAll();showFx('blast')}
+function hVDam(v){if(G.dams[v])return;G.dams[v]=true;G.va[v]-=30;sysMsg(`${v}村修坝！花费30拦水30。`);mpSendAction('village_dam',{village:v});toast('修坝成功','gn');renderAll()}
+function hDike(v){if(G.dike[v])return;G.dike[v]=true;G.va[v]-=50;sysMsg(`${VN[v]}启用蓄滞洪区！花费50排水50至下游。`);mpSendAction('activate_dike',{village:v});toast('蓄滞洪区已启用','am');renderAll()}
 function hArmyCard(c){if(!G.armyCard[c])return;G.armyCard[c]=false;
   VFLOW[c].forEach(v=>{G.ws[v]=0;G.sandbags[v]=0;G.dams[v]=false;G.dike[v]=false});G.dams[c]=false;
   sysMsg(`🚁 你动用了解放军救援牌！${CN[c]}所有村庄水位清零，防御重置！`);sysMsg(`📢 全流域通报：${CN[c]}市长已动用唯一的解放军救援牌！`);addNews(`🚁 ${CN[c]}动用解放军救援牌！全面清零水位！`);mpSendAction('army_card',{city:c});toast('解放军已出动！','gn');renderAll();showFx('army')}
 function hBroadcast(){sysMsg(`${G.nm}向全体村民发布通知：请密切关注水情，做好撤离准备！`);toast('通知已发','bl')}
+function hBlastDam(c){if(!G.dams[c]||G.blasted[c])return;if(G.ca[c]<20){toast('市资产不足，炸坝需要20','rd');return}G.blasted[c]=true;G.dams[c]=false;G.ca[c]-=20;sysMsg(`💥 你下令炸坝！${CN[c]}大坝被炸毁，拦截水量释放至下游。花费20。`);mpSendAction('blast_dam',{city:c});toast('大坝已炸毁！','am');renderAll();showFx('blast')}
+// Dam/blast with 国家防总 authorization confirmation
 function hCDamConfirm(c){showModal('🏗 修坝授权申请','<p>修建大坝属于重大水利工程，需向<b style="color:var(--cy)">国家防汛抗旱总指挥部</b>申请授权。</p><p style="font-size:.82rem;color:var(--t2)">申请内容：'+CN[c]+'辖区修建大坝，花费30万拦水30单位。</p><p style="font-size:.78rem;color:var(--gn);margin-top:6px">✓ 国家防总已审批通过，授权执行。</p>','<button class="btn btn-p" onclick="closeMo();hCDam(\''+c+'\')">确认修建</button><button class="btn btn-o" onclick="closeMo()">取消</button>')}
 function hBlastDamConfirm(c){showModal('💥 炸坝授权申请','<p>炸坝属于<b style="color:var(--rd)">极端紧急措施</b>，需向<b style="color:var(--cy)">国家防汛抗旱总指挥部</b>申请特别授权。</p><p style="font-size:.82rem;color:var(--t2)">申请内容：'+CN[c]+'辖区炸毁已建大坝，释放拦截水量至下游，花费20万。</p><p style="font-size:.82rem;color:var(--am)">⚠ 炸坝后拦截水量将全部释放至下游，造成下游水位急剧上升！</p><p style="font-size:.78rem;color:var(--gn);margin-top:6px">✓ 国家防总已审批通过，授权执行。</p>','<button class="btn btn-d" onclick="closeMo();hBlastDam(\''+c+'\')">确认炸坝</button><button class="btn btn-o" onclick="closeMo()">取消</button>')}
+// Flood zone leader evacuation order
 function hEvacOrder(v){G._evacOrdered=G._evacOrdered||{};if(G._evacOrdered[v])return;G._evacOrdered[v]=true;
-  const vils=G.players.filter(p=>p.vil===v&&!(p.role||'').startsWith('LEADER_')&&!(p.role||'').startsWith('MAYOR_'));
+  const vils=G.players.filter(p=>p.vil===v&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_'));
   vils.forEach(p=>{G.vm[v]=G.vm[v]||{};if(G.vm[v][p.id]===undefined)G.vm[v][p.id]=true});
   sysMsg(`📢 ${VN[v]}村长下达紧急撤离令！全体村民立即转移！`);addNews(`📢 ${VN[v]}蓄滞洪区下达全村紧急撤离令`);
-  mpSendAction('evacuate_order', {village:v});
   toast('撤离令已下达','am');showFx('evac');renderAll()}
+// Compensation discussion modal for flood zone leaders
 function showCompensation(v){
-  const pop=G.players.filter(p=>p.vil===v&&!(p.role||'').startsWith('LEADER_')&&!(p.role||'').startsWith('MAYOR_')).length;
-  const perH=Math.round(Math.abs(G.va[v])/Math.max(1,pop));
+  const pop=G.players.filter(p=>p.vil===v&&!p.role.startsWith('LEADER_')&&!p.role.startsWith('MAYOR_')).length;
+  const perH=Math.round(G.va[v]/Math.max(1,pop));
   const totalDmg=G.vilHist[v]?G.vilHist[v].reduce((s,h)=>s+h.dmg,0):0;
   showModal('📋 蓄滞洪区灾后补偿需求核算',`
 <div style="font-size:.84rem;color:var(--t2);line-height:2">
@@ -1170,193 +1963,104 @@ function showCompensation(v){
 <tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">个人财产损失</td><td style="text-align:right;font-family:var(--fm)">${Math.round(totalDmg*0.15)}万</td></tr>
 <tr style="font-weight:700"><td style="padding:4px 6px">累计总损失</td><td style="text-align:right;font-family:var(--fm);color:var(--rd)">${totalDmg}万</td></tr>
 </tbody></table>
-<div style="font-size:.74rem;color:var(--t3);margin-top:4px">户均预计补偿约 ${perH} 万</div>
+<div style="font-size:.74rem;color:var(--t3);margin-top:4px">户均损失约 ${perH} 万</div>
 </div>
+<div style="font-weight:700;margin:10px 0 6px">补偿责任主体讨论方案</div>
+<table style="width:100%;border-collapse:collapse;font-size:.78rem"><thead><tr style="border-bottom:1.5px solid var(--bd)"><th style="padding:4px 6px;text-align:left;color:var(--t3)">方案</th><th style="padding:4px 6px;color:var(--t3)">补偿主体</th><th style="padding:4px 6px;color:var(--t3)">比例</th></tr></thead><tbody>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">方案A</td><td style="padding:4px 6px">中央财政全额补偿</td><td style="padding:4px 6px">国家100%</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">方案B</td><td style="padding:4px 6px">上下游共担</td><td style="padding:4px 6px">国家40% + 被保护城市40% + 地方20%</td></tr>
+<tr style="border-bottom:1px solid var(--bd)"><td style="padding:4px 6px">方案C</td><td style="padding:4px 6px">受益者付费</td><td style="padding:4px 6px">下游被保护城市按受益比承担</td></tr>
+</tbody></table>
+<div style="margin-top:10px;padding:10px;background:rgba(68,114,196,.05);border:1px solid rgba(68,114,196,.15);border-radius:8px">
+<div style="font-weight:700;color:var(--cy);margin-bottom:4px">📖 国家现行补偿规则</div>
+<div style="font-size:.78rem;line-height:1.8">
+• <b>《蓄滞洪区运用补偿暂行办法》(2000年)</b>：国务院令第286号，明确蓄滞洪区运用后由国家给予补偿。<br>
+• <b>补偿范围</b>：农作物、专业养殖和经济林水产损失；住房损失；家庭农业生产机械和役畜及家庭主要耐用消费品损失。<br>
+• <b>补偿标准</b>：农作物按前三年平均年产值的50%~70%补偿；住房按损失的70%补偿；其他按损失的50%补偿。<br>
+• <b>资金来源</b>：中央财政拨付，由省级人民政府统一组织发放。<br>
+• <b>现实困境</b>：补偿标准偏低、资金到位慢、未覆盖间接损失（如务工收入中断、心理创伤等）。
+</div></div>
 </div>`,'<button class="btn btn-p" onclick="closeMo()">关闭</button>')}
-
-function renderFin(){const v=G.vil,c=v?v[0]:'A';
-  document.getElementById('fin-row').innerHTML=`
-    <div class="fi"><span class="fl">👤 个人:</span><span class="fv" style="color:${(G.pa.human||0)>=0?'var(--gn)':'var(--rd)'}">${(G.pa.human||0).toFixed(0)}</span></div>
-    ${v?`<div class="fi"><span class="fl">🏘 ${VN[v]}:</span><span class="fv" style="color:${G.va[v]>=0?'var(--cy)':'var(--rd)'}">${G.va[v].toFixed(0)}</span></div>`:''}
-    <div class="fi"><span class="fl">🏛 ${CN[c]}:</span><span class="fv" style="color:var(--gd)">${G.ca[c].toFixed(0)}</span></div>
-    <div class="fi"><span class="fl">📊 累计损失:</span><span class="fv" style="color:var(--rd)">${G.totalLoss.toFixed(0)}</span></div>
-    <div class="fi"><span class="fl">🌊 最高水位:</span><span class="fv" style="color:var(--am)">${Math.max(...VIL.map(v=>G.ws[v])).toFixed(0)}</span></div>`}
-function renderBasin(){document.getElementById('basin-bars').innerHTML=VIL.map(v=>{const w=G.ws[v],t=FT[v],p=clamp(w/t*100,0,100),cl=w>=t?'var(--rd)':w>t*.6?'var(--am)':'var(--gn)';
-  return `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:.74rem"><span style="min-width:36px">${v}</span><div style="flex:1;margin:0 7px;height:4px;background:rgba(0,0,0,.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:${p}%;background:${cl};border-radius:2px;transition:width .5s"></div></div><span style="font-family:var(--fm);color:${cl};min-width:32px;text-align:right">${w.toFixed(0)}</span></div>`}).join('')}
-function renderNews(){document.getElementById('news-list').innerHTML=G.news.map(n=>`<div style="margin-bottom:5px;padding:5px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--am);font-size:.68rem;font-weight:600">R${n.r}</span> ${n.t}</div>`).join('')}
-
-// ===================== CHAT =====================
-function renderChat(){const ct=document.getElementById('chat-msgs');
-  const f=G.role==='OBSERVER'?G.msgs:G.msgs.filter(m=>{if(G.ch==='ALL')return m.ch==='ALL';return m.ch==='VIL'&&m.vil===G.vil});
-  ct.innerHTML=f.slice(-60).map(m=>{const cls=m.tp==='sys'?'sys':m.tp==='ai'?'ai':'';
-    return `<div class="dm ${cls}"><div class="dn">${m.nm}<span class="d-role">${m.rl||''}</span> <span style="font-size:.6rem;color:var(--t3)">${m.tm}</span></div><div>${m.ct}</div></div>`}).join('');
-  ct.scrollTop=ct.scrollHeight;
-  const ba=document.getElementById('btn-ch-a'),bv=document.getElementById('btn-ch-v');
-  if(ba)ba.style.background=G.ch==='ALL'?'rgba(68,114,196,.08)':'';if(bv)bv.style.background=G.ch==='VIL'?'rgba(85,168,104,.08)':''}
-function sysMsg(c){G.msgs.push({tp:'sys',nm:'系统',ct:c,ch:'ALL',vil:null,rl:'',tm:now()});renderChat()}
-function aiChat(nm,vil,ct,rl){G.msgs.push({tp:'ai',nm,ct,ch:vil?'VIL':'ALL',vil,rl:rl||'',tm:now()});renderChat()}
-function addNews(t){G.news.push({t,r:G.round});renderNews()}
-function sendChat(){
-  const inp=document.getElementById('chat-in'),t=inp.value.trim();if(!t)return;
-  if(G._chatMuted){toast('通讯中断中，无法发送消息！','rd');return}
-  G.msgs.push({tp:'player',nm:G.nm,ct:t,ch:G.ch,vil:G.ch==='VIL'?G.vil:null,rl:RL[G.role]||'村民',tm:now()});inp.value='';renderChat();
-  mpSendChat(t,G.ch,G.ch==='VIL'?G.vil:null);
-  
-  if(PANIC_KEYWORDS.some(k=>t.includes(k))){
-    const targetVil=G.ch==='VIL'?G.vil:null;
-    G.players.filter(p=>p.bot&&p.spec!=='RATIONAL'&&(!targetVil||p.vil===targetVil))
-      .forEach(p=>{p.panic=Math.min(100,(p.panic||20)+15)});
-  }
-  const pool=G.players.filter(p=>p.bot&&(G.ch==='ALL'||p.vil===G.vil));const resps=shuffle(pool).slice(0,2+Math.floor(Math.random()*2));
-  resps.forEach((r,i)=>{
-    let msgs;
-    if(r.spec==='RATIONAL')msgs=DISCUSS_TEMPLATES.rational;
-    else if(r.spec==='STAY')msgs=DISCUSS_TEMPLATES.stay_elder;
-    else if((r.panic||20)>70)msgs=DISCUSS_TEMPLATES.panic_high;
-    else if((r.panic||20)>40)msgs=DISCUSS_TEMPLATES.worried;
-    else msgs=['说得有道理。','我同意。','情况不乐观。','别慌，冷静分析。','上游来水确实让人担心。','听你这么说我改主意了。','我再观望一下。','村长什么意见？','涿州那边据说已经淹了。','搬迁安置点在哪？'];
-    const label=r.spec==='RATIONAL'?'水文员':r.spec==='STAY'?'村民(老人)':(r.role||'').startsWith('LEADER_')?'村长':'村民';
-    setTimeout(()=>aiChat(r.nm,G.ch==='VIL'?G.vil:null,pick(msgs),label),800+i*700+Math.random()*1000)})}
-
-// ===================== RADAR CHART / RESULT FIX =====================
-function showResult() {
-  try {
-    showScreen('S-result');
-    const res = [];
-    G.players.forEach(p => {
-      let ec = 0; const pa = G.pa[p.id] || 0;
-      const roleStr = p.role || ''; 
-      if (roleStr.startsWith('MAYOR_')) {
-        const c = roleStr.replace('MAYOR_', '');
-        const vflowSum = (VFLOW[c] || []).reduce((s, v) => s + (G.va[v] || 0), 0);
-        ec = (G.ca[c] || 0) + vflowSum;
-      } else if (roleStr.startsWith('LEADER_')) {
-        const v = roleStr.replace('LEADER_', '');
-        const vilsSum = G.players.filter(q => q.vil === v && !(q.role || '').startsWith('LEADER_') && !(q.role || '').startsWith('MAYOR_')).reduce((s, q) => s + (G.pa[q.id] || 0), 0);
-        ec = (G.va[v] || 0) + vilsSum;
-      } else {
-        ec = pa;
-      }
-      res.push({ ...p, pa, ec, vt: 0 });
-    });
-    
-    res.sort((a, b) => b.ec - a.ec);
-    const colors = ['var(--gd)', '#c0c0c0', '#cd7f32', 'var(--cy)', 'var(--gn)', 'var(--t2)'];
-    document.getElementById('res-cards').innerHTML = res.slice(0, 6).map((r, i) => `<div class="res-c" style="animation-delay:${i * .08}s"><div class="rr" style="color:${colors[i]}">#${i + 1}</div><div class="rn">${r.nm}</div><div class="rl">${RL[r.role] || '村民'}${r.bot ? ' (AI)' : ''}</div><div class="rs" style="color:${r.ec >= 0 ? 'var(--gn)' : 'var(--rd)'}">${r.ec.toFixed(0)}</div></div>`).join('');
-    
-    const mayors = res.filter(r => (r.role || '').startsWith('MAYOR_'));
-    const speeches = { A: '面对极端暴雨，北京承受重创，但下游群众安全转移。上下游协同是关键！', B: '河北处中游承上游洪峰、保下游安全。蓄滞洪区启用，牺牲巨大但保住了生命。', C: '天津承受洪峰叠加。最终洪水入海，灾后重建任重道远。' };
-    
-    document.getElementById('speech-area').innerHTML = mayors.map(m => {
-      const c = m.role.replace('MAYOR_', '');
-      const cName = CN[c] || '未知';
-      return `<div style="margin-bottom:12px;padding:12px;background:rgba(0,0,0,.02);border-radius:8px;border-left:3px solid ${c === 'A' ? 'var(--bl)' : c === 'B' ? 'var(--gn)' : 'var(--am)'}"><div style="font-weight:700;margin-bottom:5px;font-size:.88rem">${m.nm} · ${cName}市长 ${m.bot ? '(AI)' : ''}</div><div style="color:var(--t2);font-size:.84rem;line-height:1.7">${speeches[c] || ''}</div><div style="margin-top:6px;font-size:.76rem;color:var(--t3)">最终市资产: ${(G.ca[c] || 0).toFixed(0)}</div></div>`;
-    }).join('');
-
-    G.voted = false; G.votes = {};
-    const isMayor = (G.role || '').startsWith('MAYOR_');
-    const humanCanVote = !isMayor && G.role !== 'OBSERVER';
-
-    const vi = document.getElementById('vote-info');
-    if (isMayor || G.role === 'OBSERVER') {
-      vi.innerHTML = `<span style="color:var(--am)">你是${G.role==='OBSERVER'?'观察者':'市长'}，不参与投票。</span>`;
-      renderVoteResult(mayors);
-    } else {
-      vi.innerHTML = `<span style="color:var(--cy)">你有1票，请点击选出最满意的市长。</span>`;
-    }
-    
-    document.getElementById('vote-row').innerHTML = mayors.map(m => {
-      const c = m.role.replace('MAYOR_', '');
-      return `<div class="vc${!humanCanVote ? ' voted-disabled' : ''}" id="vc-${m.id}" ${humanCanVote ? `onclick="vote('${m.id}')"` : ''}><div style="font-size:1.3rem;margin-bottom:5px">${c === 'A' ? '🏔' : c === 'B' ? '🌾' : '🌊'}</div><div style="font-weight:700;font-size:.92rem">${m.nm}</div><div style="font-size:.74rem;color:var(--t3)">${CN[c]}市长</div><div style="font-size:.88rem;color:var(--gd);margin-top:6px;font-weight:700" id="vct-${m.id}">${!humanCanVote ? (G.votes[m.id] || 0) + '票' : '—'}</div></div>`;
-    }).join('');
-
-    document.getElementById('res-tb').innerHTML = res.slice(0, 20).map(r => `<tr><td>${RL[r.role] || '村民'}</td><td>${r.nm}${r.bot ? ' (AI)' : ''}</td><td>${r.vil || '—'}</td><td>100</td><td style="color:${r.pa >= 0 ? 'var(--gn)' : 'var(--rd)'}">${(r.pa||0).toFixed(0)}</td><td style="color:${r.ec >= 0 ? 'var(--gn)' : 'var(--rd)'}">${(r.ec||0).toFixed(0)}</td><td id="vtd-${r.id}">${!humanCanVote ? (G.votes[r.id] || 0) : 0}</td><td>${(r.ec||0).toFixed(0)}</td></tr>`).join('');
-    
-    if(!humanCanVote) renderVoteResult(mayors);
-    setTimeout(() => drawRadarChart('radar-chart'), 500); 
-  } catch (e) {
-    console.error("渲染结算界面失败:", e);
-    toast('结算界面渲染异常', 'rd');
-  }
+// ── Decision animation effects (item 5) ──
+function showFx(type){
+  const fx=document.createElement('div');fx.className='fx-overlay';
+  if(type==='sandbag'){fx.innerHTML='<div class="fx-icon">🧱</div><div class="fx-text">沙袋防线已部署！</div>'}
+  else if(type==='dam'){fx.innerHTML='<div class="fx-icon">🏗</div><div class="fx-text">大坝修建完成！</div>'}
+  else if(type==='blast'){fx.innerHTML='<div class="fx-icon">💥</div><div class="fx-text">大坝爆破！水量释放！</div>';fx.classList.add('fx-danger')}
+  else if(type==='army'){fx.innerHTML='<div class="fx-icon">🚁</div><div class="fx-text">解放军驰援！水位清零！</div>';fx.classList.add('fx-army')}
+  else if(type==='evac'){fx.innerHTML='<div class="fx-icon">📢</div><div class="fx-text">紧急撤离令已下达！</div>';fx.classList.add('fx-danger')}
+  else if(type==='drain'){fx.innerHTML='<div class="fx-icon">🌊</div><div class="fx-text">排洪方案执行中…</div>'}
+  else if(type==='move'){fx.innerHTML='<div class="fx-icon">🚶</div><div class="fx-text">已转移至安置点</div>'}
+  else if(type==='stay'){fx.innerHTML='<div class="fx-icon">🏠</div><div class="fx-text">选择留守家园</div>';fx.classList.add('fx-danger')}
+  else return;
+  document.body.appendChild(fx);
+  requestAnimationFrame(()=>fx.classList.add('fx-show'));
+  setTimeout(()=>{fx.classList.remove('fx-show');setTimeout(()=>fx.remove(),400)},1800);
 }
 
-function calcRadarScores() {
-  const v = G.vil || 'B1'; 
-  const c = v[0] || 'B';
-  let s1 = 50;
-  if ((G.role || '').startsWith('MAYOR_')) {
-    const d = G.cd[c] || 0;
-    const tw = (VFLOW[c] || []).reduce((s, vv) => s + (G.ws[vv] || 0), 0);
-    s1 = tw > 0 ? clamp(100 - d / tw * 100, 20, 90) : 70;
-  } else if ((G.role || '').startsWith('LEADER_')) {
-    s1 = (G.sandbags[v] || 0) > 0 ? 70 : 40;
-  }
-  const finalVA = Math.max(0, G.va[v] || 0); 
-  const s2 = clamp(finalVA / 500 * 100, 0, 100);
-  const chatCount = G.msgs.filter(m => m.tp === 'player').length; 
-  const s3 = clamp(chatCount * 8, 10, 95);
-  const s4 = clamp(chatCount * 6 + 20, 10, 90);
-  const pa = G.pa?.human || 0; 
-  const s5 = clamp(pa, 0, 100);
-  return [Math.round(s1), Math.round(s2), Math.round(s3), Math.round(s4), Math.round(s5)];
+// ===================== RESULT (with voting window req #10) =====================
+function showResult(){showScreen('S-result');
+  const res=[];G.players.forEach(p=>{let ec=0;const pa=G.pa[p.id]||0;
+    if(p.role.startsWith('MAYOR_')){const c=p.role.replace('MAYOR_','');ec=G.ca[c]+VFLOW[c].reduce((s,v)=>s+G.va[v],0)}
+    else if(p.role.startsWith('LEADER_')){const v=p.role.replace('LEADER_','');ec=G.va[v]+G.players.filter(q=>q.vil===v&&!q.role.startsWith('LEADER_')&&!q.role.startsWith('MAYOR_')).reduce((s,q)=>s+(G.pa[q.id]||0),0)}
+    else ec=pa;res.push({...p,pa,ec,vt:0})});
+  res.sort((a,b)=>b.ec-a.ec);
+  const colors=['var(--gd)','#c0c0c0','#cd7f32','var(--cy)','var(--gn)','var(--t2)'];
+  document.getElementById('res-cards').innerHTML=res.slice(0,6).map((r,i)=>`<div class="res-c" style="animation-delay:${i*.08}s"><div class="rr" style="color:${colors[i]}">#${i+1}</div><div class="rn">${r.nm}</div><div class="rl">${RL[r.role]||'村民'}${r.bot?' (AI)':''}</div><div class="rs" style="color:${r.ec>=0?'var(--gn)':'var(--rd)'}">${r.ec.toFixed(0)}</div></div>`).join('');
+  const mayors=res.filter(r=>r.role.startsWith('MAYOR_'));
+  const speeches={A:'面对140年来最强暴雨，北京83小时降水744.8mm。门头沟和房山承受重创，但下游群众安全转移。上下游协同是关键！',B:'河北处中游承上游洪峰、保下游安全。涿州水深超3米，蓄滞洪区1963年来首次启用，牺牲巨大但保住了更多生命。',C:'天津承受大清河、子牙河洪峰叠加。静海东淀蓄洪、武清紧急排涝。最终洪水入海，但灾后重建任重道远。'};
+  document.getElementById('speech-area').innerHTML=mayors.map(m=>{const c=m.role.replace('MAYOR_','');return `<div style="margin-bottom:12px;padding:12px;background:rgba(0,0,0,.02);border-radius:8px;border-left:3px solid ${c==='A'?'var(--bl)':c==='B'?'var(--gn)':'var(--am)'}"><div style="font-weight:700;margin-bottom:5px;font-size:.88rem">${m.nm} · ${CN[c]}市长 ${m.bot?'(AI)':''} ${G.armyCard[c]?'':'<span style="color:var(--am);font-size:.76rem">（已使用解放军救援牌）</span>'}</div><div style="color:var(--t2);font-size:.84rem;line-height:1.7">${speeches[c]}</div><div style="margin-top:6px;font-size:.76rem;color:var(--t3)">最终市资产: ${G.ca[c].toFixed(0)} | 所辖村资产: ${VFLOW[c].reduce((s,v)=>s+G.va[v],0).toFixed(0)}</div></div>`}).join('');
+  // Voting window - only non-mayor players can vote
+  G.voted=false;G.votes={};
+  const isMayor=G.role&&G.role.startsWith('MAYOR_');
+  const aiVoters=G.players.filter(p=>p.bot&&!p.role.startsWith('MAYOR_'));
+  const humanCanVote=!isMayor;
+  const totalVoters=aiVoters.length+(humanCanVote?1:0);
+  // AI non-mayor players cast their votes immediately (weighted by city asset performance)
+  aiVoters.forEach(()=>{
+    const weights=mayors.map(m=>{const c=m.role.replace('MAYOR_','');return Math.max(1,G.ca[c]+VFLOW[c].reduce((s,v)=>s+G.va[v],0)+500)});
+    const total=weights.reduce((s,w)=>s+w,0);let r=Math.random()*total,acc=0;
+    for(let i=0;i<mayors.length;i++){acc+=weights[i];if(r<=acc){G.votes[mayors[i].id]=(G.votes[mayors[i].id]||0)+1;break}}});
+  const vi=document.getElementById('vote-info');
+  if(isMayor){vi.innerHTML='<span style="color:var(--am)">你是市长，不参与投票。AI村民与村长已投票完毕。</span>';renderVoteResult(mayors)}
+  else{vi.innerHTML=`<span style="color:var(--cy)">你有1票，请点击下方选出最满意的市长（投票后不可更改）。</span>`}
+  document.getElementById('vote-row').innerHTML=mayors.map(m=>{const c=m.role.replace('MAYOR_','');return `<div class="vc${isMayor?' voted-disabled':''}" id="vc-${m.id}" ${humanCanVote?`onclick="vote('${m.id}')"`:''}><div style="font-size:1.3rem;margin-bottom:5px">${c==='A'?'🏔':c==='B'?'🌾':'🌊'}</div><div style="font-weight:700;font-size:.92rem">${m.nm}</div><div style="font-size:.74rem;color:var(--t3)">${CN[c]}市长</div><div style="font-size:.72rem;color:var(--t2);margin-top:4px">市资产:${G.ca[c].toFixed(0)}</div><div style="font-size:.88rem;color:var(--gd);margin-top:6px;font-weight:700" id="vct-${m.id}">${isMayor?(G.votes[m.id]||0)+'票':'—'}</div></div>`}).join('');
+  document.getElementById('res-tb').innerHTML=res.slice(0,20).map(r=>`<tr><td>${RL[r.role]||'村民'}</td><td>${r.nm}${r.bot?' (AI)':''}${r.spec?' ★':''}</td><td>${r.vil||'—'}</td><td>100</td><td style="color:${r.pa>=0?'var(--gn)':'var(--rd)'}">${r.pa.toFixed(0)}</td><td style="color:${r.ec>=0?'var(--gn)':'var(--rd)'}">${r.ec.toFixed(0)}</td><td id="vtd-${r.id}">${isMayor?(G.votes[r.id]||0):0}</td><td>${r.ec.toFixed(0)}</td></tr>`).join('');
+  if(isMayor)renderVoteResult(mayors);
+  // 绘制五维雷达图
+  setTimeout(()=>drawRadarChart('radar-chart'),300);
 }
-
-function drawRadarChart(canvasId){
-  const cv=document.getElementById(canvasId);if(!cv)return;
-  const ctx=cv.getContext('2d');
-  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,R=Math.min(W,H)*0.35;
-  ctx.clearRect(0,0,W,H);
-  const labels=['大局观','风险管理','领导力','沟通协调','经济效益'];
-  const n=labels.length;
-  const angle=Math.PI*2/n;
-  const scores=calcRadarScores();
-
-  ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=1;
-  for(let ring=1;ring<=5;ring++){
-    ctx.beginPath();
-    for(let i=0;i<=n;i++){
-      const a=-Math.PI/2+i*angle;const r=R*ring/5;
-      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-  }
-  for(let i=0;i<n;i++){
-    const a=-Math.PI/2+i*angle;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.stroke();
-  }
-  ctx.beginPath();ctx.fillStyle='rgba(68,114,196,.2)';ctx.strokeStyle='#4472C4';ctx.lineWidth=2;
-  scores.forEach((s,i)=>{
-    const a=-Math.PI/2+i*angle;const r=R*s/100;
-    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  });
-  ctx.closePath();ctx.fill();ctx.stroke();
-  scores.forEach((s,i)=>{
-    const a=-Math.PI/2+i*angle;const r=R*s/100;
-    ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle='#4472C4';ctx.fill();
-  });
-  ctx.fillStyle='#2d3748';ctx.font='12px "Noto Serif SC",serif';ctx.textAlign='center';
-  labels.forEach((l,i)=>{
-    const a=-Math.PI/2+i*angle;const lr=R+24;
-    ctx.fillText(`${l}(${scores[i]})`,cx+lr*Math.cos(a),cy+lr*Math.sin(a)+4);
-  });
-}
+function renderVoteResult(mayors){
+  mayors.forEach(m=>{const c=G.votes[m.id]||0;const e=document.getElementById('vct-'+m.id);if(e)e.textContent=c+'票';const td=document.getElementById('vtd-'+m.id);if(td)td.textContent=c});
+  const vr=document.getElementById('vote-result');if(vr){const sorted=mayors.map(m=>({nm:m.nm,c:m.role.replace('MAYOR_',''),v:G.votes[m.id]||0})).sort((a,b)=>b.v-a.v);
+    vr.innerHTML=`<div style="padding:10px;background:rgba(212,168,83,.06);border:1px solid rgba(212,168,83,.12);border-radius:8px">🏆 投票结果：${sorted.map((s,i)=>`<span style="font-weight:700;color:${i===0?'var(--gd)':'var(--t2)'}"> ${CN[s.c]}·${s.nm} ${s.v}票</span>`).join(' | ')}</div>`}}
+function vote(tid){
+  if(G.voted){toast('你已投过票，不可重复投票','am');return}
+  G.voted=true;
+  document.getElementById('vc-'+tid).classList.add('voted');
+  G.votes[tid]=(G.votes[tid]||0)+1;
+  // Disable further clicks
+  document.querySelectorAll('.vc').forEach(c=>{c.onclick=null;if(!c.classList.contains('voted'))c.classList.add('voted-disabled')});
+  const vi=document.getElementById('vote-info');if(vi)vi.innerHTML='<span style="color:var(--gn)">✓ 你已投票完毕。</span>';
+  const mayors=G.players.filter(p=>p.role.startsWith('MAYOR_'));
+  renderVoteResult(mayors);
+  toast('投票成功！','gn')}
 
 // ===================== MODAL =====================
 function showModal(t,b,btns){document.getElementById('mo-t').innerHTML=t;document.getElementById('mo-b').innerHTML=b;document.getElementById('mo-btns').innerHTML=btns||'<button class="btn btn-p" onclick="closeMo()">确定</button>';document.getElementById('mo').classList.add('show')}
 function closeMo(){document.getElementById('mo').classList.remove('show');clearTimeout(G._evtModalTimer)}
 function showRoleReveal(){
   const r=G.role,rn=RL[r]||'村民',v=G.vil;let d='';
-  if(r&&(r||'').startsWith('MAYOR_')){const c=r.replace('MAYOR_','');d=`<p>作为<b>${CN[c]}市长</b>，你决定排洪量、修坝和是否炸坝释放拦水。排洪推向下游。</p><p style="color:var(--am)">🚁 你拥有唯一一次<b>解放军救援牌</b>，使用后所辖村庄水位全部清零，防御重置。全流域将收到通报。</p><p style="font-size:.8rem;color:var(--t3)">💡 你的排洪决策直接影响下游命运，但你无法预知下游的反应。</p>`}
-  else if(r&&(r||'').startsWith('LEADER_')){const vv=r.replace('LEADER_','');d=`<p>你是<b>${VN[vv]}村长</b>。可花费10~50村资金购置沙袋防洪屏障，抵挡相应水量。未拦住的水量将流向下游。</p>`;d+='<p style="font-size:.8rem;color:var(--t3)">💡 你只知道本村水情，不知道其他村长的选择。</p>'}
-  else if(r==='OBSERVER'){d='<p>你是<b>教师/观察者</b>。你可以查看所有玩家的决策和聊天，但不能参与投票或干预决策流程。</p>';}
+  if(r&&r.startsWith('MAYOR_')){const c=r.replace('MAYOR_','');d=`<p>作为<b>${CN[c]}市长</b>，你决定排洪量、修坝和是否炸坝释放拦水。排洪推向下游。</p><p style="color:var(--am)">🚁 你拥有唯一一次<b>解放军救援牌</b>，使用后所辖村庄水位全部清零，防御重置。全流域将收到通报。</p><p style="font-size:.8rem;color:var(--t3)">💡 你的排洪决策直接影响下游命运，但你无法预知下游的反应。</p>`}
+  else if(r&&r.startsWith('LEADER_')){const vv=r.replace('LEADER_','');d=`<p>你是<b>${VN[vv]}村长</b>。可花费10~50村资金购置沙袋防洪屏障，抵挡相应水量。未拦住的水量将流向下游。</p>`;d+='<p style="font-size:.8rem;color:var(--t3)">💡 你只知道本村水情，不知道其他村长的选择。</p>'}
   else{d=`<p>你是<b>${VN[v]}普通村民</b>。每轮决策搬迁or留守。</p><p>搬+未淹=损30 | 不搬+被淹=损50 | 搬+淹=0</p><p style="color:var(--am)">注意：聊天中有隐藏角色，信息不一定可靠！</p><p style="font-size:.8rem;color:var(--t3)">💡 你不知道上游会排多少水过来，也不知道村长会不会修坝。</p>`}
-  showModal(`🎭 你的角色：${rn}`,`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2.4rem">${r&&(r||'').startsWith('MAYOR')?'🏛':r&&(r||'').startsWith('LEADER')?'🏠':'🧑'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--cy)">${rn}</div><div style="font-size:.8rem;color:var(--t3);margin-top:3px">位置：${VN[v]||v||'全局'}</div></div>${d}`)}
+  showModal(`🎭 你的角色：${rn}`,`<div style="text-align:center;margin-bottom:14px"><div style="font-size:2.4rem">${r&&r.startsWith('MAYOR')?'🏛':r&&r.startsWith('LEADER')?'🏠':'🧑'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--cy)">${rn}</div><div style="font-size:.8rem;color:var(--t3);margin-top:3px">位置：${VN[v]||v}</div></div>${d}`)}
 function showGuide(){showModal('📖 游戏规则','<div style="font-size:.84rem;color:var(--t2);line-height:1.9"><p><b>背景</b>：2023年台风"杜苏芮"北上，海河流域遭遇"23·7"特大洪水，北京83h降雨744.8mm。</p><p><b>流域</b>：北京A(上游)→河北B(中游)→天津C(下游)，每城3村，共9村约90人参与</p><p><b>核心机制</b>：每人只掌握局部信息，需在不确定性下快速决策。你的选择影响他人，他人的选择也影响你。</p><p><b>阈值</b>：房山20 门头沟30 昌平35 涿州30 霸州40 保定35 静海40 武清50 滨海新区45</p><p><b>海排上限</b>：滨海新区(C3)入海口每轮最多排出60单位，超出部分积压。</p><p><b>村民</b>：搬+未淹=损30 | 不搬+淹=损50 | 搬+淹=0</p><p><b>村长</b>：可花费10~50村资金购买沙袋防洪屏障，抵挡相应水量，未拦住部分流向下游。</p><p><b>市长</b>：决定排洪量(推向下游)+修坝(花费30拦30)+可申请炸坝(花费20释放拦水至下游)+🚁解放军救援牌(一次性，清零本市所有村庄水位并重置防御)</p><p><b>评分</b>：村民=个人经济 | 其他=经济排名+声誉投票</p><p style="color:var(--gd)"><b>隐藏角色</b>："谣言散布者"混淆视听、"坚守老人"拒绝撤离！隐藏角色仅出现在普通村民中，村长和市长不会是隐藏角色。</p></div>')}
 function showConsent(){showModal('📋 知情同意书','<div style="font-size:.84rem;color:var(--t2);line-height:2"><p>尊敬的参与者：</p><p>您正在参与由天津大学资源安全与公共治理中心开发的"海河流域洪涝风险决策仿真"教学实验。本实验旨在通过模拟决策场景，帮助您理解多主体协同与博弈下的防洪决策过程。</p><p><b>自愿参与</b>：您的参与完全自愿。您可以在任何时候退出实验，且不会因此受到任何不利影响。</p><p><b>无风险</b>：本实验为虚拟仿真教学活动，不涉及任何人身、财务或心理风险。所有情境均为教学模拟，不代表真实事件后果。</p><p><b>匿名性</b>：实验中收集的数据（包括您的决策记录和研讨发言）仅用于教学分析和学术研究，所有数据均匿名处理，不会关联到您的个人身份信息。</p><p>如您同意参与，请点击下方"我已知悉并同意"按钮。</p></div>','<button class="btn btn-p" onclick="closeMo()">我已知悉并同意</button><button class="btn btn-o" onclick="closeMo()">返回</button>')}
 
+// ===================== HELPERS =====================
 function selRole(el,r){document.querySelectorAll('.rc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');G.pref=r}
+// Mobile bottom tab switching
 function mobTab(panel){
   document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector(`.mob-tab[data-panel="${panel}"]`)?.classList.add('active');
@@ -1368,18 +2072,30 @@ function mobTab(panel){
   if(panel==='action'||panel==='chat'){if(right)right.style.display=''}
   if(panel==='status'){if(left)left.style.display=''}
 }
-
-function startGame(){
-  G.nm=document.getElementById('inp-name').value.trim()||'张同学';
-  G.sid=document.getElementById('inp-sid').value.trim()||'2024001';
+function startGame(){G.nm=document.getElementById('inp-name').value.trim()||'张同学';G.sid=document.getElementById('inp-sid').value.trim()||'2024001';
+  // 确保 WORKER_API 从输入框同步（避免 onchange 未触发）
+  const workerInput=document.getElementById('inp-worker-api');
+  if(workerInput&&workerInput.value.trim())WORKER_API=workerInput.value.trim().replace(/\/$/,'');
   const roomCode=(document.getElementById('inp-room')?.value||'').trim().toUpperCase();
-  G.localSessionId=roomCode || 'SIM-' + Math.random().toString(36).substring(2, 6).toUpperCase();
   if(roomCode){
+    // Multiplayer mode: HTTP join via D1, then poll for game start
     showScreen('S-waiting');
     document.getElementById('wait-room-code').textContent=roomCode;
-    joinRoomHTTP(roomCode);
-    toast('正在加入房间 '+roomCode+'...','bl');
-  } else {
+    document.getElementById('wait-role').textContent='分配中...';
+    document.getElementById('wait-village').textContent='';
+    document.getElementById('wait-player-list').innerHTML='';
+    document.getElementById('wait-start-area').innerHTML='';
+    // 优先使用 D1 HTTP 大厅；回退到 Socket.IO 直连
+    if(WORKER_API){
+      joinRoomHTTP(roomCode);
+      toast('正在加入房间 '+roomCode+'...','bl');
+    }else{
+      mpConnect(roomCode,G.nm,G.sid,G.pref);
+      toast('正在连接房间 '+roomCode+'...','bl');
+    }
+  }
+  else{
+    // Single player mode: load config then init locally
     loadServerConfig().then(()=>initGame()).catch(()=>initGame());
   }
 }
@@ -1389,17 +2105,198 @@ function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v))}
 function toast(msg,c){const ct=document.getElementById('toast-c');const cl={gn:'var(--gn)',am:'var(--am)',bl:'var(--cy)',rd:'var(--rd)'};const t=document.createElement('div');t.style.cssText=`pointer-events:auto;padding:10px 18px;border-radius:7px;background:var(--p1);border:1.5px solid ${cl[c]||cl.bl};color:${cl[c]||cl.bl};font-size:.86rem;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.1);animation:fadeIn .25s`;t.textContent=msg;ct.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000)}
-function showCountdown(cb){ let n=3; const ov=document.createElement('div'); ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;flex-direction:column;color:white;font-size:5rem;font-weight:bold;'; ov.innerHTML=`<div id="cd-num">${n}</div>`; document.body.appendChild(ov); const timer=setInterval(()=>{ n--; if(n>0) document.getElementById('cd-num').textContent=n; else{ clearInterval(timer); ov.remove(); cb(); } },1000); }
 
-// ===================== FX =====================
-function showFx(type){
-  const ic={move:'🏃',stay:'🏠',sandbag:'🧱',drain:'🌊',dam:'🏗',blast:'💥',army:'🚁',evac:'📢'};
-  const t={move:'村民转移中...',stay:'坚守家园',sandbag:'沙袋防御部署',drain:'市长排洪中',dam:'大坝修建中',blast:'大坝爆破',army:'解放军紧急驰援',evac:'紧急撤离命令'};
-  const c={move:'fx-army',stay:'fx-army',sandbag:'fx-army',drain:'fx-army',dam:'fx-army',blast:'fx-danger',army:'fx-army',evac:'fx-danger'};
-  const ov=document.createElement('div');ov.className=`fx-overlay ${c[type]} fx-show`;
-  ov.innerHTML=`<div class="fx-icon">${ic[type]}</div><div class="fx-text">${t[type]}</div>`;
+// ===================== MULTI-DISCIPLINARY INTEGRATION =====================
+// 专业术语词典
+const TERMS={
+  '泄洪闸调度':'通过控制泄洪闸门的开启时间和开度，调节水库下泄流量，削减洪峰。',
+  '子堤':'在堤防临水面或堤顶加筑的临时性挡水设施，用于应对超标准洪水。',
+  '天文大潮顶托':'天文大潮期间海水位抬高，阻碍河水入海排泄，导致河口水位壅高。',
+  '蓄滞洪区':'利用低洼地区临时蓄滞洪水，以削减河道洪峰流量、保障重点地区安全。',
+  '漫滩':'河水超过河槽容量，溢流到两岸滩地的现象。',
+  '分洪':'将超过河道安全泄量的洪水，通过分洪闸或分洪口分流到蓄滞洪区或支流。',
+  '洪峰':'洪水过程中的最高水位或最大流量，是防洪调度的关键控制点。',
+  '汛限水位':'水库在汛期允许蓄水的上限水位，需预留库容应对来洪。',
+  '退水':'洪水过后水位逐渐回落的过程。'
+};
+function termify(text){
+  let result=text;
+  Object.entries(TERMS).forEach(([term,def])=>{
+    if(result.includes(term)){
+      result=result.replace(new RegExp(term,'g'),`<span style="border-bottom:1px dashed var(--cy);cursor:help;color:var(--cy)" title="${def}">${term}</span>`);
+    }
+  });
+  return result;
+}
+
+// 信息迷雾 — 根据角色限制可见信息
+function canSeeDetail(v){
+  if(!G.role)return true; // 单机全可见
+  if(G.role==='OBSERVER')return true;
+  const myCity=G.vil?G.vil[0]:null;
+  const targetCity=v[0];
+  if(G.role.startsWith('MAYOR_')){
+    const mc=G.role.replace('MAYOR_','');
+    return targetCity===mc; // 市长只看本市
+  }
+  if(G.role.startsWith('LEADER_')){
+    const lv=G.role.replace('LEADER_','');
+    if(v===lv)return true; // 本村全透明
+    return targetCity===myCity; // 同市粗略可见
+  }
+  // 村民：本村全透明，同城粗略
+  if(v===G.vil)return true;
+  return targetCity===myCity;
+}
+
+function fogLabel(w,th){
+  const ratio=w/th;
+  if(ratio<0.3)return '低';
+  if(ratio<0.6)return '中';
+  if(ratio<0.9)return '高';
+  return '极高';
+}
+
+// 五维雷达图评估
+function drawRadarChart(canvasId){
+  const cv=document.getElementById(canvasId);if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,R=Math.min(W,H)*0.35;
+  ctx.clearRect(0,0,W,H);
+
+  const labels=['大局观','风险管理','领导力','沟通协调','经济效益'];
+  const n=labels.length;
+  const angle=Math.PI*2/n;
+
+  // 计算各维度分数 (0-100)
+  const scores=calcRadarScores();
+
+  // 绘制网格
+  ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=1;
+  for(let ring=1;ring<=5;ring++){
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){
+      const a=-Math.PI/2+i*angle;const r=R*ring/5;
+      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  // 绘制轴线
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*angle;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.stroke();
+  }
+  // 绘制数据多边形
+  ctx.beginPath();ctx.fillStyle='rgba(68,114,196,.2)';ctx.strokeStyle='#4472C4';ctx.lineWidth=2;
+  scores.forEach((s,i)=>{
+    const a=-Math.PI/2+i*angle;const r=R*s/100;
+    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.closePath();ctx.fill();ctx.stroke();
+  // 绘制数据点
+  scores.forEach((s,i)=>{
+    const a=-Math.PI/2+i*angle;const r=R*s/100;
+    ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle='#4472C4';ctx.fill();
+  });
+  // 绘制标签
+  ctx.fillStyle='#2d3748';ctx.font='12px "Noto Serif SC",serif';ctx.textAlign='center';
+  labels.forEach((l,i)=>{
+    const a=-Math.PI/2+i*angle;const lr=R+24;
+    ctx.fillText(`${l}(${scores[i]})`,cx+lr*Math.cos(a),cy+lr*Math.sin(a)+4);
+  });
+}
+
+function calcRadarScores(){
+  const v=G.vil,c=v?v[0]:'A';
+  // 大局观：市长排洪考虑下游比例 or 村长沙袋合理性
+  let s1=50;
+  if(G.role?.startsWith('MAYOR_')){const d=G.cd[c]||0;const tw=VFLOW[c].reduce((s,vv)=>s+G.ws[vv],0);s1=tw>0?clamp(100-d/tw*100,20,90):70}
+  else if(G.role?.startsWith('LEADER_')){s1=G.sandbags[v]>0?70:40}
+  // 风险管理：资产保存率
+  const finalVA=Math.max(0,G.va[v]||0);const s2=clamp(finalVA/500*100,0,100);
+  // 领导力：参与决策次数
+  const chatCount=G.msgs.filter(m=>m.tp==='player').length;const s3=clamp(chatCount*8,10,95);
+  // 沟通协调：聊天量+回应率
+  const s4=clamp(chatCount*6+20,10,90);
+  // 经济效益：个人资产
+  const pa=G.pa?.human||0;const s5=clamp(pa,0,100);
+  return [Math.round(s1),Math.round(s2),Math.round(s3),Math.round(s4),Math.round(s5)];
+}
+
+// ===================== TUTORIAL SYSTEM =====================
+const TUT_STEPS_BASE=[
+  {sel:'.g-top',title:'游戏顶栏',desc:'显示当前轮次、阶段、你的角色、和倒计时。注意观察阶段变化和剩余时间。'},
+  {sel:'#rain-banner',title:'降雨信息',desc:'每轮开始公布三城降雨量。北京(上游)通常最大，天津(下游)最小。这决定了洪水走势。'},
+  {sel:'.map-pnl',title:'流域沙盘地图',desc:'9个村庄分布在北京(上游)→河北(中游)→天津(下游)。点击任意村庄可查看详情。蓝色水位条表示当前水量，超过阈值即被淹。'},
+  {sel:'#my-status-panel',title:'我的状态',desc:'你的角色、所在村庄、个人/村庄/城市资产一览。注意资产变化，这关系到你的最终得分。'},
+];
+const TUT_STEPS_ROLE={
+  MAYOR:[{sel:'#act-panel',title:'市长决策面板',desc:'你可以：①调节排洪量(推向下游) ②花费30万修建大坝(拦水30) ③申请炸坝释放拦水 ④动用解放军救援牌(一次性，清零本市所有水位)。排洪量越大，下游压力越大！'}],
+  LEADER:[{sel:'#act-panel',title:'村长决策面板',desc:'你可以花费10~50万村资金购置沙袋防洪屏障。沙袋能抵挡等量水位，但未拦住的部分会流向下游。量力而行！'}],
+  VIL:[{sel:'#act-panel',title:'村民决策',desc:'核心博弈：搬迁还是留守？搬迁但未淹=损失30万 | 不搬被淹=损失50万 | 搬迁且被淹=无损失。注意：聊天中有隐藏角色(谣言者/固执老人)！'}],
+};
+const TUT_STEP_CHAT={sel:'.disc-pnl',title:'研讨聊天区',desc:'与同村村民或全流域玩家讨论。信息不一定可靠——有人散布谣言，有人固执己见，也有理性水文员提供数据分析。'};
+
+function startTutorial(){
+  G._tutorialDone=false;
+  const roleKey=G.role?.startsWith('MAYOR')?'MAYOR':G.role?.startsWith('LEADER')?'LEADER':'VIL';
+  const steps=[...TUT_STEPS_BASE,...(TUT_STEPS_ROLE[roleKey]||[]),TUT_STEP_CHAT];
+  let idx=0;
+  function showStep(){
+    // 清除旧的
+    document.querySelectorAll('.tut-overlay,.tut-tip,.tut-highlight').forEach(e=>{if(e.classList.contains('tut-overlay')||e.classList.contains('tut-tip'))e.remove();else e.classList.remove('tut-highlight')});
+    if(idx>=steps.length){G._tutorialDone=true;startTimer();return}
+    const s=steps[idx];
+    const target=document.querySelector(s.sel);
+    // 遮罩
+    const ov=document.createElement('div');ov.className='tut-overlay';document.body.appendChild(ov);
+    // 高亮目标
+    if(target)target.classList.add('tut-highlight');
+    // 提示框
+    const tip=document.createElement('div');tip.className='tut-tip';
+    tip.innerHTML=`<div class="tut-step">步骤 ${idx+1}/${steps.length}</div><div class="tut-title">${s.title}</div><div>${s.desc}</div><div class="tut-btns">${idx>0?'<button class="btn btn-o" style="padding:6px 14px;font-size:.8rem" onclick="tutPrev()">上一步</button>':''}<button class="btn btn-p" style="padding:6px 14px;font-size:.8rem" onclick="tutNext()">${idx===steps.length-1?'开始游戏':'下一步'}</button><button class="btn btn-o" style="padding:6px 14px;font-size:.8rem" onclick="tutSkip()">跳过</button></div>`;
+    document.body.appendChild(tip);
+    // 定位提示框在目标附近
+    if(target){const r=target.getBoundingClientRect();const tipTop=r.bottom+12;const tipLeft=Math.max(16,Math.min(r.left,window.innerWidth-360));tip.style.top=tipTop+'px';tip.style.left=tipLeft+'px';
+      if(tipTop+200>window.innerHeight){tip.style.top=(r.top-200)+'px'}}
+    else{tip.style.top='50%';tip.style.left='50%';tip.style.transform='translate(-50%,-50%)'}
+  }
+  window.tutNext=()=>{idx++;showStep()};
+  window.tutPrev=()=>{idx=Math.max(0,idx-1);showStep()};
+  window.tutSkip=()=>{document.querySelectorAll('.tut-overlay,.tut-tip,.tut-highlight').forEach(e=>{if(e.classList.contains('tut-overlay')||e.classList.contains('tut-tip'))e.remove();else e.classList.remove('tut-highlight')});G._tutorialDone=true;startTimer()};
+  showStep();
+}
+
+// ===================== SENSORY PRESSURE =====================
+// Web Audio countdown ticks
+let _audioCtx=null;
+function playTick(freq){
+  if(!_audioCtx){try{_audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}}
+  if(_audioCtx.state==='suspended')_audioCtx.resume();
+  const osc=_audioCtx.createOscillator();const gain=_audioCtx.createGain();
+  osc.connect(gain);gain.connect(_audioCtx.destination);
+  osc.frequency.value=freq;osc.type='sine';
+  gain.gain.setValueAtTime(0.08,_audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,_audioCtx.currentTime+0.12);
+  osc.start();osc.stop(_audioCtx.currentTime+0.12);
+}
+
+// (updTimer sensory hooks are integrated directly in updTimer above)
+
+// 黑天鹅通讯中断事件
+function triggerBlackout(){
+  if(G._chatMuted)return;
+  G._chatMuted=true;
+  const ov=document.createElement('div');ov.className='blackout-overlay';ov.id='blackout-ov';
+  ov.innerHTML='<div class="blackout-text">⚡ 通讯中断！</div><div class="blackout-sub">紧急突发事件导致通讯暂时中断，15秒后恢复...</div><div id="blackout-timer" style="font-size:2rem;color:#fff;margin-top:16px;font-family:var(--fm)">15</div>';
   document.body.appendChild(ov);
-  setTimeout(()=>{ov.classList.remove('fx-show');setTimeout(()=>ov.remove(),400)},1500);
+  let sec=15;
+  const tmr=setInterval(()=>{sec--;const el=document.getElementById('blackout-timer');if(el)el.textContent=sec;
+    if(sec<=0){clearInterval(tmr);G._chatMuted=false;const bo=document.getElementById('blackout-ov');if(bo)bo.remove();sysMsg('📡 通讯已恢复！');toast('通讯恢复','gn')}
+  },1000);
+  sysMsg('⚡ 紧急通讯中断！15秒内无法发送消息。');addNews('⚡ 突发通讯故障，各地通讯暂时中断！');
 }
 
 // ===================== RAIN CANVAS =====================

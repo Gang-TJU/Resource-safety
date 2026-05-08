@@ -3,511 +3,281 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理后台 — 海河洪涝决策仿真平台</title>
+<title>管理后台 — 海河洪涝决策仿真平台 V2.1</title>
 <style>
 :root{--bg:#f7f8fa;--card:#fff;--text:#2d3748;--muted:#718096;--border:#e2e8f0;--blue:#4472C4;--green:#55A868;--amber:#DD8452;--red:#C44E52;--gold:#D4A853;--radius:10px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.top-bar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-.top-bar h1{font-size:1.1rem;font-weight:700;color:var(--blue)}
-.top-bar a{font-size:.84rem;color:var(--blue);text-decoration:none}
-.container{max-width:1100px;margin:0 auto;padding:20px}
+body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
+.top-bar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:var(--radius);margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.top-bar h1{font-size:1.15rem;font-weight:700;color:var(--blue)}
 .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0}
-.tab{padding:10px 20px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab{padding:10px 20px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
 .tab:hover{color:var(--text)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)}
-.card h3{font-size:.95rem;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
-.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.form-row.two{grid-template-columns:1fr 1fr}
-.fg{display:flex;flex-direction:column;gap:4px}
-.fg label{font-size:.78rem;color:var(--muted);font-weight:600}
-.fg input,.fg select{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88rem;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
-.fg input:focus{border-color:var(--blue)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:7px;font-size:.86rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.card h3{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 20px;border-radius:7px;font-size:.86rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
 .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{opacity:.9}
 .btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.9}
+.btn-warning{background:var(--amber);color:#fff}.btn-warning:hover{opacity:.9}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
-.btn-sm{padding:5px 12px;font-size:.78rem}
 .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.room-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative}
+.room-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;border:1.5px solid var(--border)}
 .room-card .code{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--blue);letter-spacing:2px}
-.room-card .meta{font-size:.78rem;color:var(--muted);margin:6px 0}
-.room-card .status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:600}
-.status-waiting{background:#e8f5e9;color:#2e7d32}
-.status-playing{background:#fff3e0;color:#e65100}
-.status-finished{background:#f3e5f5;color:#6a1b9a}
-.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
-.tbl th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600;font-size:.76rem}
-.tbl td{padding:7px 10px;border-bottom:1px solid var(--border)}
-.tbl tr:hover td{background:rgba(68,114,196,.03)}
-.toast{position:fixed;top:16px;right:16px;z-index:999;padding:10px 20px;border-radius:8px;background:var(--green);color:#fff;font-size:.86rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.12);animation:fadeIn .3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem;text-align:left}
+.tbl th{padding:10px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600}
+.tbl td{padding:10px;border-bottom:1px solid var(--border)}
+.toast{position:fixed;top:16px;right:16px;z-index:999;padding:12px 24px;border-radius:8px;background:var(--green);color:#fff;font-size:.9rem;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity 0.3s}
 .hidden{display:none!important}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
-.stat-box .sv{font-size:1.6rem;font-weight:700;color:var(--blue)}
-.stat-box .sl{font-size:.76rem;color:var(--muted);margin-top:4px}
-@media(max-width:768px){.form-row{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}.room-grid{grid-template-columns:1fr}}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+.stat-box .sv{font-size:1.5rem;font-weight:700;color:var(--blue)}
+.action-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.action-drain{background:#ebf8ff;color:#2b6cb0}
+.action-build{background:#f0fff4;color:#2f855a}
+.action-evac{background:#fff5f5;color:#c53030}
 </style>
 </head>
 <body>
+
 <div class="top-bar">
-  <h1>海河洪涝决策仿真平台 · 管理后台</h1>
-  <div style="display:flex;align-items:center;gap:16px">
-    <a href="/">← 返回游戏</a>
-    <button class="btn btn-outline btn-sm" onclick="showChangePw()" style="font-size:.78rem;padding:5px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)">修改密码</button>
-    <button onclick="doLogout()" style="font-size:.78rem;padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--red);background:transparent;color:var(--red);font-weight:600">退出登录</button>
+  <h1>海河洪涝决策仿真平台 · 教师控制台</h1>
+  <div style="font-size:.85rem;font-weight:600" id="server-status">连接中...</div>
+</div>
+
+<div style="max-width:1200px;margin:0 auto">
+  <div class="tabs">
+    <button class="tab active" data-tab="rooms">🎮 房间管理</button>
+    <button class="tab" data-tab="config">⚡ 教学干预 (上帝之手)</button>
+    <button class="tab" data-tab="data">📊 多维数据看板</button>
+    <button class="tab" data-tab="export">📥 数据导出 (CSV/Excel)</button>
+  </div>
+  
+  <div id="tab-rooms">
+    <div class="card">
+      <h3>创建演练房间</h3>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input id="new-group" value="实验组" placeholder="组名" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px">
+        <button class="btn btn-primary" onclick="createRoom()">新建推演房间</button>
+      </div>
+    </div>
+    <div id="room-list" class="room-grid">加载中...</div>
+  </div>
+
+  <div id="tab-config" class="hidden">
+    <div class="card">
+      <h3>⚡ 动态情景干预面板</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
+        下达突发指令，强行改变系统演化轨迹，考察学生对复杂系统的适应性治理能力。
+      </p>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px">
+        <label style="font-weight:700">目标房间码:</label>
+        <input id="target-room" placeholder="如 R1234" style="padding:9px;border:1px solid var(--border);border-radius:6px;width:180px">
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px">
+        <div style="border:1.5px solid var(--red);padding:15px;border-radius:8px;background:#fff5f5">
+          <h4 style="color:var(--red);margin-bottom:8px">特大暴雨预警</h4>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引发全流域恐慌值上升，模拟极端气候灾害。</p>
+          <button class="btn btn-danger" style="width:100%" onclick="triggerEvent('【中央气象台紧急预警】强对流天气叠加！未来12小时全流域将面临极端特大暴雨，请立即做好抗洪抢险准备！')">广播暴雨指令</button>
+        </div>
+        <div style="border:1.5px solid var(--gold);padding:15px;border-radius:8px;background:#fffff0">
+          <h4 style="color:var(--gold);margin-bottom:8px">通讯阻断危机</h4>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">模拟基站损毁，测试基层村庄的自组织能力。</p>
+          <button class="btn btn-warning" style="width:100%" onclick="triggerEvent('⚡【系统突发】电力设施受损，多地通讯基站中断！请各行政主体暂时依靠预案进行独立防洪决策！')">广播通讯中断</button>
+        </div>
+        <div style="border:1.5px solid var(--green);padding:15px;border-radius:8px;background:#f0fff4">
+          <h4 style="color:var(--green);margin-bottom:8px">生态补偿政策</h4>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引导上下游协同博弈，尝试实现集体利益最大化。</p>
+          <button class="btn btn-primary" style="background:var(--green);width:100%" onclick="triggerEvent('📜【政策引导】国家防总拟启动流域生态补偿。凡主动蓄洪、减缓下游压力的地区，灾后将获得专项财政转移支付！')">发布补偿机制</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-data" class="hidden">
+    <div id="data-overview">加载中...</div>
+  </div>
+
+  <div id="tab-export" class="hidden">
+    <div class="card">
+      <h3>📥 教学全维度数据导出</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px">
+        点击下载后，系统将同时生成 <b>JSON</b> (系统级备份) 和 <b>CSV</b> (Excel直开) 两种格式。
+      </p>
+      <div style="display:flex;gap:15px">
+        <input id="exp-room" placeholder="房间代码 (留空导出全部)" style="padding:10px;border:1px solid var(--border);border-radius:6px;width:250px">
+        <button class="btn btn-primary" onclick="doExport()">打包下载全量数据</button>
+      </div>
+    </div>
   </div>
 </div>
-<div class="container">
-  <div class="card" id="server-url-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 16px">
-    <label style="font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap">服务器地址:</label>
-    <input id="api-base-url" value="" placeholder="留空=当前页面地址" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.82rem;color:var(--text);background:var(--bg);outline:none">
-    <button class="btn btn-outline btn-sm" onclick="applyServerUrl()" style="white-space:nowrap">应用</button>
-    <span id="server-status" style="font-size:.74rem;color:var(--muted)"></span>
-  </div>
-  <div id="health-error" class="card hidden" style="border-color:var(--red);background:rgba(196,78,82,.03)"></div>
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="rooms">房间管理</button>
-    <button class="tab" data-tab="config">参数配置</button>
-    <button class="tab" data-tab="data">数据查看</button>
-    <button class="tab" data-tab="export">数据导出</button>
-  </div>
-  <div id="tab-rooms"></div>
-  <div id="tab-config" class="hidden"></div>
-  <div id="tab-data" class="hidden"></div>
-  <div id="tab-export" class="hidden"></div>
-</div>
+
 <div id="toast-area"></div>
 
 <script>
-let API = '';
-let currentTab = 'rooms';
-let config = {};
-let rooms = [];
+const API = 'https://api.resil-hub.cn';
 
-function applyServerUrl() {
-  const input = document.getElementById('api-base-url').value.trim();
-  API = input.replace(/\/+$/, '');  // strip trailing slashes
-  checkHealth();
+// --- 通用工具 ---
+async function safeFetch(url, opts) {
+  try {
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(e) { console.error('Fetch error:', e); return null; }
 }
 
 async function checkHealth() {
-  const statusEl = document.getElementById('server-status');
-  const errorEl = document.getElementById('health-error');
-  statusEl.textContent = '检查中...';
-  statusEl.style.color = 'var(--muted)';
-  errorEl.classList.add('hidden');
-  try {
-    const res = await fetch(API + '/api/health', { credentials: 'include' });
-    const ct = res.headers.get('content-type') || '';
-    const bodyText = await res.text();
-    if (!ct.includes('json')) {
-      // Got HTML back instead of JSON
-      statusEl.textContent = '连接异常';
-      statusEl.style.color = 'var(--red)';
-      errorEl.classList.remove('hidden');
-      errorEl.innerHTML = `
-        <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">服务器连接诊断失败</h3>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回类型:</b> <code>${ct}</code> (期望 application/json)</p>
-        <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>返回内容:</b> <code>${bodyText.substring(0, 200)}${bodyText.length > 200 ? '...' : ''}</code></p>
-        <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
-          <b>可能原因与解决方案:</b><br>
-          1. 服务器未启动 - 请执行 <code>python server.py</code><br>
-          2. 反向代理拦截了API请求 - 在上方"服务器地址"中填入后端直连地址(如 http://localhost:8080)<br>
-          3. Cookie问题导致返回登录页 - 尝试直接访问 <a href="/admin.html" style="color:var(--blue)">/admin.html</a>
-        </div>`;
-      return;
-    }
-    let data;
-    try { data = JSON.parse(bodyText); } catch(e) { throw new Error('JSON parse failed'); }
-    if (data.ok) {
-      statusEl.textContent = 'v' + (data.version || '?') + ' 已连接';
-      statusEl.style.color = 'var(--green)';
-      errorEl.classList.add('hidden');
-      loadRooms();
-    }
-  } catch(e) {
-    statusEl.textContent = '无法连接';
-    statusEl.style.color = 'var(--red)';
-    errorEl.classList.remove('hidden');
-    errorEl.innerHTML = `
-      <h3 style="font-size:.9rem;color:var(--red);margin-bottom:8px">无法连接到服务器</h3>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>请求地址:</b> <code>${API || window.location.origin}/api/health</code></p>
-      <p style="font-size:.82rem;color:var(--text);margin-bottom:6px"><b>错误:</b> <code>${e.message}</code></p>
-      <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;font-size:.78rem;color:var(--muted);line-height:1.8">
-        <b>请确认:</b><br>
-        1. 后端服务已启动: <code>python server.py</code><br>
-        2. 上方"服务器地址"填写正确(如 http://localhost:8080)<br>
-        3. 网络可以访问该地址
-      </div>`;
+  const st = document.getElementById('server-status');
+  const d = await safeFetch(API + '/api/health');
+  if(d && d.ok) {
+    st.textContent = '✅ 已连接云端 Serverless 引擎'; st.style.color = 'var(--green)'; loadRooms();
+  } else {
+    st.textContent = '❌ API 连接异常'; st.style.color = 'var(--red)';
   }
 }
-
-// ── Robust fetch helper (never redirects, always returns data or null) ──
-async function safeFetch(url, opts) {
-  try {
-    opts = opts || {};
-    opts.credentials = 'include';
-    const res = await fetch(url, opts);
-    const ct = res.headers.get('content-type') || '';
-    if (!res.ok) {
-      let detail = `HTTP ${res.status}`;
-      try {
-        if (ct.includes('json')) { const d = await res.json(); detail = d.detail || d.message || detail; }
-        else { const t = await res.text(); if (t && t.length < 200) detail += ': ' + t; }
-      } catch(_){}
-      throw new Error(detail);
-    }
-    if (ct.includes('json')) return await res.json();
-    const txt = await res.text();
-    try { return JSON.parse(txt); } catch(e) { throw new Error('服务器返回了非JSON内容 (content-type: '+ct+')'); }
-  } catch(e) {
-    console.error('safeFetch error for ' + url + ':', e);
-    toast('请求失败: ' + e.message, 'var(--red)');
-    return null;
-  }
-}
-
-async function doLogout() {
-  await fetch(API + '/api/admin/logout', { method: 'POST', credentials: 'include' });
-  window.location.href = '/admin';
-}
-
-function showChangePw() {
-  const html = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:999;display:flex;align-items:center;justify-content:center" id="pw-overlay" onclick="if(event.target===this)this.remove()">
-    <div style="background:#fff;border-radius:12px;padding:28px;width:360px;box-shadow:0 8px 30px rgba(0,0,0,.12)">
-      <h3 style="margin-bottom:16px;font-size:1rem">修改密码</h3>
-      <div class="fg" style="margin-bottom:12px"><label>原密码</label><input id="pw-old" type="password"></div>
-      <div class="fg" style="margin-bottom:12px"><label>新密码</label><input id="pw-new" type="password"></div>
-      <div class="fg" style="margin-bottom:16px"><label>确认新密码</label><input id="pw-confirm" type="password"></div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="doChangePw()">确认修改</button>
-        <button class="btn btn-outline" onclick="document.getElementById('pw-overlay').remove()">取消</button>
-      </div>
-      <div id="pw-err" style="color:var(--red);font-size:.82rem;margin-top:8px"></div>
-    </div>
-  </div>`;
-  document.body.insertAdjacentHTML('beforeend', html);
-}
-
-async function doChangePw() {
-  const oldPw = document.getElementById('pw-old').value;
-  const newPw = document.getElementById('pw-new').value;
-  const confirm = document.getElementById('pw-confirm').value;
-  const errEl = document.getElementById('pw-err');
-  if (newPw !== confirm) { errEl.textContent = '两次密码不一致'; return; }
-  if (newPw.length < 4) { errEl.textContent = '新密码至少4个字符'; return; }
-  try {
-    const res = await fetch(API + '/api/admin/change-password', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ old_password: oldPw, new_password: newPw })
-    });
-    if (res.ok) {
-      document.getElementById('pw-overlay').remove();
-      toast('密码已修改');
-    } else {
-      const data = await res.json().catch(() => ({}));
-      errEl.textContent = data.detail || '修改失败';
-    }
-  } catch(e) { errEl.textContent = '网络错误'; }
-}
-
-// Tab switching
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    currentTab = t.dataset.tab;
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    t.classList.add('active');
-    ['rooms','config','data','export'].forEach(id => {
-      document.getElementById('tab-'+id).classList.toggle('hidden', id !== currentTab);
-    });
-    if (currentTab === 'rooms') loadRooms();
-    if (currentTab === 'config') loadConfig();
-    if (currentTab === 'data') loadData();
-    if (currentTab === 'export') renderExport();
-  });
-});
 
 function toast(msg, color) {
   const d = document.createElement('div');
-  d.className = 'toast';
-  d.style.background = color || 'var(--green)';
-  d.textContent = msg;
+  d.className = 'toast'; d.style.background = color || 'var(--green)'; d.textContent = msg;
   document.getElementById('toast-area').appendChild(d);
-  setTimeout(() => { d.style.opacity='0'; d.style.transition='opacity .3s'; setTimeout(()=>d.remove(),300); }, 2500);
+  setTimeout(() => { d.style.opacity='0'; setTimeout(()=>d.remove(),300); }, 2500);
 }
 
-// ── Rooms ──
+// --- 房间管理 ---
 async function loadRooms() {
-  document.getElementById('tab-rooms').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
+  const el = document.getElementById('room-list');
   const data = await safeFetch(API + '/api/rooms');
-  if (data === null) {
-    document.getElementById('tab-rooms').innerHTML = `<div class="card">
-      <p style="color:var(--red);margin-bottom:10px">房间列表加载失败</p>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">请确认服务器已启动（python server.py）并检查浏览器控制台(F12)的错误信息。</p>
-      <button class="btn btn-primary btn-sm" onclick="loadRooms()">重新加载</button>
-      <button class="btn btn-outline btn-sm" onclick="runDiag()" style="margin-left:8px">运行诊断</button>
-      <pre id="diag-out" style="margin-top:10px;font-size:.72rem;background:var(--bg);padding:8px;border-radius:6px;display:none;white-space:pre-wrap;border:1px solid var(--border)"></pre>
-    </div>`;
-    return;
-  }
-  rooms = data;
-  renderRooms();
-}
-async function runDiag() {
-  const el = document.getElementById('diag-out');
-  el.style.display = 'block';
-  el.textContent = '正在诊断...\n';
-  const endpoints = ['/api/rooms', '/api/config', '/api/data/rounds'];
-  for (const ep of endpoints) {
-    try {
-      const t0 = Date.now();
-      const res = await fetch(ep, {credentials:'include'});
-      const ms = Date.now() - t0;
-      const ct = res.headers.get('content-type') || '(无)';
-      const body = await res.text();
-      const preview = body.length > 120 ? body.substring(0, 120) + '...' : body;
-      el.textContent += `\n[${ep}] ${res.status} ${res.statusText} (${ms}ms)\n  Content-Type: ${ct}\n  Body: ${preview}\n`;
-    } catch(e) {
-      el.textContent += `\n[${ep}] 网络错误: ${e.message}\n`;
-    }
-  }
-  el.textContent += '\n诊断完成。请将以上信息提供给技术支持。';
-}
-function renderRooms() {
-  const el = document.getElementById('tab-rooms');
-  el.innerHTML = `
-    <div class="card">
-      <h3>创建新房间</h3>
-      <div style="display:flex;gap:10px;align-items:end">
-        <div class="fg" style="flex:1"><label>组名</label><input id="new-group" value="A组" placeholder="如 A组、实验组"></div>
-        <button class="btn btn-primary" onclick="createRoom()">创建房间</button>
+  if (!data) return;
+  el.innerHTML = data.map(r => `
+    <div class="room-card">
+      <div class="code">${r.code}</div>
+      <div style="font-size:.8rem; margin:8px 0">${r.group_name} · R${r.rounds_played||0}</div>
+      <div style="display:flex;gap:5px">
+        ${r.status==='WAITING'?`<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 发令</button>`:''}
+        <button class="btn btn-outline btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
       </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rooms.length}</div><div class="sl">房间总数</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>(r.status||'').toLowerCase()==='waiting').length}</div><div class="sl">等待中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.filter(r=>(r.status||'').toLowerCase()==='playing').length}</div><div class="sl">进行中</div></div>
-      <div class="stat-box"><div class="sv">${rooms.reduce((s,r)=>s+(r.player_count||(r.players||[]).length||0),0)}</div><div class="sl">总玩家数</div></div>
-    </div>
-    <div class="room-grid">${rooms.map(r => {
-      const st = (r.status||'').toLowerCase();
-      const isWaiting = st === 'waiting';
-      const isPlaying = st === 'playing';
-      const players = r.players || [];
-      return `
-      <div class="room-card">
-        <div class="code">${r.code}</div>
-        <div class="meta">${r.group_name || ''} · ${r.player_count||players.length||0}人${r.round?' · 第'+r.round+'轮':''}</div>
-        <span class="status status-${st}">${isWaiting?'等待加入':isPlaying?'游戏中':'已结束'}</span>
-        ${players.length?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">'+players.map(p=>'<span style="font-size:.7rem;padding:2px 7px;background:rgba(68,114,196,.06);border:1px solid rgba(68,114,196,.12);border-radius:99px;color:#4472C4">'+p.name+'</span>').join('')+'</div>':''}
-        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-          ${isWaiting?'<button class="btn btn-primary btn-sm" onclick="startRoom(\''+r.code+'\')">开始游戏</button>':''}
-          <button class="btn btn-outline btn-sm" onclick="copyCode('${r.code}')">复制房间码</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
-        </div>
-      </div>`}).join('')}
-    </div>`;
+    </div>`).join('') || '暂无活跃房间';
 }
+
 async function createRoom() {
-  const name = document.getElementById('new-group').value || '默认组';
-  const data = await safeFetch(API + '/api/rooms', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({group_name: name}) });
-  if (data) { toast('房间已创建: ' + data.code); loadRooms(); }
-}
-async function deleteRoom(code) {
-  if (!confirm('确定删除房间 ' + code + '？')) return;
-  await safeFetch(API + '/api/rooms/' + code, { method: 'DELETE' });
-  toast('已删除', 'var(--red)');
+  const g = document.getElementById('new-group').value;
+  await safeFetch(API + '/api/rooms', { method: 'POST', body: JSON.stringify({group_name: g}) });
   loadRooms();
 }
-function copyCode(code) {
-  navigator.clipboard.writeText(code).then(() => toast('已复制: ' + code));
-}
-async function startRoom(code) {
-  if (!confirm('确定开始房间 ' + code + ' 的游戏？所有已加入的玩家将同步进入游戏。')) return;
-  // 即时禁用按钮防止重复点击
-  const btn = event.target; if(btn) { btn.disabled = true; btn.textContent = '启动中...'; }
-  const data = await safeFetch(API + '/api/rooms/' + code + '/start', {
-    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({})
-  });
-  if (data && data.ok) { toast('游戏已开始: ' + code); loadRooms(); }
-  else { if(btn) { btn.disabled = false; btn.textContent = '开始游戏'; } }
+
+async function startRoom(c) {
+  await safeFetch(`${API}/api/rooms/${c}/start`, { method: 'POST' });
+  toast('推演指令已下发！'); loadRooms();
 }
 
-// ── Config ──
-async function loadConfig() {
-  document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
-  const data = await safeFetch(API + '/api/config');
-  if (data === null) {
-    document.getElementById('tab-config').innerHTML = '<div class="card"><p style="color:var(--red);margin-bottom:10px">配置加载失败</p><button class="btn btn-primary btn-sm" onclick="loadConfig()">重新加载</button></div>';
-    return;
+async function deleteRoom(c) {
+  if(confirm('删除房间数据不可恢复？')) {
+    await safeFetch(`${API}/api/rooms/${c}`, { method: 'DELETE' });
+    loadRooms();
   }
-  config = data;
-  renderConfig();
-}
-function renderConfig() {
-  const el = document.getElementById('tab-config');
-  const g = config.game || {};
-  const h = config.hydrology || {};
-  const e = config.economy || {};
-  const ft = config.flood_thresholds || {};
-  el.innerHTML = `
-    <div class="card"><h3>游戏基本参数</h3>
-      <div class="form-row"><div class="fg"><label>总轮数</label><input id="cfg-rounds" type="number" value="${g.max_rounds||6}"></div></div>
-      <div style="font-size:.78rem;color:var(--muted);margin-top:4px">阶段倒计时(秒)：</div>
-      <div class="form-row">${Object.entries(g.phase_timers||{}).map(([k,v])=>`<div class="fg"><label>${k}</label><input id="cfg-pt-${k}" type="number" value="${v}"></div>`).join('')}</div>
-    </div>
-    <div class="card"><h3>水文参数</h3>
-      <div class="form-row">
-        <div class="fg"><label>降雨基数</label><input id="cfg-rain-base" type="number" value="${h.rainfall_base||18}"></div>
-        <div class="fg"><label>每轮递增</label><input id="cfg-rain-inc" type="number" value="${h.rainfall_round_increment||8}"></div>
-        <div class="fg"><label>波动范围</label><input id="cfg-rain-spread" type="number" value="${h.rainfall_spread||12}"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>自然衰减率</label><input id="cfg-decay" type="number" step="0.01" value="${h.natural_decay||0.85}"></div>
-        <div class="fg"><label>天津最大排量</label><input id="cfg-maxC" type="number" value="${h.max_drain_C||75}"></div>
-      </div>
-    </div>
-    <div class="card"><h3>淹没阈值</h3>
-      <div class="form-row">${Object.entries(ft).map(([k,v])=>`<div class="fg"><label>${k} (${(config.villages||{})[k]||k})</label><input id="cfg-ft-${k}" type="number" value="${v}"></div>`).join('')}</div>
-    </div>
-    <div class="card"><h3>经济参数</h3>
-      <div class="form-row">
-        <div class="fg"><label>初始村资产</label><input id="cfg-iva" type="number" value="${e.initial_village_asset||500}"></div>
-        <div class="fg"><label>初始市资产</label><input id="cfg-ica" type="number" value="${e.initial_city_asset||500}"></div>
-        <div class="fg"><label>初始个人资产</label><input id="cfg-ipa" type="number" value="${e.initial_personal_asset||100}"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>修坝费用</label><input id="cfg-dam-cost" type="number" value="${e.dam_cost||30}"></div>
-        <div class="fg"><label>修坝拦水量</label><input id="cfg-dam-block" type="number" value="${e.dam_block||30}"></div>
-        <div class="fg"><label>蓄洪区费用</label><input id="cfg-dike-cost" type="number" value="${e.dike_cost||50}"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>蓄洪区排水量</label><input id="cfg-dike-drain" type="number" value="${e.dike_drain||50}"></div>
-        <div class="fg"><label>军牌降水位</label><input id="cfg-army" type="number" value="${e.army_card_reduction||15}"></div>
-        <div class="fg"><label>搬+未淹损失</label><input id="cfg-move-loss" type="number" value="${e.move_no_flood_loss||30}"></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="btn btn-primary" onclick="saveConfig()">保存配置</button>
-      <button class="btn btn-outline" onclick="loadConfig()">重新加载</button>
-    </div>`;
-}
-async function saveConfig() {
-  const g = (id) => document.getElementById(id);
-  const n = (id) => parseFloat(g(id).value);
-  config.game.max_rounds = n('cfg-rounds');
-  ['WEATHER','VIL_DISCUSS','LEADER_BUILD','MAYOR_DRAIN','COMPUTE','ROUND_END'].forEach(k => {
-    config.game.phase_timers[k] = n('cfg-pt-'+k);
-  });
-  config.hydrology.rainfall_base = n('cfg-rain-base');
-  config.hydrology.rainfall_round_increment = n('cfg-rain-inc');
-  config.hydrology.rainfall_spread = n('cfg-rain-spread');
-  config.hydrology.natural_decay = n('cfg-decay');
-  config.hydrology.max_drain_C = n('cfg-maxC');
-  Object.keys(config.flood_thresholds).forEach(k => {
-    config.flood_thresholds[k] = n('cfg-ft-'+k);
-  });
-  config.economy.initial_village_asset = n('cfg-iva');
-  config.economy.initial_city_asset = n('cfg-ica');
-  config.economy.initial_personal_asset = n('cfg-ipa');
-  config.economy.dam_cost = n('cfg-dam-cost');
-  config.economy.dam_block = n('cfg-dam-block');
-  config.economy.dike_cost = n('cfg-dike-cost');
-  config.economy.dike_drain = n('cfg-dike-drain');
-  config.economy.army_card_reduction = n('cfg-army');
-  config.economy.move_no_flood_loss = n('cfg-move-loss');
-  await fetch(API + '/api/config', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(config) });
-  toast('配置已保存');
 }
 
-// ── Data ──
+// --- 【核心】上帝之手干预函数 ---
+async function triggerEvent(msg) {
+  const rm = document.getElementById('target-room').value.trim();
+  if(!rm) return toast('请输入目标房间码！', 'var(--red)');
+  
+  const payload = {
+    room_id: rm, round_num: 99, player_id: 'SYSTEM', player_name: '国家防总',
+    role: 'ADMIN', channel: 'ALL', village: '', content: msg, msg_type: 'sys'
+  };
+  
+  const d = await safeFetch(API + '/api/data/chats', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  
+  if(d) toast('⚡ 指令已实时推送到学生屏幕！', 'var(--amber)');
+}
+
+// --- 看板逻辑 ---
 async function loadData() {
-  document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--muted)">加载中...</p></div>';
-  const [rounds, decisions, chats] = await Promise.all([
-    safeFetch(API+'/api/data/rounds'),
-    safeFetch(API+'/api/data/decisions'),
-    safeFetch(API+'/api/data/chats'),
+  const el = document.getElementById('data-overview');
+  const [decisions, rounds] = await Promise.all([ 
+    safeFetch(API+'/api/data/decisions'), 
+    safeFetch(API+'/api/data/rounds') 
   ]);
-  if (rounds === null || decisions === null || chats === null) {
-    document.getElementById('tab-data').innerHTML = '<div class="card"><p style="color:var(--red);margin-bottom:10px">数据加载失败</p><button class="btn btn-primary btn-sm" onclick="loadData()">重新加载</button></div>';
-    return;
-  }
-  renderData(rounds, decisions, chats);
-}
-function renderData(rounds, decisions, chats) {
-  const el = document.getElementById('tab-data');
-  el.innerHTML = `
+  
+  if(!decisions) return;
+  
+  let html = `
     <div class="stat-grid">
-      <div class="stat-box"><div class="sv">${rounds.length}</div><div class="sl">回合记录</div></div>
-      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">决策记录</div></div>
-      <div class="stat-box"><div class="sv">${chats.length}</div><div class="sl">聊天记录</div></div>
-      <div class="stat-box"><div class="sv">${new Set(rounds.map(r=>r.room_id)).size}</div><div class="sl">房间数</div></div>
+      <div class="stat-box"><div class="sv">${rounds?.length || 0}</div><div class="sl">系统轮次总数</div></div>
+      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">主体决策存量</div></div>
     </div>
-    <div class="card"><h3>回合数据 (最近200条)</h3>
-      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>房间</th><th>轮</th><th>降雨A</th><th>降雨B</th><th>降雨C</th><th>轮损失</th><th>累计损失</th><th>时间</th></tr></thead><tbody>
-      ${rounds.slice(0,50).map(r=>`<tr><td>${r.room_id}</td><td>${r.round_num}</td><td>${r.rainfall_A?.toFixed(0)||'-'}</td><td>${r.rainfall_B?.toFixed(0)||'-'}</td><td>${r.rainfall_C?.toFixed(0)||'-'}</td><td style="color:var(--red)">${r.round_loss?.toFixed(0)||'-'}</td><td>${r.total_loss?.toFixed(0)||'-'}</td><td style="font-size:.72rem;color:var(--muted)">${r.ts||''}</td></tr>`).join('')}
-      </tbody></table></div>
-    </div>
-    <div class="card"><h3>玩家决策 (最近100条)</h3>
-      <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>房间</th><th>轮</th><th>玩家</th><th>角色</th><th>操作</th><th>值</th><th>时间</th></tr></thead><tbody>
-      ${decisions.slice(0,100).map(d=>`<tr><td>${d.room_id}</td><td>${d.round_num}</td><td>${d.player_name||''}</td><td>${d.role||''}</td><td>${d.action_type}</td><td>${d.action_value||''}</td><td style="font-size:.72rem;color:var(--muted)">${d.ts||''}</td></tr>`).join('')}
-      </tbody></table></div>
-    </div>`;
+    <div class="card">
+      <h3>⏱ 实时决策流追踪 (按时间降序)</h3>
+      <div style="overflow-x:auto;max-height:450px;overflow-y:auto">
+        <table class="tbl">
+          <thead><tr><th>房间.轮次</th><th>角色/主体</th><th>决策动作</th><th>数值</th><th>操作时间</th></tr></thead>
+          <tbody>
+  `;
+  
+  const actMap = { drain:'市长排洪', sandbag:'构筑堤防', build_dam:'修建大坝', evacuate:'紧急搬迁', stay:'留守' };
+  
+  decisions.slice(0, 50).forEach(d => {
+    html += `<tr>
+      <td style="font-family:monospace; font-weight:700">[${d.room_id}] R${d.round_num}</td>
+      <td>${d.player_name}</td>
+      <td><span class="action-tag action-drain">${actMap[d.action_type] || d.action_type}</span></td>
+      <td style="color:var(--blue)">${d.action_value || '-'}</td>
+      <td style="color:var(--muted)">${d.ts}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody></table></div></div>';
 }
 
-// ── Export ──
-function renderExport() {
-  const el = document.getElementById('tab-export');
-  el.innerHTML = `
-    <div class="card"><h3>数据导出</h3>
-      <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">将仿真数据导出为 Excel 或 JSON 格式，用于课后分析和研究。</p>
-      <div class="form-row two">
-        <div class="fg"><label>房间代码 (留空=全部)</label><input id="exp-room" placeholder="如 ABC123"></div>
-        <div class="fg"><label>格式</label><select id="exp-fmt"><option value="json">JSON (浏览器下载)</option><option value="xlsx">Excel (服务端生成)</option></select></div>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:10px">
-        <button class="btn btn-primary" onclick="doExport()">导出数据</button>
-      </div>
-      <div id="export-result" style="margin-top:14px"></div>
-    </div>
-    <div class="card"><h3>命令行导出 (Excel/CSV)</h3>
-      <p style="font-size:.84rem;color:var(--muted);line-height:1.8">在服务器上执行以下命令导出完整 Excel 文件：</p>
-      <pre style="background:var(--bg);padding:12px;border-radius:6px;font-size:.82rem;line-height:1.6;overflow-x:auto;border:1px solid var(--border)">
-# 导出所有数据为 Excel
-python export.py --format xlsx
-
-# 导出指定房间
-python export.py --room ABC123 --format xlsx
-
-# 导出为 CSV
-python export.py --format csv</pre>
-    </div>`;
-}
+// --- 【核心】双格式导出逻辑 ---
 async function doExport() {
   const room = document.getElementById('exp-room').value.trim();
-  const fmt = document.getElementById('exp-fmt').value;
-  let url = API + '/api/export/' + (room || '_all') + '?fmt=' + fmt;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (fmt === 'json') {
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `haihe_export_${room||'all'}_${Date.now()}.json`;
-      a.click();
-      toast('JSON已下载');
-    } else {
-      document.getElementById('export-result').innerHTML = `<p style="color:var(--amber);font-size:.84rem">Excel导出请在服务器执行: <code>python export.py --room ${room} --format xlsx</code></p>`;
-    }
-  } catch(e) { toast('导出失败: ' + e.message, 'var(--red)'); }
+  toast('正在打包云端数据...', 'var(--blue)');
+  const data = await safeFetch(API + '/api/export/' + (room || '_all'));
+  if(!data) return;
+
+  // 下载 JSON
+  downloadBlob(JSON.stringify(data, null, 2), `haihe_raw_${Date.now()}.json`, 'application/json');
+
+  // 下载 CSV (决策明细表)
+  if(data.decisions && data.decisions.length) {
+    downloadBlob(jsonToCSV(data.decisions), `haihe_decisions_${room||'all'}.csv`, 'text/csv');
+  }
+  
+  toast('✅ 下载成功 (包含 JSON 和 Excel 兼容 CSV)！');
 }
 
-// Init - check health first, then load rooms
+function jsonToCSV(arr) {
+  const cols = Object.keys(arr[0]);
+  const header = cols.join(',');
+  const rows = arr.map(obj => cols.map(k => `"${(obj[k]||'').toString().replace(/"/g, '""')}"`).join(','));
+  return '\uFEFF' + header + '\n' + rows.join('\n'); // 增加 BOM 防止中文乱码
+}
+
+function downloadBlob(content, name, type) {
+  const blob = new Blob([content], {type});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+
+// 标签页切换
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    t.classList.add('active');
+    const tabId = t.dataset.tab;
+    ['rooms','config','data','export'].forEach(id => {
+      document.getElementById('tab-'+id).classList.toggle('hidden', id !== tabId);
+    });
+    if (tabId === 'rooms') loadRooms();
+    if (tabId === 'data') loadData();
+  });
+});
+
 checkHealth();
 </script>
 </body>

@@ -2076,7 +2076,7 @@ function startGame(){G.nm = document.getElementById('inp-name').value.trim() || 
   const roomCode = (document.getElementById('inp-room')?.value || '').trim().toUpperCase();
   
   // 必须绑定一个 SessionID，否则后方获取数据会崩溃
-  G.localSessionId = roomCode || 'SINGLE-' + Math.floor(Math.random() * 10000);
+  G.localSessionId = roomCode || 'S' + Math.floor(Math.random() * 10000);
   
   if(roomCode){
     showScreen('S-waiting');

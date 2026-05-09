@@ -1,4 +1,4 @@
-// src/worker.js - 解决前后端房间数据同步问题
+// src/worker.js - 终极修复版 (包含自动建房兜底机制)
 const ROLE_SLOTS = [
   'MAYOR_A','MAYOR_B','MAYOR_C',
   'LEADER_A1','LEADER_A2','LEADER_A3',
@@ -35,9 +35,10 @@ export default {
     if (method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
-      if (path === "/api/health") return Response.json({ ok: true, version: "2.2", db: "D1" }, { headers: corsHeaders });
+      if (path === "/api/health") return Response.json({ ok: true, version: "2.3", db: "D1" }, { headers: corsHeaders });
       if (path === "/api/config") return Response.json({}, { headers: corsHeaders });
 
+      // 1. 房间管理接口
       if (path === "/api/rooms" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM rooms ORDER BY created_at DESC LIMIT 50").all();
         return Response.json(results || [], { headers: corsHeaders });
@@ -66,15 +67,15 @@ export default {
           return Response.json({ ok: true }, { headers: corsHeaders });
         }
 
+        // 核心修复：学生加入逻辑
         if (method === "POST" && action === "join") {
           const body = await request.json();
           const { results } = await env.DB.prepare("SELECT players, status FROM rooms WHERE code = ?").bind(code).all();
-
+          
           let currentStatus = 'WAITING';
           let playersStr = '[]';
 
-          // 【核心修复】：如果学生输入的房间号在数据库不存在，则自动创建该房间！
-          // 这样教师端就能立刻在后台看到学生自建的房间了
+          // 兜底机制：如果学生输入的房间不存在，自动在数据库创建，防止报错断联！
           if (results.length === 0) {
             await env.DB.prepare("INSERT INTO rooms (code, group_name, status, players) VALUES (?, ?, 'WAITING', '[]')")
               .bind(code, "自主加入房间").run();
@@ -83,11 +84,13 @@ export default {
             playersStr = results[0].players || '[]';
           }
 
-          if (currentStatus !== 'WAITING') return Response.json({ detail: "游戏已开始" }, { status: 400, headers: corsHeaders });
+          if (currentStatus !== 'WAITING') return Response.json({ detail: "游戏已开始，无法加入" }, { status: 400, headers: corsHeaders });
 
-          let players = JSON.parse(playersStr);
+          let players = [];
+          try { players = JSON.parse(playersStr); } catch(e) { players = []; }
           const takenRoles = new Set(players.map(p => p.role));
 
+          // 自动分配逻辑
           let assignedRole = null;
           let assignedVillage = 'B1';
 
@@ -113,16 +116,19 @@ export default {
         }
       }
 
+      // 2. 数据采集接口
       if (path === "/api/data/decisions" && method === "POST") {
         const d = await request.json();
+        // 兼容 action_value 可能是对象的情况
+        const actionVal = typeof d.action_value === 'object' ? JSON.stringify(d.action_value) : String(d.action_value);
         await env.DB.prepare("INSERT INTO player_decisions (room_id, round_num, player_id, player_name, role, village, action_type, action_value) VALUES (?,?,?,?,?,?,?,?)")
-          .bind(d.room_id, d.round_num, d.player_id, d.player_name, d.role, d.village, d.action_type, JSON.stringify(d.action_value)).run();
+          .bind(d.room_id, d.round_num, d.player_id||'human', d.player_name, d.role, d.village, d.action_type, actionVal).run();
         return Response.json({ ok: true }, { headers: corsHeaders });
       }
       if (path === "/api/data/chats" && method === "POST") {
         const c = await request.json();
         await env.DB.prepare("INSERT INTO chat_logs (room_id, round_num, player_id, player_name, role, channel, village, content, msg_type) VALUES (?,?,?,?,?,?,?,?,?)")
-          .bind(c.room_id, c.round_num, c.player_id, c.player_name, c.role, c.channel, c.village, c.content, c.msg_type).run();
+          .bind(c.room_id, c.round_num, c.player_id||'human', c.player_name, c.role, c.channel, c.village, c.content, c.msg_type).run();
         return Response.json({ ok: true }, { headers: corsHeaders });
       }
       if (path === "/api/data/rounds" && method === "POST") {
@@ -133,6 +139,7 @@ export default {
         return Response.json({ ok: true }, { headers: corsHeaders });
       }
 
+      // 3. 数据读取接口
       if (path === "/api/data/decisions" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 100").all();
         return Response.json(results || [], { headers: corsHeaders });
@@ -141,18 +148,25 @@ export default {
         const { results } = await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 100").all();
         return Response.json(results || [], { headers: corsHeaders });
       }
-      
+      if (path === "/api/data/chats" && method === "GET") {
+        const { results } = await env.DB.prepare("SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 100").all();
+        return Response.json(results || [], { headers: corsHeaders });
+      }
+
+      // 4. 数据导出
       if (path.startsWith("/api/export/")) {
         const room = path.split('/')[3];
         const where = room === '_all' ? "" : `WHERE room_id = '${room}'`;
         const rounds = (await env.DB.prepare(`SELECT * FROM simulation_rounds ${where}`).all()).results;
         const decisions = (await env.DB.prepare(`SELECT * FROM player_decisions ${where}`).all()).results;
-        return Response.json({ rounds, decisions }, { headers: corsHeaders });
+        const chats = (await env.DB.prepare(`SELECT * FROM chat_logs ${where}`).all()).results;
+        return Response.json({ rounds, decisions, chats }, { headers: corsHeaders });
       }
 
       return new Response("API Route Not Found", { status: 404, headers: corsHeaders });
     } catch (e) {
-      return Response.json({ error: e.message }, { status: 500, headers: corsHeaders });
+      // 若出现问题，将精准返回详细报错至前端红色提示框
+      return Response.json({ detail: "云端拦截报错: " + e.message }, { status: 500, headers: corsHeaders });
     }
   }
 };

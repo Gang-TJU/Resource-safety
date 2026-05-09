@@ -2071,18 +2071,18 @@ function mobTab(panel){
   if(panel==='action'||panel==='chat'){if(right)right.style.display=''}
   if(panel==='status'){if(left)left.style.display=''}
 }
-function startGame(){G.nm=document.getElementById('inp-name').value.trim()||'张同学';G.sid=document.getElementById('inp-sid').value.trim()||'2024001';
- const roomCode = (document.getElementById('inp-room')?.value || '').trim().toUpperCase();
+function startGame(){G.nm = document.getElementById('inp-name').value.trim() || '张同学';
+  G.sid = document.getElementById('inp-sid').value.trim() || '2024001';
+  const roomCode = (document.getElementById('inp-room')?.value || '').trim().toUpperCase();
   
-  // 核心：强制赋值房间号，防止为空时反馈数据丢失
-  G.localSessionId = roomCode || 'S' + Math.floor(Math.random()*10000);
-
- if(roomCode){
+  // 必须绑定一个 SessionID，否则后方获取数据会崩溃
+  G.localSessionId = roomCode || 'SINGLE-' + Math.floor(Math.random() * 10000);
+  
+  if(roomCode){
     showScreen('S-waiting');
     document.getElementById('wait-room-code').textContent = roomCode;
     joinRoomHTTP(roomCode);
   } else {
-    // 留空则走单机测试模式
     initGame();
   }
 }

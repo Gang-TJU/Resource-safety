@@ -2073,30 +2073,18 @@ function mobTab(panel){
   if(panel==='status'){if(left)left.style.display=''}
 }
 function startGame(){G.nm=document.getElementById('inp-name').value.trim()||'张同学';G.sid=document.getElementById('inp-sid').value.trim()||'2024001';
-  // 确保 WORKER_API 从输入框同步（避免 onchange 未触发）
-  const workerInput=document.getElementById('inp-worker-api');
-  if(workerInput&&workerInput.value.trim())WORKER_API=workerInput.value.trim().replace(/\/$/,'');
-  const roomCode=(document.getElementById('inp-room')?.value||'').trim().toUpperCase();
-  if(roomCode){
-    // Multiplayer mode: HTTP join via D1, then poll for game start
+ const roomCode = (document.getElementById('inp-room')?.value || '').trim().toUpperCase();
+  
+  // 核心：强制赋值房间号，防止为空时反馈数据丢失
+  G.localSessionId = roomCode || 'S' + Math.floor(Math.random()*10000);
+
+ if(roomCode){
     showScreen('S-waiting');
-    document.getElementById('wait-room-code').textContent=roomCode;
-    document.getElementById('wait-role').textContent='分配中...';
-    document.getElementById('wait-village').textContent='';
-    document.getElementById('wait-player-list').innerHTML='';
-    document.getElementById('wait-start-area').innerHTML='';
-    // 优先使用 D1 HTTP 大厅；回退到 Socket.IO 直连
-    if(WORKER_API){
-      joinRoomHTTP(roomCode);
-      toast('正在加入房间 '+roomCode+'...','bl');
-    }else{
-      mpConnect(roomCode,G.nm,G.sid,G.pref);
-      toast('正在连接房间 '+roomCode+'...','bl');
-    }
-  }
-  else{
-    // Single player mode: load config then init locally
-    loadServerConfig().then(()=>initGame()).catch(()=>initGame());
+    document.getElementById('wait-room-code').textContent = roomCode;
+    joinRoomHTTP(roomCode);
+  } else {
+    // 留空则走单机测试模式
+    initGame();
   }
 }
 function restart(){initGame()}

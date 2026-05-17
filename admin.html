@@ -185,13 +185,12 @@ async function triggerEvent(msg) {
   if(d) toast('⚡ 干预指令已下发！学生端将弹出警告。', 'var(--amber)');
 }
 
-// 多维数据看板逻辑
-// 多维数据看板逻辑（带强力缓存击穿）
+// 多维数据看板逻辑（加强缓存穿透版）
 async function loadData() {
   const el = document.getElementById('data-overview');
   el.innerHTML = "正在拉取最新决策...";
   
-  // 【核心修复】：增加实时时间戳，强行击穿 Cloudflare 和浏览器的双重死缓存！
+  // 【核心修复】：增加实时时间戳，强行击穿节点缓存，保证一刷必出新数据！
   const ts = Date.now();
   const [decisions, rounds] = await Promise.all([ 
     safeFetch(API+'/api/data/decisions?_t=' + ts), 
@@ -206,21 +205,19 @@ async function loadData() {
   let html = `
     <div class="stat-grid">
       <div class="stat-box"><div class="sv">${rounds?.length || 0}</div><div class="sl">系统轮次总数</div></div>
-      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">主体决策存量</div></div>
+      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">主体动作存量</div></div>
     </div>
     <div style="overflow-x:auto;max-height:450px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
         <table class="tbl">
-          <thead><tr><th>房间.轮次</th><th>角色/主体</th><th>决策动作</th><th>数值</th><th>操作时间</th></tr></thead>
+          <thead><tr><th>房间.轮次</th><th>角色/主体</th><th>动作分类</th><th>决策动作记录</th><th>操作时间</th></tr></thead>
           <tbody>
   `;
   
-  const actMap = { drain:'市长排洪', sandbag:'构筑堤防', build_dam:'修建大坝', evacuate:'紧急搬迁', stay:'留守' };
-  
-  decisions.slice(0, 50).forEach(d => {
+  decisions.slice(0, 80).forEach(d => {
     html += `<tr>
       <td style="font-family:monospace; font-weight:700; color:var(--blue)">[${d.room_id}] R${d.round_num}</td>
       <td>${d.player_name}</td>
-      <td><span class="action-tag action-drain">${actMap[d.action_type] || d.action_type}</span></td>
+      <td><span class="action-tag action-drain">${d.action_type || '-'}</span></td>
       <td style="color:var(--red);font-weight:bold">${d.action_value || '-'}</td>
       <td style="color:var(--muted);font-size:0.75rem">${d.ts || d.created_at || '刚刚'}</td>
     </tr>`;

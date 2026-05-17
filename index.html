@@ -651,9 +651,12 @@ function mpSendChat(content,channel,village){mpEmit('chat_message',{content,chan
 function mpSaveRound(){mpEmit('save_round_data',{round_num:G.round,rainfall:G.rain,water_levels:G.ws,village_assets:G.va,city_assets:G.ca,round_loss:G.hist.length?G.hist[G.hist.length-1].loss:0,total_loss:G.totalLoss})}
 
 // ===================== D1 同步大厅 =====================
-// Worker API 基地址：必须锁死为您在 Cloudflare 中配置的自定义域名
-let WORKER_API='https://api.resil-hub.cn';
+// Worker API 基地址
+let WORKER_API = 'https://api.resil-hub.cn';
 
+// 【核心修复：补上这两个定时器变量的声明】
+let _roomPollTimer = null; 
+let _gamePollTimer = null;
 async function joinRoomHTTP(code){
   const url=WORKER_API+'/api/rooms/'+code+'/join';
   try{

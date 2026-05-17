@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理后台 — 海河洪涝决策仿真平台 V2.1</title>
+<title>管理后台 — 海河洪涝决策仿真平台 V2.6</title>
 <style>
 :root{--bg:#f7f8fa;--card:#fff;--text:#2d3748;--muted:#718096;--border:#e2e8f0;--blue:#4472C4;--green:#55A868;--amber:#DD8452;--red:#C44E52;--gold:#D4A853;--radius:10px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -32,6 +32,7 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .stat-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
 .stat-box .sv{font-size:1.5rem;font-weight:700;color:var(--blue)}
+.stat-box .sl{font-size:.76rem;color:var(--muted);margin-top:4px}
 .action-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
 .action-drain{background:#ebf8ff;color:#2b6cb0}
 .action-build{background:#f0fff4;color:#2f855a}
@@ -49,8 +50,8 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
   <div class="tabs">
     <button class="tab active" data-tab="rooms">🎮 房间管理</button>
     <button class="tab" data-tab="config">⚡ 教学干预 (上帝之手)</button>
-    <button class="tab" data-tab="data">📊 多维数据看板</button>
-    <button class="tab" data-tab="export">📥 数据导出 (CSV/Excel)</button>
+    <button class="tab" data-tab="data" onclick="loadData()">📊 多维数据看板</button>
+    <button class="tab" data-tab="export">📥 数据导出</button>
   </div>
   
   <div id="tab-rooms">
@@ -72,7 +73,7 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
       </p>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px">
         <label style="font-weight:700">目标房间码:</label>
-        <input id="target-room" placeholder="如 R1234" style="padding:9px;border:1px solid var(--border);border-radius:6px;width:180px">
+        <input id="target-room" placeholder="如 R1234 (必填)" style="padding:9px;border:1px solid var(--border);border-radius:6px;width:180px">
       </div>
       
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px">
@@ -84,30 +85,40 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
         <div style="border:1.5px solid var(--gold);padding:15px;border-radius:8px;background:#fffff0">
           <h4 style="color:var(--gold);margin-bottom:8px">通讯阻断危机</h4>
           <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">模拟基站损毁，测试基层村庄的自组织能力。</p>
-          <button class="btn btn-warning" style="width:100%" onclick="triggerEvent('⚡【系统突发】电力设施受损，多地通讯基站中断！请各行政主体暂时依靠预案进行独立防洪决策！')">广播通讯中断</button>
+          <button class="btn btn-warning" style="width:100%" onclick="triggerEvent('⚡【系统突发】电力设施受损，各地通讯可能中断！请各行政主体做好依靠预案独立决策的准备！')">广播通讯危机</button>
         </div>
         <div style="border:1.5px solid var(--green);padding:15px;border-radius:8px;background:#f0fff4">
           <h4 style="color:var(--green);margin-bottom:8px">生态补偿政策</h4>
           <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引导上下游协同博弈，尝试实现集体利益最大化。</p>
-          <button class="btn btn-primary" style="background:var(--green);width:100%" onclick="triggerEvent('📜【政策引导】国家防总拟启动流域生态补偿。凡主动蓄洪、减缓下游压力的地区，灾后将获得专项财政转移支付！')">发布补偿机制</button>
+          <button class="btn btn-primary" style="background:var(--green);width:100%" onclick="triggerEvent('📜【政策引导】国家防总拟启动流域生态补偿。凡主动蓄洪、减缓下游压力的地区，灾后将获得专项补偿！')">发布补偿机制</button>
         </div>
       </div>
     </div>
   </div>
 
   <div id="tab-data" class="hidden">
-    <div id="data-overview">加载中...</div>
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>📊 实时决策流追踪</h3>
+        <button class="btn btn-outline" onclick="loadData()">🔄 刷新看板数据</button>
+      </div>
+      <div id="data-overview" style="margin-top: 15px;">拉取云端记录中...</div>
+    </div>
   </div>
 
   <div id="tab-export" class="hidden">
     <div class="card">
       <h3>📥 教学全维度数据导出</h3>
       <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px">
-        点击下载后，系统将同时生成 <b>JSON</b> (系统级备份) 和 <b>CSV</b> (Excel直开) 两种格式。
+        为防止浏览器安全机制拦截同时触发的多文件下载，系统已将导出通道拆分。CSV 格式可完美适配 Excel 直接双击打开，自带防乱码处理。
       </p>
+      <div style="display:flex;gap:15px;align-items:center;margin-bottom:20px">
+        <label style="font-weight:700">目标房间:</label>
+        <input id="exp-room" placeholder="输入房间码 (留空则导出所有)" style="padding:10px;border:1px solid var(--border);border-radius:6px;width:250px">
+      </div>
       <div style="display:flex;gap:15px">
-        <input id="exp-room" placeholder="房间代码 (留空导出全部)" style="padding:10px;border:1px solid var(--border);border-radius:6px;width:250px">
-        <button class="btn btn-primary" onclick="doExport()">打包下载全量数据</button>
+        <button class="btn btn-primary" onclick="doExportCSV()" style="background: var(--green);">📊 导出 Excel 分析表 (CSV)</button>
+        <button class="btn btn-outline" onclick="doExportJSON()">🗄️ 导出 JSON 原始库</button>
       </div>
     </div>
   </div>
@@ -118,13 +129,12 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
 <script>
 const API = 'https://api.resil-hub.cn';
 
-// --- 通用工具 ---
 async function safeFetch(url, opts) {
   try {
     const res = await fetch(url, opts);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
-  } catch(e) { console.error('Fetch error:', e); return null; }
+  } catch(e) { return null; }
 }
 
 async function checkHealth() {
@@ -144,7 +154,7 @@ function toast(msg, color) {
   setTimeout(() => { d.style.opacity='0'; setTimeout(()=>d.remove(),300); }, 2500);
 }
 
-// --- 房间管理 ---
+// 房间管理
 async function loadRooms() {
   const el = document.getElementById('room-list');
   const data = await safeFetch(API + '/api/rooms');
@@ -152,69 +162,49 @@ async function loadRooms() {
   el.innerHTML = data.map(r => `
     <div class="room-card">
       <div class="code">${r.code}</div>
-      <div style="font-size:.8rem; margin:8px 0">${r.group_name} · R${r.rounds_played||0}</div>
+      <div style="font-size:.8rem; margin:8px 0">${r.group_name} · 状态: ${r.status}</div>
       <div style="display:flex;gap:5px">
         ${r.status==='WAITING'?`<button class="btn btn-primary btn-sm" onclick="startRoom('${r.code}')">🚀 发令</button>`:''}
         <button class="btn btn-outline btn-sm" onclick="deleteRoom('${r.code}')">删除</button>
       </div>
     </div>`).join('') || '暂无活跃房间';
 }
-
 async function createRoom() {
-  const g = document.getElementById('new-group').value;
-  await safeFetch(API + '/api/rooms', { method: 'POST', body: JSON.stringify({group_name: g}) });
+  await safeFetch(API + '/api/rooms', { method: 'POST', body: JSON.stringify({group_name: document.getElementById('new-group').value}) });
   loadRooms();
 }
+async function startRoom(c) { await safeFetch(`${API}/api/rooms/${c}/start`, { method: 'POST' }); toast('推演发令成功！'); loadRooms(); }
+async function deleteRoom(c) { if(confirm('确认删除？')) { await safeFetch(`${API}/api/rooms/${c}`, { method: 'DELETE' }); loadRooms(); } }
 
-async function startRoom(c) {
-  await safeFetch(`${API}/api/rooms/${c}/start`, { method: 'POST' });
-  toast('推演指令已下发！'); loadRooms();
-}
-
-async function deleteRoom(c) {
-  if(confirm('删除房间数据不可恢复？')) {
-    await safeFetch(`${API}/api/rooms/${c}`, { method: 'DELETE' });
-    loadRooms();
-  }
-}
-
-// --- 【核心】上帝之手干预函数 ---
+// 上帝之手情景干预
 async function triggerEvent(msg) {
   const rm = document.getElementById('target-room').value.trim();
-  if(!rm) return toast('请输入目标房间码！', 'var(--red)');
-  
-  const payload = {
-    room_id: rm, round_num: 99, player_id: 'SYSTEM', player_name: '国家防总',
-    role: 'ADMIN', channel: 'ALL', village: '', content: msg, msg_type: 'sys'
-  };
-  
-  const d = await safeFetch(API + '/api/data/chats', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(payload)
-  });
-  
-  if(d) toast('⚡ 指令已实时推送到学生屏幕！', 'var(--amber)');
+  if(!rm) return toast('⚠️ 必须输入目标房间码！', 'var(--amber)');
+  const payload = { room_id: rm, round_num: 99, player_id: 'SYSTEM', player_name: '国家防总', role: 'ADMIN', channel: 'ALL', village: '', content: msg, msg_type: 'sys' };
+  const d = await safeFetch(API + '/api/data/chats', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+  if(d) toast('⚡ 干预指令已下发！学生端将弹出警告。', 'var(--amber)');
 }
 
-// --- 看板逻辑 ---
+// 多维数据看板逻辑
 async function loadData() {
   const el = document.getElementById('data-overview');
+  el.innerHTML = "正在拉取最新决策...";
   const [decisions, rounds] = await Promise.all([ 
     safeFetch(API+'/api/data/decisions'), 
     safeFetch(API+'/api/data/rounds') 
   ]);
   
-  if(!decisions) return;
+  if(!decisions || decisions.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);padding:20px;">📭 暂无学生决策数据，请等待学生在推演中提交操作。</p>';
+    return;
+  }
   
   let html = `
     <div class="stat-grid">
       <div class="stat-box"><div class="sv">${rounds?.length || 0}</div><div class="sl">系统轮次总数</div></div>
       <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">主体决策存量</div></div>
     </div>
-    <div class="card">
-      <h3>⏱ 实时决策流追踪 (按时间降序)</h3>
-      <div style="overflow-x:auto;max-height:450px;overflow-y:auto">
+    <div style="overflow-x:auto;max-height:450px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
         <table class="tbl">
           <thead><tr><th>房间.轮次</th><th>角色/主体</th><th>决策动作</th><th>数值</th><th>操作时间</th></tr></thead>
           <tbody>
@@ -224,39 +214,43 @@ async function loadData() {
   
   decisions.slice(0, 50).forEach(d => {
     html += `<tr>
-      <td style="font-family:monospace; font-weight:700">[${d.room_id}] R${d.round_num}</td>
+      <td style="font-family:monospace; font-weight:700; color:var(--blue)">[${d.room_id}] R${d.round_num}</td>
       <td>${d.player_name}</td>
       <td><span class="action-tag action-drain">${actMap[d.action_type] || d.action_type}</span></td>
-      <td style="color:var(--blue)">${d.action_value || '-'}</td>
-      <td style="color:var(--muted)">${d.ts}</td>
+      <td style="color:var(--red);font-weight:bold">${d.action_value || '-'}</td>
+      <td style="color:var(--muted);font-size:0.75rem">${d.ts || d.created_at || '刚刚'}</td>
     </tr>`;
   });
-  el.innerHTML = html + '</tbody></table></div></div>';
+  el.innerHTML = html + '</tbody></table></div>';
+  toast("看板数据已刷新", "var(--blue)");
 }
 
-// --- 【核心】双格式导出逻辑 ---
-async function doExport() {
+// 拆分后的专属 Excel(CSV) 导出通道
+async function doExportCSV() {
   const room = document.getElementById('exp-room').value.trim();
-  toast('正在打包云端数据...', 'var(--blue)');
+  toast('正在打包 Excel 数据...', 'var(--blue)');
   const data = await safeFetch(API + '/api/export/' + (room || '_all'));
-  if(!data) return;
-
-  // 下载 JSON
-  downloadBlob(JSON.stringify(data, null, 2), `haihe_raw_${Date.now()}.json`, 'application/json');
-
-  // 下载 CSV (决策明细表)
-  if(data.decisions && data.decisions.length) {
-    downloadBlob(jsonToCSV(data.decisions), `haihe_decisions_${room||'all'}.csv`, 'text/csv');
-  }
-  
-  toast('✅ 下载成功 (包含 JSON 和 Excel 兼容 CSV)！');
+  if(!data || !data.decisions || data.decisions.length === 0) return toast('⚠️ 该房间暂无决策数据', 'var(--amber)');
+  downloadBlob(jsonToCSV(data.decisions), `HaiHe_Decisions_${room||'All'}.csv`, 'text/csv');
+  toast('✅ Excel 兼容表已下载！', 'var(--green)');
 }
 
+// 拆分后的专属 JSON 导出通道
+async function doExportJSON() {
+  const room = document.getElementById('exp-room').value.trim();
+  toast('正在打包 JSON 数据...', 'var(--blue)');
+  const data = await safeFetch(API + '/api/export/' + (room || '_all'));
+  if(!data) return toast('⚠️ 获取数据失败', 'var(--red)');
+  downloadBlob(JSON.stringify(data, null, 2), `HaiHe_RawData_${Date.now()}.json`, 'application/json');
+  toast('✅ JSON 原始库已下载！', 'var(--green)');
+}
+
+// 植入 \uFEFF 前缀（BOM头）防止微软 Excel 打开乱码
 function jsonToCSV(arr) {
   const cols = Object.keys(arr[0]);
   const header = cols.join(',');
   const rows = arr.map(obj => cols.map(k => `"${(obj[k]||'').toString().replace(/"/g, '""')}"`).join(','));
-  return '\uFEFF' + header + '\n' + rows.join('\n'); // 增加 BOM 防止中文乱码
+  return '\uFEFF' + header + '\n' + rows.join('\n');
 }
 
 function downloadBlob(content, name, type) {
@@ -264,20 +258,14 @@ function downloadBlob(content, name, type) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
 }
 
-// 标签页切换
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     t.classList.add('active');
     const tabId = t.dataset.tab;
-    ['rooms','config','data','export'].forEach(id => {
-      document.getElementById('tab-'+id).classList.toggle('hidden', id !== tabId);
-    });
-    if (tabId === 'rooms') loadRooms();
-    if (tabId === 'data') loadData();
+    ['rooms','config','data','export'].forEach(id => { document.getElementById('tab-'+id).classList.toggle('hidden', id !== tabId); });
   });
 });
-
 checkHealth();
 </script>
 </body>

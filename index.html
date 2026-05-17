@@ -653,10 +653,10 @@ function mpSaveRound(){mpEmit('save_round_data',{round_num:G.round,rainfall:G.ra
 // ===================== D1 同步大厅 =====================
 // Worker API 基地址
 let WORKER_API = 'https://api.resil-hub.cn';
-
 // 【核心修复：补上这两个定时器变量的声明】
 let _roomPollTimer = null; 
 let _gamePollTimer = null;
+
 async function joinRoomHTTP(code){
   const url=WORKER_API+'/api/rooms/'+code+'/join';
   try{

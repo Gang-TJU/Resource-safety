@@ -186,12 +186,16 @@ async function triggerEvent(msg) {
 }
 
 // 多维数据看板逻辑
+// 多维数据看板逻辑（带强力缓存击穿）
 async function loadData() {
   const el = document.getElementById('data-overview');
   el.innerHTML = "正在拉取最新决策...";
+  
+  // 【核心修复】：增加实时时间戳，强行击穿 Cloudflare 和浏览器的双重死缓存！
+  const ts = Date.now();
   const [decisions, rounds] = await Promise.all([ 
-    safeFetch(API+'/api/data/decisions'), 
-    safeFetch(API+'/api/data/rounds') 
+    safeFetch(API+'/api/data/decisions?_t=' + ts), 
+    safeFetch(API+'/api/data/rounds?_t=' + ts) 
   ]);
   
   if(!decisions || decisions.length === 0) {
@@ -222,7 +226,7 @@ async function loadData() {
     </tr>`;
   });
   el.innerHTML = html + '</tbody></table></div>';
-  toast("看板数据已刷新", "var(--blue)");
+  toast("看板数据已同步最新！", "var(--blue)");
 }
 
 // 拆分后的专属 Excel(CSV) 导出通道

@@ -1,4 +1,4 @@
-// src/worker.js - 终极修复版 (包含自动建房兜底机制)
+// src/worker.js - 彻底修复版 V2.5 (修复村民误配市长问题)
 const ROLE_SLOTS = [
   'MAYOR_A','MAYOR_B','MAYOR_C',
   'LEADER_A1','LEADER_A2','LEADER_A3',
@@ -35,10 +35,9 @@ export default {
     if (method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
-      if (path === "/api/health") return Response.json({ ok: true, version: "2.3", db: "D1" }, { headers: corsHeaders });
+      if (path === "/api/health") return Response.json({ ok: true, version: "2.5", db: "D1" }, { headers: corsHeaders });
       if (path === "/api/config") return Response.json({}, { headers: corsHeaders });
 
-      // 1. 房间管理接口
       if (path === "/api/rooms" && method === "GET") {
         const { results } = await env.DB.prepare("SELECT * FROM rooms ORDER BY created_at DESC LIMIT 50").all();
         return Response.json(results || [], { headers: corsHeaders });
@@ -62,20 +61,25 @@ export default {
           return Response.json({ ok: true }, { headers: corsHeaders });
         }
 
+        if (method === "GET") {
+          const { results } = await env.DB.prepare("SELECT * FROM rooms WHERE code = ?").bind(code).all();
+          if (results.length === 0) return Response.json({ detail: '房间不存在' }, { status: 404, headers: corsHeaders });
+          const room = results[0];
+          room.players = JSON.parse(room.players || '[]');
+          return Response.json(room, { headers: corsHeaders });
+        }
+
         if (method === "POST" && action === "start") {
           await env.DB.prepare("UPDATE rooms SET status = 'PLAYING' WHERE code = ?").bind(code).run();
           return Response.json({ ok: true }, { headers: corsHeaders });
         }
 
-        // 核心修复：学生加入逻辑
         if (method === "POST" && action === "join") {
           const body = await request.json();
           const { results } = await env.DB.prepare("SELECT players, status FROM rooms WHERE code = ?").bind(code).all();
-          
           let currentStatus = 'WAITING';
           let playersStr = '[]';
 
-          // 兜底机制：如果学生输入的房间不存在，自动在数据库创建，防止报错断联！
           if (results.length === 0) {
             await env.DB.prepare("INSERT INTO rooms (code, group_name, status, players) VALUES (?, ?, 'WAITING', '[]')")
               .bind(code, "自主加入房间").run();
@@ -84,18 +88,24 @@ export default {
             playersStr = results[0].players || '[]';
           }
 
-          if (currentStatus !== 'WAITING') return Response.json({ detail: "游戏已开始，无法加入" }, { status: 400, headers: corsHeaders });
+          if (currentStatus !== 'WAITING') return Response.json({ detail: "游戏已开始" }, { status: 400, headers: corsHeaders });
 
           let players = [];
           try { players = JSON.parse(playersStr); } catch(e) { players = []; }
           const takenRoles = new Set(players.map(p => p.role));
 
-          // 自动分配逻辑
           let assignedRole = null;
           let assignedVillage = 'B1';
 
+          // 【核心修复：严格按偏好分配】
           if (body.pref === 'OBSERVER') {
             assignedRole = 'OBSERVER'; assignedVillage = 'ALL';
+          } else if (body.pref === 'VIL') { 
+            // 明确选择村民，绝对不给市长，直接盲盒分发到各村
+            const vList = ['A1','A2','A3','B1','B2','B3','C1','C2','C3'];
+            const v = vList[players.length % vList.length];
+            assignedRole = `VIL_${v}_${players.length}`;
+            assignedVillage = v;
           } else {
             const pRole = prefToRole(body.pref);
             if (pRole && !takenRoles.has(pRole)) {
@@ -103,8 +113,10 @@ export default {
             } else {
               assignedRole = ROLE_SLOTS.find(r => !takenRoles.has(r));
             }
+            // 如果 12 个官职全部爆满，强行降级为村民，彻底熔断
             if (!assignedRole) {
-              const v = body.pref === 'VLF' ? 'B1' : 'A1';
+              const vList = ['A1','A2','A3','B1','B2','B3','C1','C2','C3'];
+              const v = vList[players.length % vList.length];
               assignedRole = `VIL_${v}_${players.length}`;
             }
             assignedVillage = roleToVillage(assignedRole);
@@ -116,10 +128,8 @@ export default {
         }
       }
 
-      // 2. 数据采集接口
       if (path === "/api/data/decisions" && method === "POST") {
         const d = await request.json();
-        // 兼容 action_value 可能是对象的情况
         const actionVal = typeof d.action_value === 'object' ? JSON.stringify(d.action_value) : String(d.action_value);
         await env.DB.prepare("INSERT INTO player_decisions (room_id, round_num, player_id, player_name, role, village, action_type, action_value) VALUES (?,?,?,?,?,?,?,?)")
           .bind(d.room_id, d.round_num, d.player_id||'human', d.player_name, d.role, d.village, d.action_type, actionVal).run();
@@ -139,21 +149,10 @@ export default {
         return Response.json({ ok: true }, { headers: corsHeaders });
       }
 
-      // 3. 数据读取接口
-      if (path === "/api/data/decisions" && method === "GET") {
-        const { results } = await env.DB.prepare("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 100").all();
-        return Response.json(results || [], { headers: corsHeaders });
-      }
-      if (path === "/api/data/rounds" && method === "GET") {
-        const { results } = await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 100").all();
-        return Response.json(results || [], { headers: corsHeaders });
-      }
-      if (path === "/api/data/chats" && method === "GET") {
-        const { results } = await env.DB.prepare("SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 100").all();
-        return Response.json(results || [], { headers: corsHeaders });
-      }
-
-      // 4. 数据导出
+      if (path === "/api/data/decisions" && method === "GET") return Response.json((await env.DB.prepare("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 100").all()).results || [], { headers: corsHeaders });
+      if (path === "/api/data/rounds" && method === "GET") return Response.json((await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 100").all()).results || [], { headers: corsHeaders });
+      if (path === "/api/data/chats" && method === "GET") return Response.json((await env.DB.prepare("SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 100").all()).results || [], { headers: corsHeaders });
+      
       if (path.startsWith("/api/export/")) {
         const room = path.split('/')[3];
         const where = room === '_all' ? "" : `WHERE room_id = '${room}'`;
@@ -162,11 +161,9 @@ export default {
         const chats = (await env.DB.prepare(`SELECT * FROM chat_logs ${where}`).all()).results;
         return Response.json({ rounds, decisions, chats }, { headers: corsHeaders });
       }
-
       return new Response("API Route Not Found", { status: 404, headers: corsHeaders });
     } catch (e) {
-      // 若出现问题，将精准返回详细报错至前端红色提示框
-      return Response.json({ detail: "云端拦截报错: " + e.message }, { status: 500, headers: corsHeaders });
+      return Response.json({ detail: "云端报错: " + e.message }, { status: 500, headers: corsHeaders });
     }
   }
 };

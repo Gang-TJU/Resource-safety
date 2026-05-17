@@ -699,32 +699,34 @@ function renderWaitingPlayers(players){
 
 function startRoomPolling(code){
   stopRoomPolling();
-  // 【核心修复2】提高轮询频率至1.5秒，剔除倒计时等容易引起隐性崩溃的死结代码，确保一收到PLAYING立刻启动
-  _roomPollTimer=setInterval(async()=>{
-    try{
-      const res=await fetch(WORKER_API+'/api/rooms/'+code);
-      if(!res.ok)return;
-      const d=await res.json();
-      if(d.players)renderWaitingPlayers(d.players);
+  _roomPollTimer = setInterval(async() => {
+    try {
+      const res = await fetch(WORKER_API+'/api/rooms/'+code);
+      if(!res.ok) return;
+      const d = await res.json();
+      if(d.players) renderWaitingPlayers(d.players);
       
-      if(d.status==='PLAYING'){
+      // 只要看到云端变为 PLAYING，立刻掐断侦听并启动沙盘！
+      if(d.status === 'PLAYING'){
         stopRoomPolling();
-        console.log("🚀 云端指令：游戏点火开始！");
+        console.log("🚀 云端发令！开始推演！");
         
-        // 直接触发原生启动流程，彻底解决“教师发令后没反应卡死”的问题
-        if(G.role==='OBSERVER' && typeof initObserverGame === 'function'){
+        // 彻底剔除容易报错卡死的倒计时，实现光速响应
+        if(G.role === 'OBSERVER' && typeof initObserverGame === 'function'){
            initObserverGame({});
         } else {
            initGame();
         }
       }
-    }catch(e){
-      console.error("同步侦听异常:", e);
+    } catch(e) {
+      console.warn("网络波动跳过本次轮询...");
     }
-  }, 1500);
+  }, 1500); // 1.5秒高频侦听
 }
 
-function stopRoomPolling(){if(_roomPollTimer){clearInterval(_roomPollTimer);_roomPollTimer=null}}
+function stopRoomPolling(){
+  if(_roomPollTimer){ clearInterval(_roomPollTimer); _roomPollTimer=null; }
+}
 
 async function startRoomHTTP(){
   const code=document.getElementById('wait-room-code')?.textContent;

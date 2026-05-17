@@ -2300,26 +2300,27 @@ function triggerBlackout(){
 
 <script>
 (function() {
+  // 1. 自动路由纠正 (修复控制沙盘不显示的核心Bug：必须绑定 window 上下文)
   const originalFetch = window.fetch;
-  window.fetch = function() {
-    let args = arguments;
+  window.fetch = function(...args) {
     if (typeof args[0] === 'string' && args[0].startsWith('/api/')) {
       args[0] = (typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn') + args[0];
     }
-    return originalFetch.apply(this, args);
+    // 加上 .call(window) 彻底解决沙盘地图加载报错 (Illegal invocation)
+    return originalFetch.call(window, ...args);
   };
 
-  // 全局抓取：只要学生按下任何按钮，自动静默记录到看板
+  // 2. 全局点击捕获：把学生按的任何按钮记录到管理后台看板
   document.addEventListener('click', (e) => {
     let btn = e.target.closest('.btn') || e.target.closest('button');
     if (!btn) return;
     let txt = btn.textContent.trim();
-    if (!txt || txt === '发送' || txt.includes('开始') || txt.includes('加入')) return;
+    if (!txt || txt === '发送' || txt.includes('开始') || txt.includes('加入') || txt.includes('发令')) return;
     
     const roomCode = (typeof G !== 'undefined' ? G.localSessionId : null);
     if (roomCode && !roomCode.includes('SINGLE')) {
         const apiBase = typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn';
-        originalFetch(apiBase + '/api/data/decisions', {
+        originalFetch.call(window, apiBase + '/api/data/decisions', {
            method: 'POST',
            headers: {'Content-Type':'application/json'},
            body: JSON.stringify({
@@ -2328,22 +2329,27 @@ function triggerBlackout(){
                player_name: (typeof G!=='undefined'?G.nm:'未知'), 
                role: (typeof G!=='undefined'?G.role:''), 
                village: (typeof G!=='undefined'?G.vil:''),
-               action_type: '界面操作', action_value: txt
+               action_type: '沙盘实操', action_value: txt
            })
         }).catch(()=>{});
     }
   });
 
+  // 3. 上帝之手天线：严格解决“提前提示”与精准水文联动
   let seenSysMsgs = new Set();
   let isFirstFetch = true;
 
   setInterval(async () => {
-    const roomCode = (typeof G !== 'undefined' ? G.localSessionId : null) || document.getElementById('wait-room-code')?.textContent;
+    // 【核心修复：防提前提示】如果推演沙盘还未显示（还在大厅等待），雷达强制休眠！
+    const gameScreen = document.getElementById('S-game');
+    if (!gameScreen || gameScreen.classList.contains('hidden')) return;
+
+    const roomCode = (typeof G !== 'undefined' ? G.localSessionId : null);
     if (!roomCode || roomCode.includes('SINGLE')) return;
     
     try {
       const apiBase = typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn';
-      const res = await originalFetch(apiBase + '/api/data/chats?_t=' + Date.now()); 
+      const res = await originalFetch.call(window, apiBase + '/api/data/chats?_t=' + Date.now()); 
       const logs = await res.json();
       if (!logs || !logs.length) {
          isFirstFetch = false;
@@ -2352,7 +2358,7 @@ function triggerBlackout(){
       
       const sysLogs = logs.filter(l => l.room_id === roomCode && l.msg_type === 'sys');
       
-      // 首次载入静默吸收
+      // 首次载入静默吸收历史旧账
       if (isFirstFetch) {
          sysLogs.forEach(l => seenSysMsgs.add(l.id || l.ts || l.content));
          isFirstFetch = false;
@@ -2364,11 +2370,12 @@ function triggerBlackout(){
          if (!seenSysMsgs.has(msgId)) {
             seenSysMsgs.add(msgId);
             
+            // 霸屏警告弹窗
             alert("🚨 【系统突发情景干预】\n\n" + latest.content);
             if (typeof toast === 'function') toast("⚠️ 收到总指挥部突发预警！", "var(--red)");
             if (typeof sysMsg === 'function') sysMsg(latest.content);
 
-            // 联动1：只增幅已存在的降雨
+            // 联动1：暴雨增幅！只有本回合原有降雨时，才在此基础上乘以 1.5 倍
             if (latest.content.includes("暴雨") && typeof G !== 'undefined') {
                if (typeof G.rain === 'number' && G.rain > 0) {
                    G.rain = Math.floor(G.rain * 1.5); 
@@ -2376,7 +2383,7 @@ function triggerBlackout(){
                }
             }
 
-            // 联动2：中央财政精准扶持
+            // 联动2：生态补偿，中央财政出资直达防区
             if (latest.content.includes("补偿") && typeof G !== 'undefined') {
                if (G.role && G.role.startsWith('MAYOR')) {
                    G.ca = (typeof G.ca === 'number' ? G.ca : 0) + 500;
@@ -2387,10 +2394,12 @@ function triggerBlackout(){
                }
             }
 
+            // 联动3：通讯中断原生特效
             if (latest.content.includes("通讯") && typeof triggerBlackout === 'function') {
               triggerBlackout();
             }
 
+            // 强制刷新游戏UI
             if (typeof render === 'function') render();
             if (typeof updateUI === 'function') updateUI();
          }

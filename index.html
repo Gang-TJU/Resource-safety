@@ -2300,7 +2300,7 @@ function triggerBlackout(){
 
 <script>
 (function() {
-  // 1. 自动路由纠正：确保原生游戏的所有操作数据，都能准确无误地汇入 Cloudflare 看板
+  // 1. 自动路由纠正
   const originalFetch = window.fetch;
   window.fetch = function() {
     let args = arguments;
@@ -2310,17 +2310,25 @@ function triggerBlackout(){
     return originalFetch.apply(this, args);
   };
 
-  // 2. 上帝之手天线：自动捕捉管理后台下发的突发情景干预
+  // 2. 上帝之手天线：带首屏静默与真实数据联动
   let lastSysMsgId = null;
+  let isFirstLoad = true; // 新增：首屏静默开关
+
   setInterval(async () => {
     const roomCode = (typeof G !== 'undefined' ? G.localSessionId : null) || document.getElementById('wait-room-code')?.textContent;
     if (!roomCode || roomCode.includes('SINGLE')) return;
     
     try {
       const apiBase = typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn';
-      const res = await originalFetch(apiBase + '/api/data/chats');
+      // 加上时间戳防止浏览器缓存历史消息
+      const res = await originalFetch(apiBase + '/api/data/chats?_t=' + Date.now());
       const logs = await res.json();
-      if (!logs || !logs.length) return;
+      
+      // 如果房间刚建好完全没消息，关闭静默期
+      if (!logs || !logs.length) {
+         isFirstLoad = false;
+         return;
+      }
       
       const sysLogs = logs.filter(l => l.room_id === roomCode && l.msg_type === 'sys');
       if (sysLogs.length > 0) {
@@ -2329,14 +2337,38 @@ function triggerBlackout(){
         
         if (lastSysMsgId !== msgId) {
           lastSysMsgId = msgId;
+          
+          // 【核心修复】：如果是刚进房间拉取到了历史旧警告，只登记ID，不弹窗吓人！
+          if (isFirstLoad) {
+             isFirstLoad = false;
+             return; 
+          }
+
+          // 真的有老师下发新指令了！触发弹窗
           alert("🚨 【系统突发情景干预】\n\n" + latest.content);
           if (typeof toast === 'function') toast("⚠️ 收到总指挥部突发预警！", "var(--red)");
           if (typeof sysMsg === 'function') sysMsg(latest.content);
+
+          // 【核心联动：真实修改游戏水文与资金数据】
+          if (latest.content.includes("暴雨") && typeof G !== 'undefined') {
+             G.rain = (G.rain || 0) + 150; // 降雨量基数强行暴涨 150 毫米
+             // 尝试调用界面的刷新函数（如果存在），让数字立刻变化；即使没有刷新函数，下一回合结算时水量也会激增！
+             if (typeof render === 'function') render();
+             if (typeof updateUI === 'function') updateUI();
+          }
+
+          if (latest.content.includes("补偿") && typeof G !== 'undefined') {
+             G.va = (G.va || 0) + 500; // 直接给村庄拨发 500万 生态补偿资金
+             if (typeof render === 'function') render();
+             if (typeof updateUI === 'function') updateUI();
+          }
+
           if (latest.content.includes("通讯") && typeof triggerBlackout === 'function') {
-            triggerBlackout();
+            triggerBlackout(); // 触发原生的断网全黑特效
           }
         }
       }
+      isFirstLoad = false; // 首次拉取结束，解除静默
     } catch(e) {}
   }, 2000); 
 })();

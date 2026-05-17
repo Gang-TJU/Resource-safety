@@ -2297,5 +2297,49 @@ function triggerBlackout(){
 // ===================== RAIN CANVAS =====================
 !function(){const cv=document.getElementById('rain-canvas'),cx=cv.getContext('2d');let dr=[];function rs(){cv.width=innerWidth;cv.height=innerHeight}rs();addEventListener('resize',rs);for(let i=0;i<90;i++)dr.push({x:Math.random()*cv.width,y:Math.random()*cv.height,l:7+Math.random()*12,s:2+Math.random()*3,o:.06+Math.random()*.1});!function d(){cx.clearRect(0,0,cv.width,cv.height);dr.forEach(r=>{cx.beginPath();cx.moveTo(r.x,r.y);cx.lineTo(r.x+.8,r.y+r.l);cx.strokeStyle=`rgba(68,114,196,${r.o})`;cx.lineWidth=.8;cx.stroke();r.y+=r.s;if(r.y>cv.height){r.y=-r.l;r.x=Math.random()*cv.width}});requestAnimationFrame(d)}()}();
 </script>
+
+<script>
+(function() {
+  // 1. 自动路由纠正：确保原生游戏的所有操作数据，都能准确无误地汇入 Cloudflare 看板
+  const originalFetch = window.fetch;
+  window.fetch = function() {
+    let args = arguments;
+    if (typeof args[0] === 'string' && args[0].startsWith('/api/')) {
+      args[0] = (typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn') + args[0];
+    }
+    return originalFetch.apply(this, args);
+  };
+
+  // 2. 上帝之手天线：自动捕捉管理后台下发的突发情景干预
+  let lastSysMsgId = null;
+  setInterval(async () => {
+    const roomCode = (typeof G !== 'undefined' ? G.localSessionId : null) || document.getElementById('wait-room-code')?.textContent;
+    if (!roomCode || roomCode.includes('SINGLE')) return;
+    
+    try {
+      const apiBase = typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn';
+      const res = await originalFetch(apiBase + '/api/data/chats');
+      const logs = await res.json();
+      if (!logs || !logs.length) return;
+      
+      const sysLogs = logs.filter(l => l.room_id === roomCode && l.msg_type === 'sys');
+      if (sysLogs.length > 0) {
+        const latest = sysLogs[0]; 
+        const msgId = latest.content + (latest.created_at || latest.ts || '0');
+        
+        if (lastSysMsgId !== msgId) {
+          lastSysMsgId = msgId;
+          alert("🚨 【系统突发情景干预】\n\n" + latest.content);
+          if (typeof toast === 'function') toast("⚠️ 收到总指挥部突发预警！", "var(--red)");
+          if (typeof sysMsg === 'function') sysMsg(latest.content);
+          if (latest.content.includes("通讯") && typeof triggerBlackout === 'function') {
+            triggerBlackout();
+          }
+        }
+      }
+    } catch(e) {}
+  }, 2000); 
+})();
+</script>
 </body>
 </html>

@@ -658,6 +658,10 @@ let _roomPollTimer = null;
 let _gamePollTimer = null;
 
 async function joinRoomHTTP(code){
+  // 【核心修复1】在发出请求前，强制抓取界面下拉框里的偏好赋值给G.pref，解决盲盒全是市长的问题
+  const sel = document.getElementById('sel-role-pref');
+  if(sel) G.pref = sel.value;
+
   const url=WORKER_API+'/api/rooms/'+code+'/join';
   try{
     const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref})});
@@ -667,6 +671,7 @@ async function joinRoomHTTP(code){
     const rl=RL[d.role]||d.role;
     const waitRole=document.getElementById('wait-role');if(waitRole)waitRole.textContent=rl;
     const waitVil=document.getElementById('wait-village');if(waitVil)waitVil.textContent=d.village==='ALL'?'全局视角':VN[d.village]||d.village;
+    
     // 如果是 OBSERVER，显示开始按钮
     if(d.role==='OBSERVER'){
       const sa=document.getElementById('wait-start-area');
@@ -676,6 +681,8 @@ async function joinRoomHTTP(code){
     }
     if(d.players)renderWaitingPlayers(d.players);
     toast('角色分配: '+rl,'gn');
+    
+    // 开启心跳轮询
     startRoomPolling(code);
   }catch(e){toast('网络错误: '+e.message,'rd');showScreen('S-lobby')}
 }
@@ -686,39 +693,35 @@ function renderWaitingPlayers(players){
     const isObs=p.role==='OBSERVER';
     return `<span style="padding:4px 10px;background:${isObs?'rgba(212,168,83,.08)':'rgba(68,114,196,.08)'};border:1px solid ${isObs?'rgba(212,168,83,.15)':'rgba(68,114,196,.15)'};border-radius:99px;font-size:.78rem;color:${isObs?'var(--gd)':'var(--cy)'}">${p.name} (${RL[p.role]||p.role})</span>`;
   }).join('');
-  // 更新计数
   const cnt=document.getElementById('wait-player-count');
   if(cnt)cnt.textContent=players.length+'人已加入';
 }
 
 function startRoomPolling(code){
   stopRoomPolling();
+  // 【核心修复2】提高轮询频率至1.5秒，剔除倒计时等容易引起隐性崩溃的死结代码，确保一收到PLAYING立刻启动
   _roomPollTimer=setInterval(async()=>{
     try{
       const res=await fetch(WORKER_API+'/api/rooms/'+code);
       if(!res.ok)return;
       const d=await res.json();
       if(d.players)renderWaitingPlayers(d.players);
+      
       if(d.status==='PLAYING'){
         stopRoomPolling();
-        if(d.config&&Object.keys(d.config).length)applyConfig(d.config);
-        showCountdown(()=>{
-          // 连接 Socket.IO 用于实时游戏事件（如果可用）
-          if(typeof io!=='undefined'){
-            mpConnect(code,G.nm,G.sid,G.pref);
-            // 不等待 Socket.IO 的 game_started，直接初始化
-            setTimeout(()=>{
-              if(G.role==='OBSERVER')initObserverGame({});
-              else initGame();
-            },500);
-          }else{
-            if(G.role==='OBSERVER')initObserverGame({});
-            else initGame();
-          }
-        });
+        console.log("🚀 云端指令：游戏点火开始！");
+        
+        // 直接触发原生启动流程，彻底解决“教师发令后没反应卡死”的问题
+        if(G.role==='OBSERVER' && typeof initObserverGame === 'function'){
+           initObserverGame({});
+        } else {
+           initGame();
+        }
       }
-    }catch(e){}
-  },3000);
+    }catch(e){
+      console.error("同步侦听异常:", e);
+    }
+  }, 1500);
 }
 
 function stopRoomPolling(){if(_roomPollTimer){clearInterval(_roomPollTimer);_roomPollTimer=null}}

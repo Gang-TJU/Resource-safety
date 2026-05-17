@@ -79,17 +79,17 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px">
         <div style="border:1.5px solid var(--red);padding:15px;border-radius:8px;background:#fff5f5">
           <h4 style="color:var(--red);margin-bottom:8px">特大暴雨预警</h4>
-          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引发全流域恐慌值上升，模拟极端气候灾害。</p>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引发全流域恐慌值上升，面降雨量基数真实暴涨 50%。</p>
           <button class="btn btn-danger" style="width:100%" onclick="triggerEvent('【中央气象台紧急预警】强对流天气叠加！未来12小时全流域将面临极端特大暴雨，请立即做好抗洪抢险准备！')">广播暴雨指令</button>
         </div>
         <div style="border:1.5px solid var(--gold);padding:15px;border-radius:8px;background:#fffff0">
           <h4 style="color:var(--gold);margin-bottom:8px">通讯阻断危机</h4>
-          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">模拟基站损毁，测试基层村庄的自组织能力。</p>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">模拟基站损毁，测试基层村庄依靠预案自组织的防汛能力。</p>
           <button class="btn btn-warning" style="width:100%" onclick="triggerEvent('⚡【系统突发】电力设施受损，各地通讯可能中断！请各行政主体做好依靠预案独立决策的准备！')">广播通讯危机</button>
         </div>
         <div style="border:1.5px solid var(--green);padding:15px;border-radius:8px;background:#f0fff4">
           <h4 style="color:var(--green);margin-bottom:8px">生态补偿政策</h4>
-          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引导上下游协同博弈，尝试实现集体利益最大化。</p>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">引导上下游协同博弈，中央财政直达基层账面。</p>
           <button class="btn btn-primary" style="background:var(--green);width:100%" onclick="triggerEvent('📜【政策引导】国家防总拟启动流域生态补偿。凡主动蓄洪、减缓下游压力的地区，灾后将获得专项补偿！')">发布补偿机制</button>
         </div>
       </div>
@@ -100,7 +100,7 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3>📊 实时决策流追踪</h3>
-        <button class="btn btn-outline" onclick="loadData()">🔄 刷新看板数据</button>
+        <button class="btn btn-outline" onclick="loadData()">🔄 强力刷新看板数据</button>
       </div>
       <div id="data-overview" style="margin-top: 15px;">拉取云端记录中...</div>
     </div>
@@ -110,7 +110,7 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;backg
     <div class="card">
       <h3>📥 教学全维度数据导出</h3>
       <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px">
-        为防止浏览器安全机制拦截同时触发的多文件下载，系统已将导出通道拆分。CSV 格式可完美适配 Excel 直接双击打开，自带防乱码处理。
+        为防止浏览器安全拦截，导出通道已拆分。CSV 格式可完美适配 Excel 直接双击打开，自带防乱码处理。
       </p>
       <div style="display:flex;gap:15px;align-items:center;margin-bottom:20px">
         <label style="font-weight:700">目标房间:</label>
@@ -141,7 +141,7 @@ async function checkHealth() {
   const st = document.getElementById('server-status');
   const d = await safeFetch(API + '/api/health');
   if(d && d.ok) {
-    st.textContent = '✅ 已连接云端 Serverless 引擎'; st.style.color = 'var(--green)'; loadRooms();
+    st.textContent = '✅ 已连接云端引擎'; st.style.color = 'var(--green)'; loadRooms();
   } else {
     st.textContent = '❌ API 连接异常'; st.style.color = 'var(--red)';
   }
@@ -154,10 +154,9 @@ function toast(msg, color) {
   setTimeout(() => { d.style.opacity='0'; setTimeout(()=>d.remove(),300); }, 2500);
 }
 
-// 房间管理
 async function loadRooms() {
   const el = document.getElementById('room-list');
-  const data = await safeFetch(API + '/api/rooms');
+  const data = await safeFetch(API + '/api/rooms?_t=' + Date.now());
   if (!data) return;
   el.innerHTML = data.map(r => `
     <div class="room-card">
@@ -169,28 +168,22 @@ async function loadRooms() {
       </div>
     </div>`).join('') || '暂无活跃房间';
 }
-async function createRoom() {
-  await safeFetch(API + '/api/rooms', { method: 'POST', body: JSON.stringify({group_name: document.getElementById('new-group').value}) });
-  loadRooms();
-}
+async function createRoom() { await safeFetch(API + '/api/rooms', { method: 'POST', body: JSON.stringify({group_name: document.getElementById('new-group').value}) }); loadRooms(); }
 async function startRoom(c) { await safeFetch(`${API}/api/rooms/${c}/start`, { method: 'POST' }); toast('推演发令成功！'); loadRooms(); }
 async function deleteRoom(c) { if(confirm('确认删除？')) { await safeFetch(`${API}/api/rooms/${c}`, { method: 'DELETE' }); loadRooms(); } }
 
-// 上帝之手情景干预
 async function triggerEvent(msg) {
   const rm = document.getElementById('target-room').value.trim();
   if(!rm) return toast('⚠️ 必须输入目标房间码！', 'var(--amber)');
   const payload = { room_id: rm, round_num: 99, player_id: 'SYSTEM', player_name: '国家防总', role: 'ADMIN', channel: 'ALL', village: '', content: msg, msg_type: 'sys' };
   const d = await safeFetch(API + '/api/data/chats', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-  if(d) toast('⚡ 干预指令已下发！学生端将弹出警告。', 'var(--amber)');
+  if(d) toast('⚡ 干预指令已下发！学生端将收到警报。', 'var(--amber)');
 }
 
-// 多维数据看板逻辑（加强缓存穿透版）
 async function loadData() {
   const el = document.getElementById('data-overview');
   el.innerHTML = "正在拉取最新决策...";
   
-  // 【核心修复】：增加实时时间戳，强行击穿节点缓存，保证一刷必出新数据！
   const ts = Date.now();
   const [decisions, rounds] = await Promise.all([ 
     safeFetch(API+'/api/data/decisions?_t=' + ts), 
@@ -198,18 +191,18 @@ async function loadData() {
   ]);
   
   if(!decisions || decisions.length === 0) {
-    el.innerHTML = '<p style="color:var(--muted);padding:20px;">📭 暂无学生决策数据，请等待学生在推演中提交操作。</p>';
+    el.innerHTML = '<p style="color:var(--muted);padding:20px;">📭 暂无学生决策数据，请等待学生在推演中点击操作按钮。</p>';
     return;
   }
   
   let html = `
     <div class="stat-grid">
       <div class="stat-box"><div class="sv">${rounds?.length || 0}</div><div class="sl">系统轮次总数</div></div>
-      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">主体动作存量</div></div>
+      <div class="stat-box"><div class="sv">${decisions.length}</div><div class="sl">抓取决策存量</div></div>
     </div>
     <div style="overflow-x:auto;max-height:450px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
         <table class="tbl">
-          <thead><tr><th>房间.轮次</th><th>角色/主体</th><th>动作分类</th><th>决策动作记录</th><th>操作时间</th></tr></thead>
+          <thead><tr><th>房间.轮次</th><th>角色/主体</th><th>动作源</th><th>决策记录</th><th>操作时间</th></tr></thead>
           <tbody>
   `;
   
@@ -223,30 +216,27 @@ async function loadData() {
     </tr>`;
   });
   el.innerHTML = html + '</tbody></table></div>';
-  toast("看板数据已同步最新！", "var(--blue)");
+  toast("看板数据已强制击穿缓存并刷新！", "var(--blue)");
 }
 
-// 拆分后的专属 Excel(CSV) 导出通道
 async function doExportCSV() {
   const room = document.getElementById('exp-room').value.trim();
   toast('正在打包 Excel 数据...', 'var(--blue)');
-  const data = await safeFetch(API + '/api/export/' + (room || '_all'));
+  const data = await safeFetch(API + '/api/export/' + (room || '_all') + '?_t=' + Date.now());
   if(!data || !data.decisions || data.decisions.length === 0) return toast('⚠️ 该房间暂无决策数据', 'var(--amber)');
   downloadBlob(jsonToCSV(data.decisions), `HaiHe_Decisions_${room||'All'}.csv`, 'text/csv');
   toast('✅ Excel 兼容表已下载！', 'var(--green)');
 }
 
-// 拆分后的专属 JSON 导出通道
 async function doExportJSON() {
   const room = document.getElementById('exp-room').value.trim();
   toast('正在打包 JSON 数据...', 'var(--blue)');
-  const data = await safeFetch(API + '/api/export/' + (room || '_all'));
+  const data = await safeFetch(API + '/api/export/' + (room || '_all') + '?_t=' + Date.now());
   if(!data) return toast('⚠️ 获取数据失败', 'var(--red)');
   downloadBlob(JSON.stringify(data, null, 2), `HaiHe_RawData_${Date.now()}.json`, 'application/json');
   toast('✅ JSON 原始库已下载！', 'var(--green)');
 }
 
-// 植入 \uFEFF 前缀（BOM头）防止微软 Excel 打开乱码
 function jsonToCSV(arr) {
   const cols = Object.keys(arr[0]);
   const header = cols.join(',');

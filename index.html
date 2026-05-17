@@ -2300,7 +2300,6 @@ function triggerBlackout(){
 
 <script>
 (function() {
-  // 1. 自动路由纠正
   const originalFetch = window.fetch;
   window.fetch = function() {
     let args = arguments;
@@ -2310,12 +2309,11 @@ function triggerBlackout(){
     return originalFetch.apply(this, args);
   };
 
-  // 2. 全局点击捕获：自动把学生在沙盘里按的任何按钮，静默转化为决策流传给老师！(解决看板不更新)
+  // 全局抓取：只要学生按下任何按钮，自动静默记录到看板
   document.addEventListener('click', (e) => {
     let btn = e.target.closest('.btn') || e.target.closest('button');
     if (!btn) return;
     let txt = btn.textContent.trim();
-    // 过滤无关的基础按钮
     if (!txt || txt === '发送' || txt.includes('开始') || txt.includes('加入')) return;
     
     const roomCode = (typeof G !== 'undefined' ? G.localSessionId : null);
@@ -2330,13 +2328,12 @@ function triggerBlackout(){
                player_name: (typeof G!=='undefined'?G.nm:'未知'), 
                role: (typeof G!=='undefined'?G.role:''), 
                village: (typeof G!=='undefined'?G.vil:''),
-               action_type: '前线操作', action_value: txt // 直接把学生点击的按钮文字发给后台
+               action_type: '界面操作', action_value: txt
            })
         }).catch(()=>{});
     }
   });
 
-  // 3. 上帝之手天线：带首屏静默、1.5倍真实水文联动与中央财政拨款
   let seenSysMsgs = new Set();
   let isFirstFetch = true;
 
@@ -2346,7 +2343,7 @@ function triggerBlackout(){
     
     try {
       const apiBase = typeof WORKER_API !== 'undefined' ? WORKER_API : 'https://api.resil-hub.cn';
-      const res = await originalFetch(apiBase + '/api/data/chats?_t=' + Date.now()); // 加时间戳击穿死缓存
+      const res = await originalFetch(apiBase + '/api/data/chats?_t=' + Date.now()); 
       const logs = await res.json();
       if (!logs || !logs.length) {
          isFirstFetch = false;
@@ -2355,25 +2352,23 @@ function triggerBlackout(){
       
       const sysLogs = logs.filter(l => l.room_id === roomCode && l.msg_type === 'sys');
       
-      // 首次拉取：只把历史警告记录在案，绝对不弹窗！(解决进门就弹的Bug)
+      // 首次载入静默吸收
       if (isFirstFetch) {
          sysLogs.forEach(l => seenSysMsgs.add(l.id || l.ts || l.content));
          isFirstFetch = false;
          return;
       }
 
-      // 后续拉取：发现全新指令！
       sysLogs.forEach(latest => {
          const msgId = latest.id || latest.ts || latest.content;
          if (!seenSysMsgs.has(msgId)) {
             seenSysMsgs.add(msgId);
             
-            // 触发强力弹窗霸屏
             alert("🚨 【系统突发情景干预】\n\n" + latest.content);
             if (typeof toast === 'function') toast("⚠️ 收到总指挥部突发预警！", "var(--red)");
             if (typeof sysMsg === 'function') sysMsg(latest.content);
 
-            // 联动 1：暴雨增幅！只有在原计划有降雨时，按 1.5倍(增幅50%) 放缩
+            // 联动1：只增幅已存在的降雨
             if (latest.content.includes("暴雨") && typeof G !== 'undefined') {
                if (typeof G.rain === 'number' && G.rain > 0) {
                    G.rain = Math.floor(G.rain * 1.5); 
@@ -2381,7 +2376,7 @@ function triggerBlackout(){
                }
             }
 
-            // 联动 2：生态补偿！中央财政出资，直接打入玩家的 UI 账户
+            // 联动2：中央财政精准扶持
             if (latest.content.includes("补偿") && typeof G !== 'undefined') {
                if (G.role && G.role.startsWith('MAYOR')) {
                    G.ca = (typeof G.ca === 'number' ? G.ca : 0) + 500;
@@ -2392,12 +2387,10 @@ function triggerBlackout(){
                }
             }
 
-            // 联动 3：通讯中断原生特效
             if (latest.content.includes("通讯") && typeof triggerBlackout === 'function') {
               triggerBlackout();
             }
 
-            // 强制刷新画面
             if (typeof render === 'function') render();
             if (typeof updateUI === 'function') updateUI();
          }

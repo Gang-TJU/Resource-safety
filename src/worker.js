@@ -1,11 +1,6 @@
-// worker.js — V3.0 竞态条件彻底修复版
-// 核心改动：用独立 room_players 表 + DB UNIQUE 约束替代 JSON blob 内存锁
-// 解决：30人并发加入时身份重复、覆盖丢失、卡死三大问题
-// 每次请求进来，先自动检查并建表（第一次创建，之后走缓存标志几乎零开销）
-await ensureTablesExist(env);
+// worker.js — V3.1 自动建表版（解决 no such table: room_players 报错）
+// 新增：ensureTablesExist() 在每次请求时自动建表，无需手动跑迁移 SQL
 
-// CREATE TABLE IF NOT EXISTS 是幂等的，
-// 多个 Worker 实例并发执行也完全安全
 const ROLE_SLOTS = [
   'MAYOR_A','MAYOR_B','MAYOR_C',
   'LEADER_A1','LEADER_A2','LEADER_A3',
@@ -27,11 +22,34 @@ function prefToRole(pref) {
   return null;
 }
 
-// 生成几乎不可能冲突的村民角色字符串
 function genVilRole(village) {
   const rand = Math.random().toString(36).slice(2, 7);
   return `VIL_${village}_${Date.now()}_${rand}`;
 }
+
+// ── 自动建表 ─────────────────────────────────────────────────────────────────
+// Worker 全局变量：每个 isolate 实例只初始化一次，避免每次请求都跑 CREATE TABLE
+let _dbInitialized = false;
+
+async function ensureTablesExist(env) {
+  if (_dbInitialized) return;
+  // CREATE TABLE IF NOT EXISTS 是幂等的，多个 Worker 实例并发执行也安全
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS room_players (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id     TEXT NOT NULL,
+      player_id   TEXT NOT NULL,
+      player_name TEXT,
+      role        TEXT NOT NULL,
+      village     TEXT,
+      joined_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(room_id, player_id),
+      UNIQUE(room_id, role)
+    )
+  `).run();
+  _dbInitialized = true;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default {
   async fetch(request, env, ctx) {
@@ -47,10 +65,13 @@ export default {
 
     if (method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+    // 每次请求先确保表存在（第二次之后走缓存标志，几乎无开销）
+    await ensureTablesExist(env);
+
     try {
       // ── 健康检查 ──────────────────────────────────────────────
       if (path === "/api/health")
-        return Response.json({ ok: true, version: "3.0", db: "D1" }, { headers: corsHeaders });
+        return Response.json({ ok: true, version: "3.1", db: "D1" }, { headers: corsHeaders });
 
       if (path === "/api/config")
         return Response.json({}, { headers: corsHeaders });
@@ -115,8 +136,8 @@ export default {
           const body = await request.json();
 
           const playerName = (body.name || '玩家').toString().slice(0, 30);
-          // 用学号+姓名拼成稳定的玩家ID，支持断线重连幂等性
           const rawId    = (body.student_id || body.player_id || '');
+          // 用学号+姓名拼成稳定的玩家ID，支持断线重连幂等性
           const playerId = (rawId + '_' + (body.name || '')).replace(/\s+/g, '_').slice(0, 60)
                         || `anon_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
           const pref     = body.pref || 'MAYOR';
@@ -127,7 +148,6 @@ export default {
           ).bind(code).all();
 
           if (roomRows.length === 0) {
-            // 自动创建（允许学生先于老师进入）
             await env.DB.prepare(
               "INSERT OR IGNORE INTO rooms (code, group_name, status, players) VALUES (?, ?, 'WAITING', '[]')"
             ).bind(code, "自主加入房间").run();
@@ -136,12 +156,9 @@ export default {
           }
 
           // 2. 幂等检查：同一学生断线重连，直接返回已分配的角色
-          let existingRow = null;
-          try {
-            existingRow = await env.DB.prepare(
-              "SELECT role, village FROM room_players WHERE room_id = ? AND player_id = ?"
-            ).bind(code, playerId).first();
-          } catch(e) { /* table may not exist yet */ }
+          const existingRow = await env.DB.prepare(
+            "SELECT role, village FROM room_players WHERE room_id = ? AND player_id = ?"
+          ).bind(code, playerId).first().catch(() => null);
 
           if (existingRow) {
             const { results: allPlayers } = await env.DB.prepare(
@@ -154,12 +171,12 @@ export default {
             }, { headers: corsHeaders });
           }
 
-          // 3. 角色分配（利用 DB UNIQUE 约束实现原子抢占）
+          // 3. 角色分配（利用 DB UNIQUE 约束实现原子抢占，彻底解决竞态条件）
           let assignedRole    = null;
           let assignedVillage = null;
 
           if (pref === 'OBSERVER') {
-            // 观察者：允许多个（多位老师），用唯一时间戳区分
+            // 观察者：允许多个老师，用时间戳区分
             const obsRole = 'OBSERVER';
             try {
               await env.DB.prepare(
@@ -167,7 +184,7 @@ export default {
               ).bind(code, playerId, playerName, obsRole, 'ALL').run();
               assignedRole = obsRole; assignedVillage = 'ALL';
             } catch(e) {
-              // OBSERVER 已被占用（两位老师），分配带编号的观察者角色
+              // OBSERVER 角色冲突，追加编号
               const obsRoleN = `OBSERVER_${Date.now()}`;
               await env.DB.prepare(
                 "INSERT INTO room_players (room_id, player_id, player_name, role, village) VALUES (?,?,?,?,?)"
@@ -176,7 +193,7 @@ export default {
             }
 
           } else if (pref === 'VIL') {
-            // 明确选择村民：直接分配，永不给官职
+            // 明确选村民：永不给官职
             const countRow = await env.DB.prepare(
               "SELECT COUNT(*) as c FROM room_players WHERE room_id = ?"
             ).bind(code).first();
@@ -189,9 +206,10 @@ export default {
             assignedRole = vilRole; assignedVillage = v;
 
           } else {
-            // 官职角色：按偏好优先，逐一尝试 INSERT，UNIQUE 冲突则尝试下一个
-            const prefRole   = prefToRole(pref);
-            const roleOrder  = [];
+            // 官职角色：按偏好优先，逐一尝试 INSERT
+            // UNIQUE 约束冲突 → 该角色已被人抢走 → 自动尝试下一个，零竞态条件
+            const prefRole  = prefToRole(pref);
+            const roleOrder = [];
             if (prefRole) roleOrder.push(prefRole);
             ROLE_SLOTS.filter(r => r !== prefRole).forEach(r => roleOrder.push(r));
 
@@ -202,10 +220,9 @@ export default {
                 ).bind(code, playerId, playerName, role, roleToVillage(role)).run();
                 assignedRole    = role;
                 assignedVillage = roleToVillage(role);
-                break;  // 成功抢到，退出循环
+                break;
               } catch(e) {
-                // UNIQUE constraint 冲突 → 该角色已被别人抢走，继续尝试下一个
-                continue;
+                continue; // 被抢了，试下一个
               }
             }
 
@@ -224,12 +241,11 @@ export default {
             }
           }
 
-          // 4. 读取最新玩家列表并返回（同时更新 rooms.players 字段保持向后兼容）
+          // 4. 返回结果，异步更新 rooms.players JSON（向后兼容）
           const { results: players } = await env.DB.prepare(
             "SELECT player_name as name, role, village FROM room_players WHERE room_id = ? ORDER BY joined_at ASC"
           ).bind(code).all();
 
-          // 异步更新 JSON blob（不阻塞响应）
           ctx.waitUntil(
             env.DB.prepare("UPDATE rooms SET players = ? WHERE code = ?")
               .bind(JSON.stringify(players), code).run()
@@ -247,8 +263,7 @@ export default {
       if (path === "/api/data/decisions" && method === "POST") {
         const d = await request.json();
         const actionVal = typeof d.action_value === 'object'
-          ? JSON.stringify(d.action_value)
-          : String(d.action_value);
+          ? JSON.stringify(d.action_value) : String(d.action_value);
         await env.DB.prepare(
           "INSERT INTO player_decisions (room_id,round_num,player_id,player_name,role,village,action_type,action_value) VALUES (?,?,?,?,?,?,?,?)"
         ).bind(d.room_id, d.round_num, d.player_id||'human', d.player_name, d.role, d.village, d.action_type, actionVal).run();
@@ -279,13 +294,11 @@ export default {
           (await env.DB.prepare("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 100").all()).results || [],
           { headers: corsHeaders }
         );
-
       if (path === "/api/data/rounds" && method === "GET")
         return Response.json(
           (await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 100").all()).results || [],
           { headers: corsHeaders }
         );
-
       if (path === "/api/data/chats" && method === "GET")
         return Response.json(
           (await env.DB.prepare("SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 100").all()).results || [],
@@ -302,9 +315,7 @@ export default {
           env.DB.prepare(`SELECT * FROM chat_logs ${where}`).all(),
         ]);
         return Response.json({
-          rounds:    rounds.results,
-          decisions: decisions.results,
-          chats:     chats.results
+          rounds: rounds.results, decisions: decisions.results, chats: chats.results
         }, { headers: corsHeaders });
       }
 

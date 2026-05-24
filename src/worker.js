@@ -21,6 +21,38 @@ function prefToRole(pref) {
   return null;
 }
 
+
+function assignRole(players, pref) {
+  const takenRoles = new Set(players.map(p => p.role));
+  let assignedRole = null;
+  let assignedVillage = 'B1';
+
+  if (pref === 'OBSERVER') {
+    assignedRole = 'OBSERVER';
+    assignedVillage = 'ALL';
+  } else if (pref === 'VIL') {
+    const vList = ['A1','A2','A3','B1','B2','B3','C1','C2','C3'];
+    const v = vList[players.length % vList.length];
+    assignedRole = `VIL_${v}_${players.length}`;
+    assignedVillage = v;
+  } else {
+    const pRole = prefToRole(pref);
+    if (pRole && !takenRoles.has(pRole)) {
+      assignedRole = pRole;
+    } else {
+      assignedRole = ROLE_SLOTS.find(r => !takenRoles.has(r));
+    }
+    if (!assignedRole) {
+      const vList = ['A1','A2','A3','B1','B2','B3','C1','C2','C3'];
+      const v = vList[players.length % vList.length];
+      assignedRole = `VIL_${v}_${players.length}`;
+    }
+    assignedVillage = roleToVillage(assignedRole);
+  }
+
+  return { assignedRole, assignedVillage };
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -76,55 +108,46 @@ export default {
 
         if (method === "POST" && action === "join") {
           const body = await request.json();
-          const { results } = await env.DB.prepare("SELECT players, status FROM rooms WHERE code = ?").bind(code).all();
-          let currentStatus = 'WAITING';
-          let playersStr = '[]';
+          const maxRetries = 8;
 
-          if (results.length === 0) {
-            await env.DB.prepare("INSERT INTO rooms (code, group_name, status, players) VALUES (?, ?, 'WAITING', '[]')")
-              .bind(code, "自主加入房间").run();
-          } else {
+          for (let i = 0; i < maxRetries; i++) {
+            const { results } = await env.DB.prepare("SELECT players, status FROM rooms WHERE code = ?").bind(code).all();
+            let currentStatus = 'WAITING';
+            let playersStr = '[]';
+
+            if (results.length === 0) {
+              try {
+                await env.DB.prepare("INSERT INTO rooms (code, group_name, status, players) VALUES (?, ?, 'WAITING', '[]')")
+                  .bind(code, "自主加入房间").run();
+              } catch (_) {
+                // 并发下可能已有其他请求创建房间，继续重试
+              }
+              continue;
+            }
+
             currentStatus = results[0].status;
             playersStr = results[0].players || '[]';
+
+            if (currentStatus !== 'WAITING') return Response.json({ detail: "游戏已开始" }, { status: 400, headers: corsHeaders });
+
+            let players = [];
+            try { players = JSON.parse(playersStr); } catch (e) { players = []; }
+
+            const { assignedRole, assignedVillage } = assignRole(players, body.pref);
+            const nextPlayers = [...players, { name: body.name || '玩家', role: assignedRole, village: assignedVillage }];
+            const nextPlayersStr = JSON.stringify(nextPlayers);
+
+            // 关键：CAS 更新，只有当 players/status 仍与读取时一致才写入成功
+            const updateRes = await env.DB.prepare(
+              "UPDATE rooms SET players = ? WHERE code = ? AND status = 'WAITING' AND players = ?"
+            ).bind(nextPlayersStr, code, playersStr).run();
+
+            if (updateRes.meta?.changes > 0) {
+              return Response.json({ role: assignedRole, village: assignedVillage, players: nextPlayers }, { headers: corsHeaders });
+            }
           }
 
-          if (currentStatus !== 'WAITING') return Response.json({ detail: "游戏已开始" }, { status: 400, headers: corsHeaders });
-
-          let players = [];
-          try { players = JSON.parse(playersStr); } catch(e) { players = []; }
-          const takenRoles = new Set(players.map(p => p.role));
-
-          let assignedRole = null;
-          let assignedVillage = 'B1';
-
-          // 【核心修复：严格按偏好分配】
-          if (body.pref === 'OBSERVER') {
-            assignedRole = 'OBSERVER'; assignedVillage = 'ALL';
-          } else if (body.pref === 'VIL') { 
-            // 明确选择村民，绝对不给市长，直接盲盒分发到各村
-            const vList = ['A1','A2','A3','B1','B2','B3','C1','C2','C3'];
-            const v = vList[players.length % vList.length];
-            assignedRole = `VIL_${v}_${players.length}`;
-            assignedVillage = v;
-          } else {
-            const pRole = prefToRole(body.pref);
-            if (pRole && !takenRoles.has(pRole)) {
-              assignedRole = pRole;
-            } else {
-              assignedRole = ROLE_SLOTS.find(r => !takenRoles.has(r));
-            }
-            // 如果 12 个官职全部爆满，强行降级为村民，彻底熔断
-            if (!assignedRole) {
-              const vList = ['A1','A2','A3','B1','B2','B3','C1','C2','C3'];
-              const v = vList[players.length % vList.length];
-              assignedRole = `VIL_${v}_${players.length}`;
-            }
-            assignedVillage = roleToVillage(assignedRole);
-          }
-
-          players.push({ name: body.name || '玩家', role: assignedRole, village: assignedVillage });
-          await env.DB.prepare("UPDATE rooms SET players = ? WHERE code = ?").bind(JSON.stringify(players), code).run();
-          return Response.json({ role: assignedRole, village: assignedVillage, players }, { headers: corsHeaders });
+          return Response.json({ detail: "加入人数过于密集，请重试" }, { status: 409, headers: corsHeaders });
         }
       }
 

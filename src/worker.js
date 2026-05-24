@@ -1,7 +1,11 @@
 // worker.js — V3.0 竞态条件彻底修复版
 // 核心改动：用独立 room_players 表 + DB UNIQUE 约束替代 JSON blob 内存锁
 // 解决：30人并发加入时身份重复、覆盖丢失、卡死三大问题
+// 每次请求进来，先自动检查并建表（第一次创建，之后走缓存标志几乎零开销）
+await ensureTablesExist(env);
 
+// CREATE TABLE IF NOT EXISTS 是幂等的，
+// 多个 Worker 实例并发执行也完全安全
 const ROLE_SLOTS = [
   'MAYOR_A','MAYOR_B','MAYOR_C',
   'LEADER_A1','LEADER_A2','LEADER_A3',

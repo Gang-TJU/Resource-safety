@@ -658,15 +658,30 @@ let _roomPollTimer = null;
 let _gamePollTimer = null;
 
 async function joinRoomHTTP(code){
-  // 【核心修复1】在发出请求前，强制抓取界面下拉框里的偏好赋值给G.pref，解决盲盒全是市长的问题
-  const sel = document.getElementById('sel-role-pref');
-  if(sel) G.pref = sel.value;
+  // G.pref 已由 selRole() 在点击角色卡时正确赋值，此处直接使用
+  // 构造稳定的玩家ID：学号+姓名，支持断线重连时服务端幂等识别
+  const stablePlayerId = (G.sid + '_' + G.nm).replace(/\s+/g,'_').slice(0,60);
 
   const url=WORKER_API+'/api/rooms/'+code+'/join';
   try{
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref})});
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref,player_id:stablePlayerId})});
     const d=await res.json();
-    if(!res.ok){toast(d.detail||'加入失败','rd');showScreen('S-lobby');return}
+    if(!res.ok){
+      // 首次失败自动重试一次（网络抖动场景）
+      toast('加入中，稍候重试...','am');
+      await new Promise(r=>setTimeout(r,800+Math.random()*600));
+      const res2=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref,player_id:stablePlayerId})});
+      if(!res2.ok){const e2=await res2.json();toast(e2.detail||'加入失败','rd');showScreen('S-lobby');return}
+      const d2=await res2.json();
+      G.role=d2.role;G.vil=d2.village;
+      const rl2=RL[d2.role]||d2.role;
+      const waitRole2=document.getElementById('wait-role');if(waitRole2)waitRole2.textContent=rl2;
+      const waitVil2=document.getElementById('wait-village');if(waitVil2)waitVil2.textContent=d2.village==='ALL'?'全局视角':VN[d2.village]||d2.village;
+      if(d2.role==='OBSERVER'){const sa=document.getElementById('wait-start-area');if(sa)sa.innerHTML='<button class="btn btn-p" style="width:100%;font-size:1.1rem;padding:14px 30px;margin-top:8px" onclick="startRoomHTTP()">开始游戏</button>';const wt=document.getElementById('wait-title');if(wt)wt.textContent='等待玩家加入...';const ws=document.getElementById('wait-subtitle');if(ws)ws.textContent='你是教师/观察者。当所有玩家就绪后，点击下方按钮开始游戏。';}
+      if(d2.players)renderWaitingPlayers(d2.players);
+      toast('角色分配: '+rl2,'gn');
+      startRoomPolling(code);return;
+    }
     G.role=d.role;G.vil=d.village;
     const rl=RL[d.role]||d.role;
     const waitRole=document.getElementById('wait-role');if(waitRole)waitRole.textContent=rl;
@@ -721,7 +736,7 @@ function startRoomPolling(code){
     } catch(e) {
       console.warn("网络波动跳过本次轮询...");
     }
-  }, 1500); // 1.5秒高频侦听
+  }, 1200 + Math.random() * 1300); // 1.2~2.5秒随机抖动，防止30人同步发请求打爆D1写锁
 }
 
 function stopRoomPolling(){

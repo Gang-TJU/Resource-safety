@@ -515,7 +515,7 @@ body{font-family:var(--fd);background:var(--bg);color:var(--t1);min-height:100vh
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
 // ===================== MULTIPLAYER / CONFIG LAYER =====================
-let MP={enabled:false,socket:null,roomCode:null,isHost:false};
+let MP={enabled:false,socket:null,roomCode:null,isHost:false,mpPlayers:[],playerId:null,_seenDecisions:new Set(),_seenRounds:new Set(),_syncTimer:null};
 let SERVER_CFG=null;
 async function loadServerConfig(){
   try{const r=await fetch('/api/config');if(r.ok){SERVER_CFG=await r.json();applyConfig(SERVER_CFG);return true}}catch(e){}
@@ -540,7 +540,7 @@ function mpConnect(code,name,sid,pref){
   MP.socket=s;MP.roomCode=code;MP.enabled=true;
   s.on('connect',()=>{s.emit('join_room',{code,name,student_id:sid,pref});toast('已连接服务器','gn')});
   s.on('role_assigned',d=>{
-    G.role=d.role;G.vil=d.village;MP.roomCode=d.room_code;
+    G.role=d.role;G.vil=d.village;MP.mpPlayers=d.players||[];MP.roomCode=d.room_code;
     if(d.config)applyConfig(d.config);
     // Update waiting room UI
     const rl=RL[d.role]||d.role;
@@ -646,9 +646,75 @@ function renderObserverDashboard(){
   if(ex)ex.innerHTML='<button class="btn btn-p" style="width:100%;margin-top:8px" onclick="mpEmit(\'advance_phase\',{})">推进下一阶段</button>';
 }
 function mpEmit(evt,data){if(MP.enabled&&MP.socket){data.code=MP.roomCode;MP.socket.emit(evt,data)}}
-function mpSendAction(action,value){mpEmit('player_action',{action,value})}
-function mpSendChat(content,channel,village){mpEmit('chat_message',{content,channel,village})}
-function mpSaveRound(){mpEmit('save_round_data',{round_num:G.round,rainfall:G.rain,water_levels:G.ws,village_assets:G.va,city_assets:G.ca,round_loss:G.hist.length?G.hist[G.hist.length-1].loss:0,total_loss:G.totalLoss})}
+function getMPPlayerId(){return MP.playerId||(G.sid+'_'+G.nm).replace(/\s+/g,'_').slice(0,60)}
+function postMPData(path,payload){
+  if(!MP.enabled||!MP.roomCode)return Promise.resolve();
+  return fetch(WORKER_API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(e=>console.warn('多人数据同步失败',path,e));
+}
+function mpSendAction(action,value){
+  mpEmit('player_action',{action,value});
+  postMPData('/api/data/decisions',{room_id:MP.roomCode,round_num:G.round,player_id:getMPPlayerId(),player_name:G.nm,role:G.role,village:G.vil,action_type:action,action_value:value});
+}
+function mpSendChat(content,channel,village){
+  mpEmit('chat_message',{content,channel,village});
+  postMPData('/api/data/chats',{room_id:MP.roomCode,round_num:G.round,player_id:getMPPlayerId(),player_name:G.nm,role:G.role,channel,village,content,msg_type:'player'});
+}
+function mpSaveRound(){
+  const last=G.hist.length?G.hist[G.hist.length-1]:null;
+  const payload={room_id:MP.roomCode,round_num:last?.r||G.round,rainfall_A:(last?.rain||G.rain).A||0,rainfall_B:(last?.rain||G.rain).B||0,rainfall_C:(last?.rain||G.rain).C||0,round_loss:last?.loss||0,total_loss:G.totalLoss};
+  VIL.forEach(v=>{payload['water_'+v]=Math.round((last?.ws?.[v]??G.ws[v]??0)*10)/10;payload['asset_'+v]=Math.round((last?.va?.[v]??G.va[v]??0)*10)/10});
+  ['A','B','C'].forEach(c=>payload['city_asset_'+c]=Math.round(((last?.ca?.[c]??G.ca[c]??0))*10)/10);
+  mpEmit('save_round_data',{round_num:G.round,rainfall:G.rain,water_levels:G.ws,village_assets:G.va,city_assets:G.ca,round_loss:payload.round_loss,total_loss:G.totalLoss});
+  return postMPData('/api/data/rounds',payload);
+}
+
+
+function startMPSync(){
+  if(!MP.enabled||!MP.roomCode)return;
+  if(MP._syncTimer)clearInterval(MP._syncTimer);
+  syncMPState();
+  MP._syncTimer=setInterval(syncMPState,1800);
+}
+function stopMPSync(){if(MP._syncTimer){clearInterval(MP._syncTimer);MP._syncTimer=null}}
+async function syncMPState(){
+  if(!MP.enabled||!MP.roomCode)return;
+  try{
+    const [decRes,roundRes]=await Promise.all([
+      fetch(WORKER_API+'/api/data/decisions?room_id='+encodeURIComponent(MP.roomCode)+'&_t='+Date.now()),
+      fetch(WORKER_API+'/api/data/rounds?room_id='+encodeURIComponent(MP.roomCode)+'&_t='+Date.now())
+    ]);
+    if(decRes.ok){const rows=await decRes.json();(rows||[]).forEach(applyRemoteDecision)}
+    if(roundRes.ok){const rows=await roundRes.json();applyLatestRemoteRound(rows||[])}
+  }catch(e){console.warn('多人状态轮询失败',e)}
+}
+function decisionKey(d){return d.id||[d.room_id,d.round_num,d.player_id,d.action_type,d.ts].join('|')}
+function applyRemoteDecision(d){
+  const k=decisionKey(d);if(MP._seenDecisions.has(k))return;MP._seenDecisions.add(k);
+  if(d.player_id&&d.player_id===getMPPlayerId())return;
+  let v=d.action_value;try{if(typeof v==='string')v=JSON.parse(v)}catch(e){}
+  const a=d.action_type;
+  if(a==='sandbag'&&v?.village){const amt=Number(v.amount)||0;if(!G.sandbags[v.village]){G.sandbags[v.village]=amt;G.va[v.village]=Math.max(-300,(G.va[v.village]||0)-amt)}}
+  else if(a==='drain'&&v?.city){G.cd[v.city]=Number(v.value)||0}
+  else if(a==='build_dam'&&v?.city){if(!G.dams[v.city]){G.dams[v.city]=true;G.ca[v.city]=(G.ca[v.city]||0)-30}}
+  else if(a==='village_dam'&&v?.village){if(!G.dams[v.village]){G.dams[v.village]=true;G.va[v.village]=(G.va[v.village]||0)-30}}
+  else if(a==='activate_dike'&&v?.village){if(!G.dike[v.village]){G.dike[v.village]=true;G.va[v.village]=(G.va[v.village]||0)-50}}
+  else if(a==='army_card'&&v?.city){G.armyCard[v.city]=false;VFLOW[v.city].forEach(x=>{G.ws[x]=0;G.sandbags[x]=0;G.dams[x]=false;G.dike[x]=false});G.dams[v.city]=false}
+  else if(a==='blast_dam'&&v?.city){G.blasted[v.city]=true;G.dams[v.city]=false;G.ca[v.city]=(G.ca[v.city]||0)-20}
+  else if((a==='evacuate'||a==='stay')&&v?.village){G.vm[v.village]=G.vm[v.village]||{};G.vm[v.village][d.player_id||d.player_name]=(a==='evacuate')}
+  else return;
+  sysMsg(`【云端同步】${d.player_name||'其他玩家'}：${RL[d.role]||d.role||''} ${a}`);
+  renderAll();
+}
+function applyLatestRemoteRound(rows){
+  if(!rows.length)return;
+  const latest=rows.filter(r=>Number(r.round_num)>=G.round-1).sort((a,b)=>Number(b.round_num)-Number(a.round_num)||String(b.ts||'').localeCompare(String(a.ts||'')))[0];
+  if(!latest)return;
+  const k=latest.id||latest.ts||latest.round_num+'|'+latest.total_loss;if(MP._seenRounds.has(k))return;MP._seenRounds.add(k);
+  VIL.forEach(v=>{const w=latest['water_'+v];if(w!==undefined&&w!==null)G.ws[v]=Number(w)||0;const a=latest['asset_'+v];if(a!==undefined&&a!==null)G.va[v]=Number(a)||0});
+  ['A','B','C'].forEach(c=>{const a=latest['city_asset_'+c];if(a!==undefined&&a!==null)G.ca[c]=Number(a)||0});
+  if(latest.total_loss!==undefined)G.totalLoss=Number(latest.total_loss)||G.totalLoss;
+  renderAll();
+}
 
 // ===================== D1 同步大厅 =====================
 // Worker API 基地址
@@ -661,6 +727,7 @@ async function joinRoomHTTP(code){
   // G.pref 已由 selRole() 在点击角色卡时正确赋值，此处直接使用
   // 构造稳定的玩家ID：学号+姓名，支持断线重连时服务端幂等识别
   const stablePlayerId = (G.sid + '_' + G.nm).replace(/\s+/g,'_').slice(0,60);
+  MP.enabled=true;MP.roomCode=code;MP.playerId=stablePlayerId;
 
   const url=WORKER_API+'/api/rooms/'+code+'/join';
   try{
@@ -673,7 +740,7 @@ async function joinRoomHTTP(code){
       const res2=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:G.nm,student_id:G.sid,pref:G.pref,player_id:stablePlayerId})});
       if(!res2.ok){const e2=await res2.json();toast(e2.detail||'加入失败','rd');showScreen('S-lobby');return}
       const d2=await res2.json();
-      G.role=d2.role;G.vil=d2.village;
+      G.role=d2.role;G.vil=d2.village;MP.mpPlayers=d2.players||[];
       const rl2=RL[d2.role]||d2.role;
       const waitRole2=document.getElementById('wait-role');if(waitRole2)waitRole2.textContent=rl2;
       const waitVil2=document.getElementById('wait-village');if(waitVil2)waitVil2.textContent=d2.village==='ALL'?'全局视角':VN[d2.village]||d2.village;
@@ -682,7 +749,7 @@ async function joinRoomHTTP(code){
       toast('角色分配: '+rl2,'gn');
       startRoomPolling(code);return;
     }
-    G.role=d.role;G.vil=d.village;
+    G.role=d.role;G.vil=d.village;MP.mpPlayers=d.players||[];
     const rl=RL[d.role]||d.role;
     const waitRole=document.getElementById('wait-role');if(waitRole)waitRole.textContent=rl;
     const waitVil=document.getElementById('wait-village');if(waitVil)waitVil.textContent=d.village==='ALL'?'全局视角':VN[d.village]||d.village;
@@ -719,7 +786,7 @@ function startRoomPolling(code){
       const res = await fetch(WORKER_API+'/api/rooms/'+code);
       if(!res.ok) return;
       const d = await res.json();
-      if(d.players) renderWaitingPlayers(d.players);
+      if(d.players){MP.mpPlayers=d.players;renderWaitingPlayers(d.players);}
       
       // 只要看到云端变为 PLAYING，立刻掐断侦听并启动沙盘！
       if(d.status === 'PLAYING'){
@@ -806,7 +873,7 @@ function initGame(){
   G.ca={A:500,B:500,C:500};G.cd={A:0,B:0,C:0};G.dams.A=false;G.dams.B=false;G.dams.C=false;
   G.armyCard={A:true,B:true,C:true};G.blasted={A:false,B:false,C:false};
   G._upflow={};VIL.forEach(v=>G._upflow[v]=0);G._justFlooded={};G._seaDischarge=0;
-  createPlayers();genRain();showScreen('S-game');renderAll();
+  createPlayers();genRain();showScreen('S-game');if(MP.enabled)startMPSync();renderAll();
   if(!G._tutorialDone){startTutorial()}else{startTimer()}
   sysMsg('游戏开始！模拟2023年7月29日—8月2日海河"23·7"流域性特大洪水，共6轮。');
   sysMsg('💡 提示：每人只掌握局部信息，需在不确定性下快速决策。你的选择会影响他人，他人的选择也会影响你。');
@@ -814,17 +881,20 @@ function initGame(){
   setTimeout(()=>showRoleReveal(),500);
 }
 function createPlayers(){
-  G.players=[];let ar;
-  if(G.pref==='MAYOR')ar='MAYOR_A';else if(G.pref==='VLF')ar='LEADER_B1';else if(G.pref==='VLN')ar='LEADER_B2';else if(G.pref==='OBSERVER')ar='MAYOR_A';else ar=null;
-  let pv=null;
-  if(ar&&ar.startsWith('LEADER_'))pv=ar.replace('LEADER_','');
-  else if(ar&&ar.startsWith('MAYOR_'))pv=ar.replace('MAYOR_','')+'1';
-  else{pv='B1';ar='VIL_B1_0'}
+  G.players=[];let ar=MP.enabled&&G.role?G.role:null;
+  if(!ar){if(G.pref==='MAYOR')ar='MAYOR_A';else if(G.pref==='VLF')ar='LEADER_B1';else if(G.pref==='VLN')ar='LEADER_B2';else if(G.pref==='OBSERVER')ar='MAYOR_A';else ar=null}
+  let pv=MP.enabled&&G.vil?G.vil:null;
+  if(!pv){
+    if(ar&&ar.startsWith('LEADER_'))pv=ar.replace('LEADER_','');
+    else if(ar&&ar.startsWith('MAYOR_'))pv=ar.replace('MAYOR_','')+'1';
+    else{pv='B1';ar='VIL_B1_0'}
+  }
   G.role=ar;G.vil=pv;
   G.players.push({id:'human',nm:G.nm,role:ar,vil:pv,bot:0,spec:null,panic:0,conformity:0,memory:[]});G.pa.human=100;
+  const occupiedRoles=new Set((MP.mpPlayers||[]).map(p=>p.role).filter(r=>r&&r!==ar&&!r.startsWith('OBSERVER')));
   const struct=['MAYOR_A','MAYOR_B','MAYOR_C','LEADER_A1','LEADER_A2','LEADER_A3','LEADER_B1','LEADER_B2','LEADER_B3','LEADER_C1','LEADER_C2','LEADER_C3'];
   let mi=0,li=0;
-  struct.forEach(r=>{if(r===ar)return;let v=null;
+  struct.forEach(r=>{if(r===ar||occupiedRoles.has(r))return;let v=null;
     if(r.startsWith('LEADER_'))v=r.replace('LEADER_','');else if(r.startsWith('MAYOR_'))v=r.replace('MAYOR_','')+'1';
     const nm=r.startsWith('MAYOR_')?NAMES_M[mi++%3]:NAMES_L[li++%9];
     G.players.push({id:'ai_'+r,nm,role:r,vil:v,bot:1,spec:null,panic:10+Math.random()*15,conformity:30+Math.random()*30,memory:[]});G.pa['ai_'+r]=100;
@@ -851,15 +921,17 @@ function createPlayers(){
     }
   });
 }
+function seededRand(seed){let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619)}return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
 function genRain(){
   // Tuned: moderate rainfall so some villages survive with good decisions (req #5)
   const base=getHyd('rainfall_base',18),inc=getHyd('rainfall_round_increment',8),sp=getHyd('rainfall_spread',12),spinc=getHyd('rainfall_spread_round_increment',5);
   const b=base+G.round*inc,s=sp+G.round*spinc;
   const rm=window._HYD?.rainfall_multiplier||{A:1.1,B:0.9,C:0.6};
   const sm=window._HYD?.spread_multiplier||{A:1.0,B:0.9,C:0.7};
-  G.rain.A=Math.round(b*rm.A+Math.random()*s*sm.A);
-  G.rain.B=Math.round(b*rm.B+Math.random()*s*sm.B);
-  G.rain.C=Math.round(b*rm.C+Math.random()*s*sm.C);
+  const rnd=MP.enabled&&MP.roomCode?seededRand(`${MP.roomCode}:${G.round}:rain`):Math.random;
+  G.rain.A=Math.round(b*rm.A+rnd()*s*sm.A);
+  G.rain.B=Math.round(b*rm.B+rnd()*s*sm.B);
+  G.rain.C=Math.round(b*rm.C+rnd()*s*sm.C);
 }
 
 // ===================== PHASE ENGINE =====================
@@ -871,16 +943,16 @@ function updTimer(){const el=document.getElementById('g-timer');if(!el)return;el
   const sg=document.getElementById('S-game');
   if(sg)sg.classList.toggle('danger-border',VIL.some(v=>G.ws[v]>FT[v]*0.8&&G.ws[v]<FT[v]));
 }
-function advancePhase(){clearInterval(G.timer);closeMo();execPhase(PH[G.pi]);G.pi++;if(G.pi>=PH.length){endRound();return}renderAll();startTimer();runAIPhase(PH[G.pi])}
+async function advancePhase(){clearInterval(G.timer);closeMo();await execPhase(PH[G.pi]);G.pi++;if(G.pi>=PH.length){endRound();return}renderAll();startTimer();runAIPhase(PH[G.pi])}
 function autoPhase(){const p=PH[G.pi];if(p==='VIL_DISCUSS'&&G.role&&G.role.startsWith('VIL_')&&!G.vm[G.vil]?.human){G.vm[G.vil]=G.vm[G.vil]||{};G.vm[G.vil].human=false;sysMsg('时间到！系统默认你选择"暂不搬迁"。')}advancePhase()}
-function execPhase(p){
+async function execPhase(p){
   if(p==='WEATHER'){sysMsg(`【天气预报】北京降水${G.rain.A}mm | 河北降水${G.rain.B}mm | 天津降水${G.rain.C}mm`);
     // 黑天鹅通讯中断事件（第3-5轮，30%概率）
     if(G.round>=3&&G.round<=5&&Math.random()<0.3)setTimeout(()=>triggerBlackout(),2000)}
   else if(p==='VIL_DISCUSS'){aiVilDiscuss();let mc=0,sc=0;VIL.forEach(v=>{Object.values(G.vm[v]||{}).forEach(m=>{if(m)mc++;else sc++})});sysMsg(`【村民表决完成】搬迁${mc}人，留守${sc}人。`)}
   else if(p==='LEADER_BUILD'){aiLeaderBuild()}
   else if(p==='MAYOR_DRAIN'){aiMayorDrain()}
-  else if(p==='COMPUTE'){computeFlood()}
+  else if(p==='COMPUTE'){if(MP.enabled)await syncMPState();computeFlood()}
 }
 
 // ===================== AI DISCUSSION =====================
@@ -2251,13 +2323,14 @@ const TUT_STEP_CHAT={sel:'.disc-pnl',title:'研讨聊天区',desc:'与同村村�
 
 function startTutorial(){
   G._tutorialDone=false;
+  function clearTutorial(){document.querySelectorAll('.tut-overlay,.tut-tip,.tut-highlight').forEach(e=>{if(e.classList.contains('tut-overlay')||e.classList.contains('tut-tip'))e.remove();else e.classList.remove('tut-highlight')})}
   const roleKey=G.role?.startsWith('MAYOR')?'MAYOR':G.role?.startsWith('LEADER')?'LEADER':'VIL';
   const steps=[...TUT_STEPS_BASE,...(TUT_STEPS_ROLE[roleKey]||[]),TUT_STEP_CHAT];
   let idx=0;
   function showStep(){
     // 清除旧的
-    document.querySelectorAll('.tut-overlay,.tut-tip,.tut-highlight').forEach(e=>{if(e.classList.contains('tut-overlay')||e.classList.contains('tut-tip'))e.remove();else e.classList.remove('tut-highlight')});
-    if(idx>=steps.length){G._tutorialDone=true;startTimer();return}
+    clearTutorial();
+    if(idx>=steps.length){clearTutorial();G._tutorialDone=true;startTimer();return}
     const s=steps[idx];
     const target=document.querySelector(s.sel);
     // 遮罩
@@ -2275,7 +2348,7 @@ function startTutorial(){
   }
   window.tutNext=()=>{idx++;showStep()};
   window.tutPrev=()=>{idx=Math.max(0,idx-1);showStep()};
-  window.tutSkip=()=>{document.querySelectorAll('.tut-overlay,.tut-tip,.tut-highlight').forEach(e=>{if(e.classList.contains('tut-overlay')||e.classList.contains('tut-tip'))e.remove();else e.classList.remove('tut-highlight')});G._tutorialDone=true;startTimer()};
+  window.tutSkip=()=>{clearTutorial();G._tutorialDone=true;startTimer()};
   showStep();
 }
 

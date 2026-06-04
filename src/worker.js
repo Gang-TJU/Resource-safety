@@ -15,11 +15,15 @@ function roleToVillage(role) {
   return 'B1';
 }
 
-function prefToRole(pref) {
-  if (pref === 'MAYOR') return 'MAYOR_A';
-  if (pref === 'VLF')   return 'LEADER_B1';
-  if (pref === 'VLN')   return 'LEADER_B2';
-  return null;
+function prefToRoles(pref) {
+  if (pref === 'MAYOR') return ['MAYOR_A', 'MAYOR_B', 'MAYOR_C'];
+  if (pref === 'VLF') {
+    return ['LEADER_A1', 'LEADER_B1', 'LEADER_C1', 'LEADER_A2', 'LEADER_B2', 'LEADER_C2', 'LEADER_A3', 'LEADER_B3', 'LEADER_C3'];
+  }
+  if (pref === 'VLN') {
+    return ['LEADER_A2', 'LEADER_B2', 'LEADER_C2', 'LEADER_A3', 'LEADER_B3', 'LEADER_C3', 'LEADER_A1', 'LEADER_B1', 'LEADER_C1'];
+  }
+  return [];
 }
 
 function genVilRole(village) {
@@ -208,10 +212,10 @@ export default {
           } else {
             // 官职角色：按偏好优先，逐一尝试 INSERT
             // UNIQUE 约束冲突 → 该角色已被人抢走 → 自动尝试下一个，零竞态条件
-            const prefRole  = prefToRole(pref);
+            const preferredRoles = prefToRoles(pref);
             const roleOrder = [];
-            if (prefRole) roleOrder.push(prefRole);
-            ROLE_SLOTS.filter(r => r !== prefRole).forEach(r => roleOrder.push(r));
+            preferredRoles.forEach(r => { if (!roleOrder.includes(r)) roleOrder.push(r); });
+            ROLE_SLOTS.filter(r => !roleOrder.includes(r)).forEach(r => roleOrder.push(r));
 
             for (const role of roleOrder) {
               try {
@@ -281,29 +285,48 @@ export default {
       if (path === "/api/data/rounds" && method === "POST") {
         const r = await request.json();
         await env.DB.prepare(
-          "INSERT INTO simulation_rounds (room_id,round_num,rainfall_A,rainfall_B,rainfall_C,round_loss,total_loss) VALUES (?,?,?,?,?,?,?)"
-        ).bind(r.room_id, r.round_num, r.rainfall_A||0, r.rainfall_B||0, r.rainfall_C||0, r.round_loss||0, r.total_loss||0).run();
+          `INSERT INTO simulation_rounds (
+            room_id,round_num,rainfall_A,rainfall_B,rainfall_C,
+            water_A1,water_A2,water_A3,water_B1,water_B2,water_B3,water_C1,water_C2,water_C3,
+            asset_A1,asset_A2,asset_A3,asset_B1,asset_B2,asset_B3,asset_C1,asset_C2,asset_C3,
+            city_asset_A,city_asset_B,city_asset_C,round_loss,total_loss
+          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        ).bind(
+          r.room_id, r.round_num, r.rainfall_A||0, r.rainfall_B||0, r.rainfall_C||0,
+          r.water_A1||0, r.water_A2||0, r.water_A3||0, r.water_B1||0, r.water_B2||0, r.water_B3||0, r.water_C1||0, r.water_C2||0, r.water_C3||0,
+          r.asset_A1||0, r.asset_A2||0, r.asset_A3||0, r.asset_B1||0, r.asset_B2||0, r.asset_B3||0, r.asset_C1||0, r.asset_C2||0, r.asset_C3||0,
+          r.city_asset_A||0, r.city_asset_B||0, r.city_asset_C||0, r.round_loss||0, r.total_loss||0
+        ).run();
         await env.DB.prepare("UPDATE rooms SET rounds_played = ? WHERE code = ?")
           .bind(r.round_num, r.room_id).run();
         return Response.json({ ok: true }, { headers: corsHeaders });
       }
 
       // ── 数据查询 ──────────────────────────────────────────────
-      if (path === "/api/data/decisions" && method === "GET")
-        return Response.json(
-          (await env.DB.prepare("SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 100").all()).results || [],
-          { headers: corsHeaders }
-        );
-      if (path === "/api/data/rounds" && method === "GET")
-        return Response.json(
-          (await env.DB.prepare("SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 100").all()).results || [],
-          { headers: corsHeaders }
-        );
-      if (path === "/api/data/chats" && method === "GET")
-        return Response.json(
-          (await env.DB.prepare("SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 100").all()).results || [],
-          { headers: corsHeaders }
-        );
+      if (path === "/api/data/decisions" && method === "GET") {
+        const roomId = url.searchParams.get('room_id');
+        const sql = roomId
+          ? "SELECT * FROM player_decisions WHERE room_id = ? ORDER BY round_num ASC, ts ASC"
+          : "SELECT * FROM player_decisions ORDER BY ts DESC LIMIT 100";
+        const q = roomId ? env.DB.prepare(sql).bind(roomId) : env.DB.prepare(sql);
+        return Response.json((await q.all()).results || [], { headers: corsHeaders });
+      }
+      if (path === "/api/data/rounds" && method === "GET") {
+        const roomId = url.searchParams.get('room_id');
+        const sql = roomId
+          ? "SELECT * FROM simulation_rounds WHERE room_id = ? ORDER BY round_num ASC, ts ASC"
+          : "SELECT * FROM simulation_rounds ORDER BY ts DESC LIMIT 100";
+        const q = roomId ? env.DB.prepare(sql).bind(roomId) : env.DB.prepare(sql);
+        return Response.json((await q.all()).results || [], { headers: corsHeaders });
+      }
+      if (path === "/api/data/chats" && method === "GET") {
+        const roomId = url.searchParams.get('room_id');
+        const sql = roomId
+          ? "SELECT * FROM chat_logs WHERE room_id = ? ORDER BY ts ASC"
+          : "SELECT * FROM chat_logs ORDER BY ts DESC LIMIT 100";
+        const q = roomId ? env.DB.prepare(sql).bind(roomId) : env.DB.prepare(sql);
+        return Response.json((await q.all()).results || [], { headers: corsHeaders });
+      }
 
       // ── 数据导出 ──────────────────────────────────────────────
       if (path.startsWith("/api/export/")) {

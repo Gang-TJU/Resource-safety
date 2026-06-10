@@ -68,8 +68,11 @@ CREATE TABLE IF NOT EXISTS chat_logs (
 
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_rounds_room ON simulation_rounds(room_id, round_num);
+CREATE INDEX IF NOT EXISTS idx_rounds_room_round_id ON simulation_rounds(room_id, round_num, id);
 CREATE INDEX IF NOT EXISTS idx_decisions_room ON player_decisions(room_id, round_num);
+CREATE INDEX IF NOT EXISTS idx_decisions_room_id ON player_decisions(room_id, id);
 CREATE INDEX IF NOT EXISTS idx_chats_room ON chat_logs(room_id, round_num);
+CREATE INDEX IF NOT EXISTS idx_chats_room_id ON chat_logs(room_id, id);
 
 -- 表4: 房间同步大厅
 CREATE TABLE IF NOT EXISTS rooms (
@@ -78,8 +81,23 @@ CREATE TABLE IF NOT EXISTS rooms (
     status TEXT DEFAULT 'WAITING',       -- WAITING | PLAYING | FINISHED
     players TEXT DEFAULT '[]',           -- JSON数组 [{name, student_id, role, village, pref, joined_at}]
     config TEXT DEFAULT '{}',
+    rounds_played INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now')),
     started_at TEXT,
     finished_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_rooms_status ON rooms(status);
+
+-- 表5: 房间内玩家角色分配。UNIQUE(room_id, role) 用于原子抢占官职角色，避免多人同时加入时重复分配。
+CREATE TABLE IF NOT EXISTS room_players (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id TEXT NOT NULL,
+    player_id TEXT NOT NULL,
+    player_name TEXT,
+    role TEXT NOT NULL,
+    village TEXT,
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(room_id, player_id),
+    UNIQUE(room_id, role)
+);
+CREATE INDEX IF NOT EXISTS idx_room_players_room ON room_players(room_id, joined_at);

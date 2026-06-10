@@ -126,7 +126,13 @@ async function ensureTablesExist(env) {
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_decisions_room_id ON player_decisions(room_id, id)").run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_chats_room_id ON chat_logs(room_id, id)").run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_rounds_room_round_id ON simulation_rounds(room_id, round_num, id)").run();
+  await ensureColumn(env, "rooms", "group_name", "TEXT DEFAULT '默认组'");
+  await ensureColumn(env, "rooms", "status", "TEXT DEFAULT 'WAITING'");
+  await ensureColumn(env, "rooms", "players", "TEXT DEFAULT '[]'");
+  await ensureColumn(env, "rooms", "config", "TEXT DEFAULT '{}'");
   await ensureColumn(env, "rooms", "rounds_played", "INTEGER DEFAULT 0");
+  await ensureColumn(env, "rooms", "started_at", "TEXT");
+  await ensureColumn(env, "rooms", "finished_at", "TEXT");
   _dbInitialized = true;
 }
 

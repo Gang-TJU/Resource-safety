@@ -1,5 +1,5 @@
-// worker.js — V3.2 多人同步版
-// 角色分配、玩家动作、聊天和轮次水情快照全部走 HTTP/D1，前端无需 WebSocket。
+// worker.js — V3.3 多人同步与教学过程数据版
+// 角色分配、玩家动作、聊天、房间事件和轮次水情快照全部走 HTTP/D1，前端无需 WebSocket。
 
 const ROLE_SLOTS = [
   'MAYOR_A','MAYOR_B','MAYOR_C',
@@ -81,6 +81,9 @@ async function ensureTablesExist(env) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       room_id TEXT NOT NULL,
       round_num INTEGER NOT NULL,
+      forecast_A REAL DEFAULT 0,
+      forecast_B REAL DEFAULT 0,
+      forecast_C REAL DEFAULT 0,
       rainfall_A REAL DEFAULT 0,
       rainfall_B REAL DEFAULT 0,
       rainfall_C REAL DEFAULT 0,
@@ -123,9 +126,59 @@ async function ensureTablesExist(env) {
       UNIQUE(room_id, role)
     )
   `).run();
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS room_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id TEXT NOT NULL,
+      round_num INTEGER NOT NULL,
+      event_key TEXT NOT NULL,
+      event_type TEXT DEFAULT 'shock',
+      title TEXT,
+      content TEXT,
+      payload TEXT DEFAULT '{}',
+      source TEXT DEFAULT 'system',
+      ts TEXT DEFAULT (datetime('now')),
+      UNIQUE(room_id, round_num, event_key)
+    )
+  `).run();
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS decision_timeline (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id TEXT NOT NULL,
+      round_num INTEGER NOT NULL,
+      player_id TEXT,
+      player_name TEXT,
+      role TEXT,
+      village TEXT,
+      phase TEXT,
+      action_type TEXT NOT NULL,
+      action_value TEXT,
+      elapsed_ms INTEGER,
+      info_state TEXT DEFAULT '{}',
+      ts TEXT DEFAULT (datetime('now'))
+    )
+  `).run();
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS information_exposure (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id TEXT NOT NULL,
+      round_num INTEGER NOT NULL,
+      player_id TEXT,
+      role TEXT,
+      village TEXT,
+      info_key TEXT NOT NULL,
+      info_value TEXT,
+      certainty REAL DEFAULT 1,
+      source TEXT DEFAULT 'system',
+      ts TEXT DEFAULT (datetime('now'))
+    )
+  `).run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_decisions_room_id ON player_decisions(room_id, id)").run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_chats_room_id ON chat_logs(room_id, id)").run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_rounds_room_round_id ON simulation_rounds(room_id, round_num, id)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_events_room_id ON room_events(room_id, id)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_timeline_room_id ON decision_timeline(room_id, id)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_exposure_room_id ON information_exposure(room_id, id)").run();
   await ensureColumn(env, "rooms", "group_name", "TEXT DEFAULT '默认组'");
   await ensureColumn(env, "rooms", "status", "TEXT DEFAULT 'WAITING'");
   await ensureColumn(env, "rooms", "players", "TEXT DEFAULT '[]'");
@@ -133,6 +186,9 @@ async function ensureTablesExist(env) {
   await ensureColumn(env, "rooms", "rounds_played", "INTEGER DEFAULT 0");
   await ensureColumn(env, "rooms", "started_at", "TEXT");
   await ensureColumn(env, "rooms", "finished_at", "TEXT");
+  await ensureColumn(env, "simulation_rounds", "forecast_A", "REAL DEFAULT 0");
+  await ensureColumn(env, "simulation_rounds", "forecast_B", "REAL DEFAULT 0");
+  await ensureColumn(env, "simulation_rounds", "forecast_C", "REAL DEFAULT 0");
   _dbInitialized = true;
 }
 
@@ -163,7 +219,7 @@ export default {
     try {
       // ── 健康检查 ──────────────────────────────────────────────
       if (path === "/api/health")
-        return Response.json({ ok: true, version: "3.2", db: "D1" }, { headers: corsHeaders });
+        return Response.json({ ok: true, version: "3.3", db: "D1" }, { headers: corsHeaders });
 
       if (path === "/api/config")
         return Response.json({}, { headers: corsHeaders });
@@ -203,6 +259,7 @@ export default {
         if (method === "GET" && action === "sync") {
           const sinceAction = Number(url.searchParams.get("since_action") || 0);
           const sinceChat = Number(url.searchParams.get("since_chat") || 0);
+          const sinceEvent = Number(url.searchParams.get("since_event") || 0);
           const { results: roomRows } = await env.DB.prepare(
             "SELECT * FROM rooms WHERE code = ?"
           ).bind(code).all();
@@ -218,6 +275,9 @@ export default {
           const { results: chats } = await env.DB.prepare(
             "SELECT * FROM chat_logs WHERE room_id = ? AND id > ? ORDER BY id ASC LIMIT 500"
           ).bind(code, sinceChat).all();
+          const { results: events } = await env.DB.prepare(
+            "SELECT * FROM room_events WHERE room_id = ? AND id > ? ORDER BY id ASC LIMIT 100"
+          ).bind(code, sinceEvent).all();
           const latestRound = await env.DB.prepare(
             "SELECT * FROM simulation_rounds WHERE room_id = ? ORDER BY round_num DESC, id DESC LIMIT 1"
           ).bind(code).first();
@@ -227,6 +287,7 @@ export default {
             players,
             decisions: decisions || [],
             chats: chats || [],
+            events: events || [],
             latest_round: latestRound || null
           }, { headers: corsHeaders });
         }
@@ -411,19 +472,68 @@ export default {
         ).bind(r.room_id, r.round_num).run();
         await env.DB.prepare(
           `INSERT INTO simulation_rounds (
-            room_id,round_num,rainfall_A,rainfall_B,rainfall_C,
+            room_id,round_num,forecast_A,forecast_B,forecast_C,rainfall_A,rainfall_B,rainfall_C,
             water_A1,water_A2,water_A3,water_B1,water_B2,water_B3,water_C1,water_C2,water_C3,
             asset_A1,asset_A2,asset_A3,asset_B1,asset_B2,asset_B3,asset_C1,asset_C2,asset_C3,
             city_asset_A,city_asset_B,city_asset_C,round_loss,total_loss
-          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
         ).bind(
-          r.room_id, r.round_num, r.rainfall_A||0, r.rainfall_B||0, r.rainfall_C||0,
+          r.room_id, r.round_num, r.forecast_A||0, r.forecast_B||0, r.forecast_C||0, r.rainfall_A||0, r.rainfall_B||0, r.rainfall_C||0,
           r.water_A1||0, r.water_A2||0, r.water_A3||0, r.water_B1||0, r.water_B2||0, r.water_B3||0, r.water_C1||0, r.water_C2||0, r.water_C3||0,
           r.asset_A1||0, r.asset_A2||0, r.asset_A3||0, r.asset_B1||0, r.asset_B2||0, r.asset_B3||0, r.asset_C1||0, r.asset_C2||0, r.asset_C3||0,
           r.city_asset_A||0, r.city_asset_B||0, r.city_asset_C||0, r.round_loss||0, r.total_loss||0
         ).run();
         await env.DB.prepare("UPDATE rooms SET rounds_played = ? WHERE code = ?").bind(r.round_num, r.room_id).run();
         return Response.json({ ok: true }, { headers: corsHeaders });
+      }
+
+      if (path === "/api/data/events" && method === "POST") {
+        const e = await request.json();
+        const payload = typeof e.payload === 'object' ? JSON.stringify(e.payload) : String(e.payload || '{}');
+        const result = await env.DB.prepare(
+          `INSERT OR IGNORE INTO room_events
+            (room_id,round_num,event_key,event_type,title,content,payload,source)
+           VALUES (?,?,?,?,?,?,?,?)`
+        ).bind(
+          e.room_id, e.round_num || 1, e.event_key || 'manual_event',
+          e.event_type || 'shock', e.title || '', e.content || '',
+          payload, e.source || 'system'
+        ).run();
+        return Response.json({ ok: true, id: result.meta?.last_row_id || null }, { headers: corsHeaders });
+      }
+
+      if (path === "/api/data/timeline" && method === "POST") {
+        const d = await request.json();
+        const actionVal = typeof d.action_value === 'object'
+          ? JSON.stringify(d.action_value) : String(d.action_value || '');
+        const infoState = typeof d.info_state === 'object'
+          ? JSON.stringify(d.info_state) : String(d.info_state || '{}');
+        const result = await env.DB.prepare(
+          `INSERT INTO decision_timeline
+            (room_id,round_num,player_id,player_name,role,village,phase,action_type,action_value,elapsed_ms,info_state)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        ).bind(
+          d.room_id, d.round_num || 1, d.player_id || 'human', d.player_name || '',
+          d.role || '', d.village || '', d.phase || '', d.action_type || 'unknown',
+          actionVal, d.elapsed_ms || null, infoState
+        ).run();
+        return Response.json({ ok: true, id: result.meta?.last_row_id || null }, { headers: corsHeaders });
+      }
+
+      if (path === "/api/data/exposure" && method === "POST") {
+        const d = await request.json();
+        const infoValue = typeof d.info_value === 'object'
+          ? JSON.stringify(d.info_value) : String(d.info_value || '');
+        const result = await env.DB.prepare(
+          `INSERT INTO information_exposure
+            (room_id,round_num,player_id,role,village,info_key,info_value,certainty,source)
+           VALUES (?,?,?,?,?,?,?,?,?)`
+        ).bind(
+          d.room_id, d.round_num || 1, d.player_id || 'human', d.role || '',
+          d.village || '', d.info_key || 'unknown', infoValue,
+          d.certainty == null ? 1 : Number(d.certainty), d.source || 'system'
+        ).run();
+        return Response.json({ ok: true, id: result.meta?.last_row_id || null }, { headers: corsHeaders });
       }
 
       // ── 数据查询 ──────────────────────────────────────────────
@@ -453,22 +563,56 @@ export default {
         const q = roomId ? env.DB.prepare(sql).bind(roomId, since) : env.DB.prepare(sql);
         return Response.json((await q.all()).results || [], { headers: corsHeaders });
       }
+      if (path === "/api/data/events" && method === "GET") {
+        const roomId = url.searchParams.get("room_id");
+        const since = Number(url.searchParams.get("since") || 0);
+        const sql = roomId
+          ? "SELECT * FROM room_events WHERE room_id = ? AND id > ? ORDER BY id ASC LIMIT 500"
+          : "SELECT * FROM room_events ORDER BY ts DESC LIMIT 100";
+        const q = roomId ? env.DB.prepare(sql).bind(roomId, since) : env.DB.prepare(sql);
+        return Response.json((await q.all()).results || [], { headers: corsHeaders });
+      }
+      if (path === "/api/data/timeline" && method === "GET") {
+        const roomId = url.searchParams.get("room_id");
+        const since = Number(url.searchParams.get("since") || 0);
+        const sql = roomId
+          ? "SELECT * FROM decision_timeline WHERE room_id = ? AND id > ? ORDER BY id ASC LIMIT 1000"
+          : "SELECT * FROM decision_timeline ORDER BY ts DESC LIMIT 100";
+        const q = roomId ? env.DB.prepare(sql).bind(roomId, since) : env.DB.prepare(sql);
+        return Response.json((await q.all()).results || [], { headers: corsHeaders });
+      }
+      if (path === "/api/data/exposure" && method === "GET") {
+        const roomId = url.searchParams.get("room_id");
+        const since = Number(url.searchParams.get("since") || 0);
+        const sql = roomId
+          ? "SELECT * FROM information_exposure WHERE room_id = ? AND id > ? ORDER BY id ASC LIMIT 1000"
+          : "SELECT * FROM information_exposure ORDER BY ts DESC LIMIT 100";
+        const q = roomId ? env.DB.prepare(sql).bind(roomId, since) : env.DB.prepare(sql);
+        return Response.json((await q.all()).results || [], { headers: corsHeaders });
+      }
 
       // ── 数据导出 ──────────────────────────────────────────────
       if (path.startsWith("/api/export/")) {
         const room  = path.split('/')[3];
         const allRooms = room === '_all';
-        const [rounds, decisions, chats] = await Promise.all(allRooms ? [
+        const [rounds, decisions, chats, events, timeline, exposure] = await Promise.all(allRooms ? [
           env.DB.prepare("SELECT * FROM simulation_rounds").all(),
           env.DB.prepare("SELECT * FROM player_decisions").all(),
           env.DB.prepare("SELECT * FROM chat_logs").all(),
+          env.DB.prepare("SELECT * FROM room_events").all(),
+          env.DB.prepare("SELECT * FROM decision_timeline").all(),
+          env.DB.prepare("SELECT * FROM information_exposure").all(),
         ] : [
           env.DB.prepare("SELECT * FROM simulation_rounds WHERE room_id = ?").bind(room).all(),
           env.DB.prepare("SELECT * FROM player_decisions WHERE room_id = ?").bind(room).all(),
           env.DB.prepare("SELECT * FROM chat_logs WHERE room_id = ?").bind(room).all(),
+          env.DB.prepare("SELECT * FROM room_events WHERE room_id = ?").bind(room).all(),
+          env.DB.prepare("SELECT * FROM decision_timeline WHERE room_id = ?").bind(room).all(),
+          env.DB.prepare("SELECT * FROM information_exposure WHERE room_id = ?").bind(room).all(),
         ]);
         return Response.json({
-          rounds: rounds.results, decisions: decisions.results, chats: chats.results
+          rounds: rounds.results, decisions: decisions.results, chats: chats.results,
+          events: events.results, timeline: timeline.results, exposure: exposure.results
         }, { headers: corsHeaders });
       }
 

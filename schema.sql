@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS simulation_rounds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     room_id TEXT NOT NULL,
     round_num INTEGER NOT NULL,
+    forecast_A REAL DEFAULT 0,
+    forecast_B REAL DEFAULT 0,
+    forecast_C REAL DEFAULT 0,
     rainfall_A REAL DEFAULT 0,
     rainfall_B REAL DEFAULT 0,
     rainfall_C REAL DEFAULT 0,
@@ -101,3 +104,53 @@ CREATE TABLE IF NOT EXISTS room_players (
     UNIQUE(room_id, role)
 );
 CREATE INDEX IF NOT EXISTS idx_room_players_room ON room_players(room_id, joined_at);
+
+-- 表6: 房间级突发事件。用于统一同步暴雨、通讯中断、生态补偿等临时冲击。
+CREATE TABLE IF NOT EXISTS room_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id TEXT NOT NULL,
+    round_num INTEGER NOT NULL,
+    event_key TEXT NOT NULL,
+    event_type TEXT DEFAULT 'shock',
+    title TEXT,
+    content TEXT,
+    payload TEXT DEFAULT '{}',
+    source TEXT DEFAULT 'system',
+    ts TEXT DEFAULT (datetime('now')),
+    UNIQUE(room_id, round_num, event_key)
+);
+CREATE INDEX IF NOT EXISTS idx_events_room_id ON room_events(room_id, id);
+
+-- 表7: 决策过程时间线。用于复盘响应时间、行动类型、信息状态与策略变化。
+CREATE TABLE IF NOT EXISTS decision_timeline (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id TEXT NOT NULL,
+    round_num INTEGER NOT NULL,
+    player_id TEXT,
+    player_name TEXT,
+    role TEXT,
+    village TEXT,
+    phase TEXT,
+    action_type TEXT NOT NULL,
+    action_value TEXT,
+    elapsed_ms INTEGER,
+    info_state TEXT DEFAULT '{}',
+    ts TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_timeline_room_id ON decision_timeline(room_id, id);
+
+-- 表8: 信息暴露记录。用于分析不同角色在有限信息下看到过什么、信息可靠度如何。
+CREATE TABLE IF NOT EXISTS information_exposure (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id TEXT NOT NULL,
+    round_num INTEGER NOT NULL,
+    player_id TEXT,
+    role TEXT,
+    village TEXT,
+    info_key TEXT NOT NULL,
+    info_value TEXT,
+    certainty REAL DEFAULT 1,
+    source TEXT DEFAULT 'system',
+    ts TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_exposure_room_id ON information_exposure(room_id, id);

@@ -920,8 +920,10 @@ function maybeCreateRoundEvents(){
   const events=selectRoomEventsForRound(G.round);
   if(!events.length)return;
   if(mpIsHTTP()){
-    if(!mpCanSaveRound())return;
-    events.forEach(postRoomEvent);
+    let changed=false;
+    events.forEach(e=>{if(applyGameEvent(e)){changed=true;logRoundExposure('event_'+e.event_key)}});
+    if(changed)renderAll();
+    if(mpCanSaveRound())events.forEach(postRoomEvent);
     return;
   }
   events.forEach(e=>{if(applyGameEvent(e))renderAll()});
@@ -1915,7 +1917,8 @@ function showRoundTransition(){
     <div class="ro-round">第 ${G.round} / ${getMR()} 轮</div>
     <div class="ro-msg">截至目前海河流域损失总览</div>
     ${lossTbl}${cityRow}${bankWarn}
-    <div style="margin:16px 0 8px;font-size:.92rem;font-weight:700;color:var(--cy)">🌧 下一轮降雨预报</div>
+    <div style="margin:16px 0 4px;font-size:.92rem;font-weight:700;color:var(--cy)">🌧 下一轮预测降雨</div>
+    <div style="font-size:.76rem;color:var(--t3);margin-bottom:8px">真实降雨将在村民撤离与村长沙袋决策后公布</div>
     <div class="ro-rain-grid">${['A','B','C'].map(c=>`<div class="ro-rain-card"><div class="rrc-city">${CN[c]}</div><div class="rrc-val">${G.rain[c]}</div><div class="rrc-u">mm</div></div>`).join('')}</div>
     <button class="btn btn-p" style="font-size:.95rem;padding:13px 40px" onclick="closeRoundOv()">开始第 ${G.round} 轮</button>`;
   ov.classList.add('show');
